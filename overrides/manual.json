@@ -1,0 +1,647 @@
+{
+  "ANT-2026-09SNWQBT": {
+    "fix_commits": [
+      {
+        "sha": "f79f9f6916ae19bc632364b1021a68042503ee2d",
+        "url": "https://github.com/LibreDWG/libredwg/commit/f79f9f6916ae19bc632364b1021a68042503ee2d",
+        "repository": "LibreDWG/libredwg",
+        "evidence_url": "https://github.com/LibreDWG/libredwg/commit/f79f9f6916ae19bc632364b1021a68042503ee2d"
+      }
+    ],
+    "fixed_versions": [
+      {
+        "version": "0.14",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "verified",
+        "evidence_url": "https://github.com/LibreDWG/libredwg/compare/f79f9f6...0.14",
+        "note": "The 0.14 stable tag contains the fix; 0.13.4 predates it. This supersedes the earlier nightly-only assessment."
+      }
+    ],
+    "release_assessment": {
+      "status": "confirmed_versions",
+      "evidence_url": "https://github.com/LibreDWG/libredwg/releases/tag/0.14",
+      "note": "0.14 is the first stable release after the fix."
+    }
+  },
+  "ANT-2026-0GNNMNPS": {
+    "fix_commits": [
+      {
+        "sha": "f42ead6",
+        "url": "https://github.com/WebAssembly/wabt/commit/f42ead6",
+        "repository": "WebAssembly/wabt",
+        "evidence_url": "https://github.com/WebAssembly/wabt/commit/f42ead6"
+      }
+    ],
+    "release_assessment": {
+      "status": "no_release_yet",
+      "evidence_url": "https://github.com/WebAssembly/wabt/releases",
+      "note": "The fix postdates stable 1.0.41; do not label 1.0.41 as fixed."
+    }
+  },
+  "ANT-2026-2NNMB24E": {
+    "fixed_versions": [
+      {
+        "version": "10.4",
+        "package": "OpenSSH",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.openssh.com/txt/release-10.4"
+      },
+      {
+        "version": "10.4p1",
+        "package": "OpenSSH portable",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.openssh.com/txt/release-10.4"
+      }
+    ],
+    "release_assessment": {
+      "status": "confirmed_versions",
+      "evidence_url": "https://www.openssh.com/txt/release-10.4"
+    }
+  },
+  "ANT-2026-4PKJCSR8": {
+    "fixed_versions": [
+      {
+        "version": "3.13.2",
+        "role": "operational_baseline",
+        "first_patched": false,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
+        "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-4PKJCSR8",
+      "note": "No public one-to-one ANT to fix commit to first tag chain was found."
+    }
+  },
+  "ANT-2026-5BD488PV": {
+    "fixed_versions": [
+      {
+        "version": "1.3.48",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://sourceforge.net/p/graphicsmagick/mailman/message/59363313/"
+      }
+    ]
+  },
+  "ANT-2026-7R9KHDAS": {
+    "fixed_versions": [
+      {
+        "version": "v1.6.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/cloudflare/circl/compare/846a67b9095e...v1.6.4",
+        "note": "Tag ancestry confirms the BLS fix is included."
+      }
+    ]
+  },
+  "ANT-2026-8AZGCAHG": {
+    "fixed_versions": [
+      {
+        "version": "3.13.2",
+        "role": "operational_baseline",
+        "first_patched": false,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
+        "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-8AZGCAHG",
+      "note": "No public one-to-one ANT to fix commit to first tag chain was found."
+    }
+  },
+  "ANT-2026-B324R0JY": {
+    "fixed_versions": [
+      {
+        "version": "v2.1.0",
+        "role": "operational_baseline",
+        "first_patched": false,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/syncthing/syncthing/releases/tag/v2.1.0",
+        "note": "First stable release after the known fix, retained as an operational baseline rather than an authoritative first-fixed claim."
+      }
+    ],
+    "release_assessment": {
+      "status": "commit_only",
+      "evidence_url": "https://github.com/syncthing/syncthing/commit/774aa11795a9edc904e8849e772a47804cf2aeb6",
+      "note": "The fix commit is known; v2.1.0 is only a conservative release baseline."
+    }
+  },
+  "ANT-2026-BDHSQ5GE": {
+    "fixed_versions": [
+      {
+        "version": "1.7.3",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/hunspell/hunspell/releases/tag/v1.7.3"
+      }
+    ]
+  },
+  "ANT-2026-BT210RQ0": {
+    "fix_references": [
+      {
+        "kind": "pull_request",
+        "url": "https://github.com/libtom/libtomcrypt/pull/726",
+        "repository": "libtom/libtomcrypt",
+        "number": 726,
+        "evidence_url": "https://github.com/libtom/libtomcrypt/pull/726"
+      }
+    ],
+    "release_assessment": {
+      "status": "no_release_yet",
+      "evidence_url": "https://github.com/libtom/libtomcrypt/releases",
+      "note": "PR 726 is merged on the development line, but no stable release newer than 1.18.2 exists."
+    }
+  },
+  "ANT-2026-F1GCJ0JY": {
+    "fixed_versions": [
+      {
+        "version": "1.3.48",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://sourceforge.net/p/graphicsmagick/mailman/message/59363313/"
+      }
+    ]
+  },
+  "ANT-2026-F8AZ7X04": {
+    "fixed_versions": [
+      {
+        "version": "4.4.16",
+        "branch": "4.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.wireshark.org/docs/relnotes/wireshark-4.4.16.html"
+      },
+      {
+        "version": "4.6.6",
+        "branch": "4.6",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.wireshark.org/docs/relnotes/wireshark-4.6.6.html"
+      }
+    ]
+  },
+  "ANT-2026-GEM3N3N3": {
+    "fixed_versions": [
+      {
+        "version": "8.1.2",
+        "branch": "8.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2026-29198",
+        "note": "NVD models 8.1.0 through less than 8.1.2 as vulnerable."
+      }
+    ]
+  },
+  "ANT-2026-HFGGE6HR": {
+    "fixed_versions": [
+      {
+        "version": "21.12.3",
+        "branch": "21",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/asterisk/asterisk/releases/tag/21.12.3"
+      },
+      {
+        "version": "22.10.1",
+        "branch": "22",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/asterisk/asterisk/releases/tag/22.10.1"
+      },
+      {
+        "version": "23.4.1",
+        "branch": "23",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/asterisk/asterisk/releases/tag/23.4.1"
+      },
+      {
+        "version": "20.7-cert11",
+        "branch": "certified-20",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/asterisk/asterisk/releases/tag/certified-20.7-cert11"
+      },
+      {
+        "version": "22.8-cert3",
+        "branch": "certified-22",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/asterisk/asterisk/releases/tag/certified-22.8-cert3"
+      }
+    ]
+  },
+  "ANT-2026-HRZEDXBB": {
+    "release_assessment": {
+      "status": "no_release_yet",
+      "evidence_url": "https://github.com/ArtifexSoftware/ghostpdl-downloads/releases",
+      "note": "Stable 10.07.1 predates the reported fix work; do not label it as fixed."
+    }
+  },
+  "ANT-2026-K3APEMB5": {
+    "fixed_versions": [
+      {
+        "version": "3.13.0",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/OSGeo/gdal/compare/e2b913be...v3.13.0",
+        "note": "Tag ancestry includes the known fix commit."
+      }
+    ]
+  },
+  "ANT-2026-K6DHGAYS": {
+    "release_assessment": {
+      "status": "commit_only",
+      "evidence_url": "https://github.com/WebKit/WebKit/commit/eba64ef44de395091d66bdfdf1c2b1f0f4983c56",
+      "note": "WebKit has separate Safari, WebKitGTK, and WPE release streams; no single universal SemVer is asserted."
+    }
+  },
+  "ANT-2026-N7D3E5WK": {
+    "fixed_versions": [
+      {
+        "version": "2026.03.6",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/rdkit/rdkit/releases/tag/Release_2026_03_6",
+        "note": "Release-level security batch baseline; the public release note does not map this ANT ID one-to-one."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://github.com/rdkit/rdkit/releases/tag/Release_2026_03_6",
+      "note": "Likely included in the security batch, but exact first-fixed attribution remains incomplete."
+    }
+  },
+  "ANT-2026-P7DSVPH6": {
+    "fixed_versions": [
+      {
+        "version": "2.4.5",
+        "role": "operational_baseline",
+        "first_patched": false,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/wasm-micro-runtime/wasm-micro-runtime/releases/tag/WAMR-2.4.5",
+        "note": "Conservative release baseline. The repository advisory still displays no patched version, so this is not promoted to first_patched."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://github.com/bytecodealliance/wasm-micro-runtime/security/advisories/GHSA-wj3p-xhqm-pffc",
+      "note": "Release evidence and the advisory metadata conflict; exact first-fixed status remains unresolved."
+    }
+  },
+  "ANT-2026-PGRNAV88": {
+    "fix_commits": [
+      {
+        "sha": "092f02df06e824168b9078e06d83429f86664299",
+        "url": "https://github.com/apache/spark/commit/092f02df06e824168b9078e06d83429f86664299",
+        "repository": "apache/spark",
+        "evidence_url": "https://github.com/apache/spark/commit/092f02df06e824168b9078e06d83429f86664299",
+        "note": "SPARK-56463 backport on branch-3.5."
+      },
+      {
+        "sha": "c89c7add89f5b495e2f1ee6ff0ff5b2d82e88b04",
+        "url": "https://github.com/apache/spark/commit/c89c7add89f5b495e2f1ee6ff0ff5b2d82e88b04",
+        "repository": "apache/spark",
+        "evidence_url": "https://github.com/apache/spark/commit/c89c7add89f5b495e2f1ee6ff0ff5b2d82e88b04",
+        "note": "SPARK-56463 backport on branch-4.0."
+      },
+      {
+        "sha": "d188c97a601307e97896db96466dd351d102a38d",
+        "url": "https://github.com/apache/spark/commit/d188c97a601307e97896db96466dd351d102a38d",
+        "repository": "apache/spark",
+        "evidence_url": "https://github.com/apache/spark/commit/d188c97a601307e97896db96466dd351d102a38d",
+        "note": "SPARK-56463 backport on branch-4.1."
+      },
+      {
+        "sha": "6e55b208682d8288ae6c73209f23bc24673c1909",
+        "url": "https://github.com/apache/spark/commit/6e55b208682d8288ae6c73209f23bc24673c1909",
+        "repository": "apache/spark",
+        "evidence_url": "https://github.com/apache/spark/commit/6e55b208682d8288ae6c73209f23bc24673c1909",
+        "note": "SPARK-56463 commit on the main development line."
+      }
+    ],
+    "fixed_versions": [
+      {
+        "version": "3.5.9",
+        "branch": "3.5",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/apache/spark/compare/092f02df06e824168b9078e06d83429f86664299...v3.5.9",
+        "note": "The fix is absent from v3.5.8 and is an ancestor of v3.5.9."
+      },
+      {
+        "version": "4.0.3",
+        "branch": "4.0",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/apache/spark/compare/c89c7add89f5b495e2f1ee6ff0ff5b2d82e88b04...v4.0.3",
+        "note": "The branch backport is absent from v4.0.2 and is an ancestor of v4.0.3."
+      },
+      {
+        "version": "4.1.2",
+        "branch": "4.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/apache/spark/compare/d188c97a601307e97896db96466dd351d102a38d...v4.1.2",
+        "note": "The branch backport is absent from v4.1.1 and is an ancestor of v4.1.2."
+      },
+      {
+        "version": "4.2.0",
+        "branch": "4.2",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/apache/spark/compare/6e55b208682d8288ae6c73209f23bc24673c1909...v4.2.0",
+        "note": "The main-line fix is an ancestor of the first 4.2 release."
+      }
+    ],
+    "release_assessment": {
+      "status": "confirmed_versions",
+      "evidence_url": "https://issues.apache.org/jira/browse/SPARK-56463",
+      "note": "External release evidence is newer than the Anthropic snapshot's patched flag."
+    }
+  },
+  "ANT-2026-Q5A1RHS0": {
+    "release_assessment": {
+      "status": "no_release_yet",
+      "evidence_url": "https://github.com/libssh2/libssh2/releases",
+      "note": "The upstream fix is present after 1.11.1, while the development version is 1.11.2_DEV; 1.11.2 has not been formally released."
+    }
+  },
+  "ANT-2026-QPYFFTMS": {
+    "fixed_versions": [
+      {
+        "version": "3.13.2",
+        "role": "operational_baseline",
+        "first_patched": false,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
+        "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QPYFFTMS",
+      "note": "No public one-to-one ANT to fix commit to first tag chain was found."
+    }
+  },
+  "ANT-2026-QRPT15J8": {
+    "fixed_versions": [
+      {
+        "version": "1.4.5",
+        "branch": "1.4",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/duckdb/duckdb/releases/tag/v1.4.5"
+      },
+      {
+        "version": "1.5.5",
+        "branch": "1.5",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/duckdb/duckdb/releases/tag/v1.5.5"
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://github.com/duckdb/duckdb/releases/tag/v1.5.5",
+      "note": "Maintenance releases include the security fixes, but the advisory does not name this ANT sub-finding one-to-one."
+    }
+  },
+  "ANT-2026-SC8JK49A": {
+    "fixed_versions": [
+      {
+        "version": "4.4.8",
+        "branch": "4.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n4.4.8/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      },
+      {
+        "version": "5.1.10",
+        "branch": "5.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n5.1.10/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      },
+      {
+        "version": "6.1.6",
+        "branch": "6.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n6.1.6/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      },
+      {
+        "version": "7.1.5",
+        "branch": "7.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n7.1.5/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      },
+      {
+        "version": "8.0.3",
+        "branch": "8.0",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n8.0.3/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      },
+      {
+        "version": "8.1.2",
+        "branch": "8.1",
+        "role": "first_patched",
+        "first_patched": true,
+        "confidence": "high",
+        "evidence_url": "https://github.com/FFmpeg/FFmpeg/blob/n8.1.2/libavcodec/diracdec.c",
+        "note": "The tagged source contains the Dirac allocation and height-guard fix."
+      }
+    ]
+  },
+  "ANT-2026-T6EKK5DB": {
+    "fixed_versions": [
+      {
+        "version": "10.4",
+        "package": "OpenSSH",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.openssh.com/txt/release-10.4"
+      },
+      {
+        "version": "10.4p1",
+        "package": "OpenSSH portable",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.openssh.com/txt/release-10.4"
+      }
+    ]
+  },
+  "ANT-2026-TJ0ZJHM6": {
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TJ0ZJHM6",
+      "note": "Do not reuse the versions from ANT-2026-SC8JK49A without an independent fix mapping."
+    }
+  },
+  "ANT-2026-TNXYTAEH": {
+    "fixed_versions": [
+      {
+        "version": "26.2.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.libreoffice.org/security/"
+      }
+    ]
+  },
+  "ANT-2026-VTJ2W5KM": {
+    "fixed_versions": [
+      {
+        "version": "1.3.48",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://sourceforge.net/p/graphicsmagick/mailman/message/59363313/",
+        "note": "Release-level Anthropic security batch evidence; exact function-to-ANT naming is incomplete."
+      }
+    ]
+  },
+  "ANT-2026-WNRZ9D35": {
+    "fixed_versions": [
+      {
+        "version": "3.13.0",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://github.com/OSGeo/gdal/compare/262a41e1...v3.13.0",
+        "note": "Tag ancestry includes the known fix commit."
+      }
+    ]
+  },
+  "ANT-2026-XKHM3P45": {
+    "fixed_versions": [
+      {
+        "version": "3.90.6",
+        "branch": "3.90",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_90_6.html"
+      },
+      {
+        "version": "3.112.4",
+        "branch": "3.112",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_112_4.html"
+      },
+      {
+        "version": "3.122.1",
+        "branch": "3.122",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_122_1.html"
+      },
+      {
+        "version": "3.123",
+        "branch": "3.123",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://firefox-source-docs.mozilla.org/security/nss/releases/nss_3_123.html"
+      }
+    ]
+  },
+  "ANT-2026-XV1EVAMH": {
+    "fixed_versions": [
+      {
+        "version": "26.2.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.libreoffice.org/security/"
+      }
+    ]
+  },
+  "ANT-2026-YMN2QG55": {
+    "fixed_versions": [
+      {
+        "version": "v0.12.0",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/libjxl/libjxl/releases/tag/v0.12.0",
+        "note": "Release-level security hardening baseline; the public record does not expose a reproducible ANT-to-fix-to-prior-tag chain."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://github.com/libjxl/libjxl/releases/tag/v0.12.0",
+      "note": "v0.12.0 contains the relevant security batch, but exact first-fixed attribution remains incomplete."
+    }
+  },
+  "ANT-2026-YN5QG0SH": {
+    "fixed_versions": [
+      {
+        "version": "26.2.4",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://www.libreoffice.org/security/"
+      }
+    ]
+  },
+  "ANT-2026-YQ12XT7Y": {
+    "fixed_versions": [
+      {
+        "version": "3.2.0",
+        "role": "patched",
+        "first_patched": null,
+        "confidence": "medium",
+        "evidence_url": "https://github.com/openbabel/openbabel/releases/tag/openbabel-3-2-0",
+        "note": "The official release describes the Claude Mythos security-fix batch but does not identify this ANT finding one-to-one."
+      }
+    ],
+    "release_assessment": {
+      "status": "unresolved",
+      "evidence_url": "https://github.com/openbabel/openbabel/releases/tag/openbabel-3-2-0",
+      "note": "3.2.0 is a patched release baseline; the public evidence is insufficient to assert it as the exact first fixed tag for this finding."
+    }
+  },
+  "ANT-2026-YZAKBHEW": {
+    "release_assessment": {
+      "status": "commit_only",
+      "evidence_url": "https://github.com/facebook/hermes/commit/cb8a9a3fa39f9165f6db93dcee871cfa625a9753",
+      "note": "Hermes does not expose a single universal SemVer release boundary for this fix; map downstream React Native/product releases separately."
+    }
+  },
+  "ANT-2026-ZRDQDR79": {
+    "fixed_versions": [
+      {
+        "version": "2.41.5",
+        "branch": "2.41",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://security-tracker.debian.org/tracker/CVE-2026-13595"
+      },
+      {
+        "version": "2.42.2",
+        "branch": "2.42",
+        "role": "first_patched",
+        "first_patched": true,
+        "evidence_url": "https://security-tracker.debian.org/tracker/CVE-2026-13595"
+      }
+    ]
+  }
+}

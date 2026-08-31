@@ -1,0 +1,32 @@
+{
+  "name": "glasswing-fixmap",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evidence-backed Anthropic CVD fix commit and first patched release map",
+  "type": "module",
+  "bin": {
+    "glasswing-fixmap": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "sync": "tsx src/cli.ts sync",
+    "report": "tsx src/cli.ts report",
+    "validate": "tsx src/cli.ts validate",
+    "test": "tsx --test test/*.test.ts",
+    "verify": "npm run check && npm test && npm run validate"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "ajv": "8.20.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  },
+  "license": "Apache-2.0"
+}

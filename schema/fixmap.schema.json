@@ -1,0 +1,291 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/windshock/glasswing-fixmap/raw/main/schema/fixmap.schema.json",
+  "title": "glasswing-fixmap dataset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "findings"],
+  "properties": {
+    "metadata": { "$ref": "#/$defs/metadata" },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "confidence": {
+      "enum": ["verified", "high", "medium", "low"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "url"],
+      "properties": {
+        "source": {
+          "enum": [
+            "anthropic_ledger",
+            "anthropic_finding",
+            "github_advisory_database",
+            "cve_list_v5",
+            "osv",
+            "github_repository",
+            "manual_override"
+          ]
+        },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "locator": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": [
+            "not_run",
+            "verified_contains_fix",
+            "tag_not_found",
+            "fix_not_in_tag",
+            "repository_unknown",
+            "error"
+          ]
+        },
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "fix_sha": { "type": "string" },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "detail": { "type": "string" }
+      }
+    },
+    "fixCommit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha", "url", "confidence", "evidence"],
+      "properties": {
+        "sha": { "type": "string", "pattern": "^[0-9a-f]{7,64}$" },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "repository": { "type": "string" },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "minItems": 1
+        }
+      }
+    },
+    "fixReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "url", "confidence", "evidence"],
+      "properties": {
+        "kind": { "enum": ["pull_request", "patch", "changeset"] },
+        "url": { "type": "string", "pattern": "^https?://" },
+        "repository": { "type": "string" },
+        "number": { "type": "integer", "minimum": 1 },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "minItems": 1
+        }
+      }
+    },
+    "fixedVersion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "role",
+        "first_patched",
+        "confidence",
+        "evidence",
+        "commit_verification"
+      ],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "package": { "type": "string" },
+        "ecosystem": { "type": "string" },
+        "branch": { "type": "string" },
+        "introduced": { "type": "string" },
+        "role": {
+          "enum": ["first_patched", "patched", "nightly", "operational_baseline"]
+        },
+        "first_patched": { "type": ["boolean", "null"] },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "minItems": 1
+        },
+        "commit_verification": { "$ref": "#/$defs/verification" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "first_patched": { "const": true } },
+            "required": ["first_patched"]
+          },
+          "then": { "properties": { "role": { "const": "first_patched" } } }
+        },
+        {
+          "if": {
+            "properties": { "role": { "const": "operational_baseline" } },
+            "required": ["role"]
+          },
+          "then": { "properties": { "first_patched": { "const": false } } }
+        },
+        {
+          "if": {
+            "properties": { "role": { "const": "first_patched" } },
+            "required": ["role"]
+          },
+          "then": { "properties": { "first_patched": { "const": true } } }
+        }
+      ]
+    },
+    "releaseAssessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "evidence"],
+      "properties": {
+        "status": {
+          "enum": [
+            "confirmed_versions",
+            "commit_only",
+            "no_release_yet",
+            "unresolved",
+            "not_applicable"
+          ]
+        },
+        "note": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source_as_of",
+        "source_revision",
+        "source_manifest_sha3",
+        "source_url",
+        "finding_count",
+        "patched_count",
+        "with_fix_commit",
+        "with_fixed_version",
+        "complete_count",
+        "partial_count",
+        "unresolved_count"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "source_as_of": { "type": "string" },
+        "source_revision": { "type": ["number", "string", "null"] },
+        "source_manifest_sha3": { "type": ["string", "null"] },
+        "source_url": { "type": "string", "pattern": "^https?://" },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "patched_count": { "type": "integer", "minimum": 0 },
+        "with_fix_commit": { "type": "integer", "minimum": 0 },
+        "with_fixed_version": { "type": "integer", "minimum": 0 },
+        "complete_count": { "type": "integer", "minimum": 0 },
+        "partial_count": { "type": "integer", "minimum": 0 },
+        "unresolved_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "ant_id",
+        "project",
+        "title",
+        "bug_class",
+        "severity",
+        "status",
+        "patched",
+        "patched_at",
+        "discovered_on",
+        "revealed_at",
+        "withdrawn",
+        "cve_ids",
+        "ghsa_ids",
+        "fix_commits",
+        "fix_references",
+        "fixed_versions",
+        "release_assessment",
+        "enrichment",
+        "sources"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "ant_id": { "type": "string", "pattern": "^ANT-[0-9]{4}-[A-Z0-9]+$" },
+        "project": { "type": "string", "minLength": 1 },
+        "title": { "type": ["string", "null"] },
+        "bug_class": { "type": ["string", "null"] },
+        "severity": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["claude", "firm", "maintainer"],
+          "properties": {
+            "claude": { "type": ["string", "null"] },
+            "firm": { "type": ["string", "null"] },
+            "maintainer": { "type": ["string", "null"] }
+          }
+        },
+        "status": { "type": "string" },
+        "patched": { "type": "boolean" },
+        "patched_at": { "type": ["string", "null"] },
+        "discovered_on": { "type": ["string", "null"] },
+        "revealed_at": { "type": ["string", "null"] },
+        "withdrawn": { "type": "boolean" },
+        "cve_ids": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^CVE-[0-9]{4}-[0-9]+$" },
+          "uniqueItems": true
+        },
+        "ghsa_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^GHSA-[23456789CFGHJMPQRVWXcfghjmpqrvwx]{4}-[23456789CFGHJMPQRVWXcfghjmpqrvwx]{4}-[23456789CFGHJMPQRVWXcfghjmpqrvwx]{4}$"
+          },
+          "uniqueItems": true
+        },
+        "fix_commits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fixCommit" }
+        },
+        "fix_references": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fixReference" }
+        },
+        "fixed_versions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fixedVersion" }
+        },
+        "release_assessment": { "$ref": "#/$defs/releaseAssessment" },
+        "enrichment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "warnings"],
+          "properties": {
+            "status": { "enum": ["complete", "partial", "unresolved", "not_patched"] },
+            "warnings": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

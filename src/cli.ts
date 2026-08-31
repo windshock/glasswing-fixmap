@@ -1,0 +1,129 @@
+#!/usr/bin/env node
+import path from "node:path";
+import process from "node:process";
+import { HttpClient } from "./http.js";
+import { readDataset } from "./output.js";
+import { syncFixmap } from "./sync.js";
+import { validateDataset } from "./validate.js";
+
+const HELP = `glasswing-fixmap
+
+Usage:
+  glasswing-fixmap sync [options]
+  glasswing-fixmap report [data/fixmap.json]
+  glasswing-fixmap validate [data/fixmap.json]
+
+Sync options:
+  --output <dir>          Output directory (default: data)
+  --cache <dir>           HTTP cache directory (default: .cache/http)
+  --overrides <file>      Manual override file (default: overrides/manual.json)
+  --only <ANT,...>        Sync only selected public ANT IDs
+  --concurrency <n>       Concurrent requests (default: 8)
+  --offline               Use cached responses only
+  --verify-github         Verify candidate tags contain a known fix commit
+  --strict                Fail instead of recording a source-fetch warning
+  -h, --help              Show this help
+
+Environment:
+  GITHUB_TOKEN or GH_TOKEN is required for practical --verify-github runs.
+`;
+
+interface ParsedArguments {
+  command: string;
+  positional: string[];
+  values: Map<string, string>;
+  flags: Set<string>;
+}
+
+function parseArguments(argv: string[]): ParsedArguments {
+  const command = argv[0] && !argv[0].startsWith("-") ? argv[0] : "sync";
+  const rest = command === argv[0] ? argv.slice(1) : argv;
+  const values = new Map<string, string>();
+  const flags = new Set<string>();
+  const positional: string[] = [];
+  const valueOptions = new Set(["--output", "--cache", "--overrides", "--only", "--concurrency"]);
+  for (let index = 0; index < rest.length; index += 1) {
+    const argument = rest[index]!;
+    if (valueOptions.has(argument)) {
+      const value = rest[index + 1];
+      if (!value || value.startsWith("--")) throw new Error(`${argument} requires a value`);
+      values.set(argument, value);
+      index += 1;
+    } else if (argument.startsWith("-")) {
+      flags.add(argument);
+    } else {
+      positional.push(argument);
+    }
+  }
+  return { command, positional, values, flags };
+}
+
+function printReport(dataset: Awaited<ReturnType<typeof readDataset>>): void {
+  const metadata = dataset.metadata;
+  process.stdout.write(
+    [
+      `Source snapshot: ${metadata.source_as_of} (revision ${metadata.source_revision ?? "unknown"})`,
+      `Public findings: ${metadata.finding_count}`,
+      `Patched: ${metadata.patched_count}`,
+      `Fix commit known: ${metadata.with_fix_commit}`,
+      `Fixed version known: ${metadata.with_fixed_version}`,
+      `Complete / partial / unresolved: ${metadata.complete_count} / ${metadata.partial_count} / ${metadata.unresolved_count}`,
+    ].join("\n") + "\n",
+  );
+}
+
+async function main(): Promise<void> {
+  const args = parseArguments(process.argv.slice(2));
+  if (args.flags.has("--help") || args.flags.has("-h") || args.command === "help") {
+    process.stdout.write(HELP);
+    return;
+  }
+  if (args.command === "report" || args.command === "validate") {
+    const file = path.resolve(args.positional[0] ?? "data/fixmap.json");
+    const dataset = await readDataset(file);
+    const errors = validateDataset(dataset);
+    if (args.command === "validate") {
+      if (errors.length > 0) throw new Error(errors.join("\n"));
+      process.stdout.write(`Valid: ${file} (${dataset.findings.length} findings)\n`);
+    } else {
+      printReport(dataset);
+      if (errors.length > 0) process.stderr.write(`Validation errors:\n${errors.join("\n")}\n`);
+    }
+    return;
+  }
+  if (args.command !== "sync") throw new Error(`Unknown command: ${args.command}`);
+
+  const concurrency = Number(args.values.get("--concurrency") ?? "8");
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 32) {
+    throw new Error("--concurrency must be an integer between 1 and 32");
+  }
+  const verifyGithub = args.flags.has("--verify-github");
+  const githubToken = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+  if (verifyGithub && !githubToken) {
+    throw new Error("--verify-github requires GITHUB_TOKEN or GH_TOKEN to avoid API rate limits");
+  }
+  const client = new HttpClient({
+    cacheDirectory: path.resolve(args.values.get("--cache") ?? ".cache/http"),
+    offline: args.flags.has("--offline"),
+    ...(githubToken ? { githubToken } : {}),
+  });
+  const onlyValue = args.values.get("--only");
+  const dataset = await syncFixmap({
+    client,
+    outputDirectory: args.values.get("--output") ?? "data",
+    overridesFile: path.resolve(args.values.get("--overrides") ?? "overrides/manual.json"),
+    concurrency,
+    ...(onlyValue
+      ? { only: new Set(onlyValue.split(",").map((value) => value.trim()).filter(Boolean)) }
+      : {}),
+    verifyGithub,
+    strict: args.flags.has("--strict"),
+    onProgress: (message) => process.stderr.write(`${message}\n`),
+  });
+  printReport(dataset);
+}
+
+main().catch((error) => {
+  process.stderr.write(`${error instanceof Error ? error.stack ?? error.message : String(error)}\n`);
+  process.exitCode = 1;
+});

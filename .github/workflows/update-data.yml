@@ -1,0 +1,58 @@
+name: Update fixmap data
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-fixmap-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync and verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run sync -- --verify-github
+          npm run verify
+
+      - name: Open or update data pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet -- data; then
+            echo "No data changes"
+            exit 0
+          fi
+          branch="automation/update-fixmap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$branch"
+          git add data
+          git commit -m "data: refresh Anthropic CVD fixmap"
+          git push --force-with-lease origin "HEAD:$branch"
+          if gh pr view "$branch" >/dev/null 2>&1; then
+            gh pr edit "$branch" --title "data: refresh Anthropic CVD fixmap" --body "Automated refresh from the current Anthropic CVD, GitHub advisory, and CVE List V5 sources."
+          else
+            gh pr create --base "${GITHUB_REF_NAME}" --head "$branch" --title "data: refresh Anthropic CVD fixmap" --body "Automated refresh from the current Anthropic CVD, GitHub advisory, and CVE List V5 sources."
+          fi
