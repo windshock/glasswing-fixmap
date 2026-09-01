@@ -54,6 +54,8 @@ This repository distinguishes between the existence of an upstream patch and the
 
 See [docs/METHODOLOGY.md](docs/METHODOLOGY.md) for the full methodology and confidence rules, and [docs/CROSS_VALIDATION.md](docs/CROSS_VALIDATION.md) for reviewed exceptions.
 
+The planned source-level extension is documented in [docs/PATCH_PRESENCE_PLAN.md](docs/PATCH_PRESENCE_PLAN.md). It preserves the current fixmap workflow while adding evidence-backed `fix commit → file/function/patch → source` verification and conservative SBOM candidate selection.
+
 ## Data example
 
 ```json
