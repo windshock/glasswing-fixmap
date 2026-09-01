@@ -27,6 +27,8 @@ The result should answer a narrow, defensible question: **is the upstream fix ac
 - `PATCH_NOT_FOUND` is not `AFFECTED`; `UNKNOWN` is not `ERROR`.
 - A heuristic component-name match must never fail a security gate.
 - Do not add broad AST support, VEX, SARIF, SPDX, binary analysis, or package-manager-specific source discovery in the initial implementation.
+- Do not implement SBOM specification parsers, PackageURL parsing, or version comparison algorithms from scratch. Prefer official validators and schemas plus established, ecosystem-correct libraries.
+- Keep custom SBOM code limited to projecting validated documents into `NormalizedComponent`; keep custom version code limited to selecting and invoking an appropriate comparator.
 - Do not store complete upstream patches in generated datasets.
 - Do not fetch, modify, build, or execute the source tree being inspected.
 - Existing `sync`, `report`, `validate`, `--verify-github`, `data/fixmap.json`, and `data/fixmap.csv` behavior must remain compatible.
@@ -238,7 +240,26 @@ interface NormalizedComponent {
 }
 ```
 
-CycloneDX JSON is implemented first. A narrow Syft-native JSON adapter follows in the same phase because two supplied acceptance samples use that format. SPDX, VEX, SARIF, XML, and other formats are explicitly deferred.
+### Validation and projection boundary
+
+The adapter pipeline is deliberately small:
+
+```text
+JSON input
+  → format and schema-version detection
+  → official schema validation
+  → thin components/artifacts projection
+  → PackageURL canonicalization
+  → NormalizedComponent[]
+```
+
+CycloneDX JSON is implemented first. For supported specification versions 1.5, 1.6, and 1.7, use `JsonStrictValidator` from the official [`@cyclonedx/cyclonedx-library`](https://github.com/CycloneDX/cyclonedx-javascript-library), including its required Ajv peer dependencies. After validation, use `JSON.parse()` only to project the small set of fields required by `NormalizedComponent`; do not build a second CycloneDX object model or specification parser.
+
+Parse and canonicalize every supplied PURL with [`packageurl-js`](https://github.com/package-url/packageurl-js), using `PackageURL.fromString()` followed by `toString()` as the canonical representation. A malformed optional PURL is never eligible for exact identity matching; record the issue and fall back conservatively rather than repairing or concatenating a PURL manually.
+
+A narrow Syft-native JSON adapter follows in the same phase because two supplied acceptance samples use that format. Validate the document against the exact versioned [official Anchore Syft JSON schema](https://oss.anchore.com/docs/reference/syft/json/) selected by the document's schema version, then project only `artifacts[]`. Pin supported schemas, their upstream URLs, and checksums locally for reproducible offline validation; do not download a schema or transmit inventory at scan time. The initial acceptance target includes schema `16.1.2` used by the supplied samples.
+
+Generic Go or Python SBOM tooling is not added as a subprocess or runtime dependency. SPDX, VEX, SARIF, XML, and other formats remain explicitly deferred.
 
 Component matching priority is:
 
@@ -261,6 +282,32 @@ Additional safeguards:
 - Do not persist or upload a user's component inventory unless the user explicitly chooses an output path.
 
 The SBOM command first reports candidate-selection evidence, then runs source verification for an unambiguous candidate when `--source` is supplied. A clean result with no candidate Anthropic findings is valid and must not be represented as an error.
+
+### Version-comparison boundary
+
+Affected-range evaluation has a separate adapter contract:
+
+```ts
+interface VersionComparator {
+  supports(ecosystem: string, rangeType: string): boolean;
+  evaluate(version: string, range: AuthoritativeRange):
+    | "affected"
+    | "not_affected"
+    | "unknown";
+}
+```
+
+Use [`semver`](https://github.com/npm/node-semver) for npm and sources that explicitly declare Semantic Versioning. Use strict parsing for security decisions; do not silently coerce an arbitrary version into SemVer. Maven, PyPI/PEP 440, Debian, RPM, and other ecosystems require their own well-maintained comparison implementation and conformance fixtures. A generic “semver-ish” comparator may be useful for display ordering, but it must not evaluate authoritative ranges for a different ecosystem.
+
+Projects such as [OSV-Scanner](https://github.com/google/osv-scanner) and [univers](https://github.com/aboutcode-org/univers) provide useful ecosystem semantics and test vectors, but their Go and Python implementations are references rather than runtime dependencies for this Node CLI. Each ecosystem comparator is enabled only after its behavior is tested against authoritative examples. If the ecosystem, version scheme, or range type cannot be selected reliably, return `UNKNOWN`.
+
+`AFFECTED` therefore requires all three conditions:
+
+1. strong component identity;
+2. an authoritative affected range with provenance; and
+3. a comparator that explicitly supports that ecosystem and range type.
+
+No comparator match may be reconstructed from release ordering alone. The CLI must not send package names or versions to an external query service by default.
 
 ## Supplied SBOM acceptance corpus
 
@@ -296,8 +343,11 @@ Additional regression cases:
 - Maven PostgreSQL JDBC must not match the PostgreSQL server.
 - A PURL mismatch must defeat an equal package name.
 - A name-only match must never produce `AFFECTED` or a failing exit code.
+- An invalid PURL must never be repaired into an exact match.
 - File-only CycloneDX documents must parse to zero package candidates.
 - CycloneDX and Syft forms of the same PURL must normalize identically.
+- SemVer security decisions must reject values that require coercion.
+- An unsupported ecosystem or range type must produce `UNKNOWN`, not a lexical or generic-version guess.
 - Partial/fuzzy signatures must remain `UNKNOWN`.
 - Existing sync fixtures, schema validation, JSON/CSV output, and GitHub tag verification must remain unchanged.
 
@@ -320,6 +370,7 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 ### Milestone 0 — Contracts and fixtures
 
 - Add schemas and TypeScript contracts for fix impacts and verification results.
+- Prototype and pin only the validators, schemas, PURL library, and comparators needed by supported inputs; record upstream provenance and checksums for vendored schemas.
 - Add compact synthetic diff/source fixtures and sanitized SBOM identity fixtures.
 - Record privacy behavior and decision invariants in tests.
 
@@ -337,8 +388,9 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 
 ### Milestone 3 — `check-sbom`
 
-- Implement CycloneDX JSON normalization and candidate matching.
-- Add the narrow Syft-native adapter required by the supplied samples.
+- Add official CycloneDX validation, thin JSON projection, and `packageurl-js` canonicalization.
+- Add exact-version official Syft schema validation and the narrow `artifacts[]` projection required by the supplied samples.
+- Add comparator adapters only for explicitly supported ecosystem/range pairs; all others remain `UNKNOWN`.
 - Connect an unambiguous candidate to `verify-source`.
 
 ### Milestone 4 — Hardening and release
