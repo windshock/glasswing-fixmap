@@ -2,6 +2,8 @@
 import path from "node:path";
 import process from "node:process";
 import { HttpClient } from "./http.js";
+import { syncImpactDataset } from "./impact/sync.js";
+import type { FixImpactDataset } from "./impact/types.js";
 import { readDataset } from "./output.js";
 import { syncFixmap } from "./sync.js";
 import { validateDataset } from "./validate.js";
@@ -10,6 +12,7 @@ const HELP = `glasswing-fixmap
 
 Usage:
   glasswing-fixmap sync [options]
+  glasswing-fixmap sync-impacts [options]
   glasswing-fixmap report [data/fixmap.json]
   glasswing-fixmap validate [data/fixmap.json]
 
@@ -24,8 +27,18 @@ Sync options:
   --strict                Fail instead of recording a source-fetch warning
   -h, --help              Show this help
 
+Impact sync options:
+  --fixmap <file>         Input fixmap (default: data/fixmap.json)
+  --output <file>         Output file (default: data/fix-impacts.json)
+  --cache <dir>           HTTP cache directory (default: .cache/http)
+  --only <ANT,...>        Extract only selected ANT IDs
+  --concurrency <n>       Concurrent requests (default: 4)
+  --offline               Use cached responses only
+  --strict                Fail on the first extraction error
+
 Environment:
-  GITHUB_TOKEN or GH_TOKEN is required for practical --verify-github runs.
+  GITHUB_TOKEN or GH_TOKEN is required for practical --verify-github and full
+  sync-impacts runs.
 `;
 
 interface ParsedArguments {
@@ -41,7 +54,14 @@ function parseArguments(argv: string[]): ParsedArguments {
   const values = new Map<string, string>();
   const flags = new Set<string>();
   const positional: string[] = [];
-  const valueOptions = new Set(["--output", "--cache", "--overrides", "--only", "--concurrency"]);
+  const valueOptions = new Set([
+    "--output",
+    "--cache",
+    "--overrides",
+    "--only",
+    "--concurrency",
+    "--fixmap",
+  ]);
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index]!;
     if (valueOptions.has(argument)) {
@@ -72,6 +92,18 @@ function printReport(dataset: Awaited<ReturnType<typeof readDataset>>): void {
   );
 }
 
+function printImpactReport(dataset: FixImpactDataset): void {
+  const metadata = dataset.metadata;
+  process.stdout.write(
+    [
+      `Source snapshot: ${metadata.generated_from.source_as_of}`,
+      `Findings with GitHub fix commits: ${metadata.finding_count}`,
+      `Unique fix impacts: ${metadata.impact_count}`,
+      `Complete / partial / error: ${metadata.complete_count} / ${metadata.partial_count} / ${metadata.error_count}`,
+    ].join("\n") + "\n",
+  );
+}
+
 async function main(): Promise<void> {
   const args = parseArguments(process.argv.slice(2));
   if (args.flags.has("--help") || args.flags.has("-h") || args.command === "help") {
@@ -89,6 +121,38 @@ async function main(): Promise<void> {
       printReport(dataset);
       if (errors.length > 0) process.stderr.write(`Validation errors:\n${errors.join("\n")}\n`);
     }
+    return;
+  }
+  if (args.command === "sync-impacts") {
+    const concurrency = Number(args.values.get("--concurrency") ?? "4");
+    if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
+      throw new Error("--concurrency must be an integer between 1 and 16");
+    }
+    const githubToken = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+    const onlyValue = args.values.get("--only");
+    if (!githubToken && !args.flags.has("--offline") && !onlyValue) {
+      throw new Error(
+        "A full sync-impacts run requires GITHUB_TOKEN or GH_TOKEN; use --only for a small unauthenticated run",
+      );
+    }
+    const client = new HttpClient({
+      cacheDirectory: path.resolve(args.values.get("--cache") ?? ".cache/http"),
+      offline: args.flags.has("--offline"),
+      ...(githubToken ? { githubToken } : {}),
+    });
+    const fixmap = await readDataset(path.resolve(args.values.get("--fixmap") ?? "data/fixmap.json"));
+    const dataset = await syncImpactDataset({
+      client,
+      fixmap,
+      outputFile: path.resolve(args.values.get("--output") ?? "data/fix-impacts.json"),
+      concurrency,
+      ...(onlyValue
+        ? { only: new Set(onlyValue.split(",").map((value) => value.trim()).filter(Boolean)) }
+        : {}),
+      strict: args.flags.has("--strict"),
+      onProgress: (message) => process.stderr.write(`${message}\n`),
+    });
+    printImpactReport(dataset);
     return;
   }
   if (args.command !== "sync") throw new Error(`Unknown command: ${args.command}`);

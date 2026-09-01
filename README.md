@@ -88,11 +88,22 @@ Actual records also contain confidence levels, source URLs, JSON field or page l
 
 ```text
 glasswing-fixmap sync [options]
+glasswing-fixmap sync-impacts [options]
 glasswing-fixmap report [data/fixmap.json]
 glasswing-fixmap validate [data/fixmap.json]
 ```
 
 The `sync` command supports `--output`, `--cache`, `--overrides`, `--only`, `--concurrency`, `--offline`, `--verify-github`, and `--strict`. Run `npm run sync -- --help` for the complete usage text.
+
+Phase 1 of patch-presence verification can extract changed paths, diff hunk context, and normalized fingerprints for known GitHub fix commits. It writes compact metadata and hashes, not complete patch bodies:
+
+```bash
+GITHUB_TOKEN=... npm run sync:impacts -- \
+  --only ANT-2026-P23DVQM2 \
+  --output .cache/fix-impacts.sample.json
+```
+
+A token is required for a full run unless all responses are already cached for `--offline` use. A full run writes `data/fix-impacts.json` by default. The generated artifact follows [schema/fix-impacts.schema.json](schema/fix-impacts.schema.json). Source-tree decisions and SBOM candidate selection remain the next implementation phases; `sync-impacts` alone does not claim that a build is fixed or affected.
 
 ## Manual overrides
 

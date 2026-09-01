@@ -1,6 +1,7 @@
 # Patch-Presence Verification Plan
 
-Status: proposed implementation plan  
+Status: Phase 1 implemented; Phases 2 and 3 planned
+
 Last updated: 2026-09-01
 
 ## Objective
@@ -89,10 +90,18 @@ New code should be grouped by responsibility (`impact`, `source-verification`, a
 
 ```ts
 interface FixImpactDataset {
-  schema_version: "1.0.0";
-  generated_from: {
-    fixmap_schema_version: string;
-    source_as_of: string;
+  metadata: {
+    schema_version: "1.0.0";
+    generated_from: {
+      fixmap_schema_version: string;
+      source_as_of: string;
+      source_url: string;
+    };
+    finding_count: number;
+    impact_count: number;
+    complete_count: number;
+    partial_count: number;
+    error_count: number;
   };
   impacts: FixImpact[];
 }
@@ -101,30 +110,40 @@ interface FixImpact {
   repository: string;
   commit: string;
   ant_ids: string[];
+  extraction_status: "complete" | "partial" | "error";
   files: ChangedFile[];
   evidence: Evidence[];
+  warnings: string[];
 }
 
 interface ChangedFile {
   path_before?: string;
   path_after?: string;
   status: "added" | "modified" | "deleted" | "renamed";
+  patch_available: boolean;
   functions?: string[];
   hunks: PatchHunk[];
 }
 
 interface PatchHunk {
-  old_range: string;
-  new_range: string;
+  old_range: { start: number; count: number };
+  new_range: { start: number; count: number };
   context?: string;
   signatures: PatchSignature[];
 }
 
 interface PatchSignature {
   algorithm: "glasswing-normalized-sha256-v1";
-  kind: "added" | "deleted" | "unchanged_context" | "combined";
+  kind:
+    | "added"
+    | "deleted"
+    | "unchanged_context"
+    | "preimage"
+    | "postimage"
+    | "combined";
   digest: string;
   line_count: number;
+  normalized_length: number;
 }
 ```
 
@@ -175,6 +194,8 @@ Normalization v1 will remove line-ending differences, normalize horizontal white
 The extractor will expose a small `FunctionContextExtractor` interface, but v1 will use diff hunk headers and context only. Language-specific AST parsers are deferred until real false-negative data justifies their maintenance cost.
 
 Phase 1 is complete when extraction is deterministic, schema-validated, cache/offline compatible, and fixture-tested for modified, added, deleted, and renamed files.
+
+Phase 1 is implemented. An unavailable or unparseable patch, an unsupported file status, or GitHub's changed-file limit produces a `partial` impact with warnings rather than a false complete result. A failed commit lookup is retained as an `error` impact in the default mode; `--strict` fails immediately. A live acceptance run for `ANT-2026-P23DVQM2` resolved one full commit, four files, and eleven hunks without persisting patch source text.
 
 ## Phase 2 — Source verification
 
@@ -374,7 +395,7 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - Add compact synthetic diff/source fixtures and sanitized SBOM identity fixtures.
 - Record privacy behavior and decision invariants in tests.
 
-### Milestone 1 — `sync-impacts`
+### Milestone 1 — `sync-impacts` (implemented)
 
 - Extract GitHub commit impact metadata and fingerprints.
 - Reuse HTTP cache, offline mode, token handling, deterministic sorting, and evidence conventions.
