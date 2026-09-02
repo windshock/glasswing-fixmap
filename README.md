@@ -146,7 +146,7 @@ npm run sync:ranges
 npm run check:sbom -- --sbom bom.cdx.json --ranges data/affected-ranges.json --fail-on-affected
 ```
 
-The SemVer (npm) comparator is enabled; other ecosystems return `unknown` until each has conformance fixtures, and a name-only candidate is never evaluated for `AFFECTED`. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
+The SemVer comparator covers npm, Go, and crates.io; other ecosystems (Maven, PyPI, Packagist) return `unknown` until each has its own comparator, and a name-only candidate is never evaluated for `AFFECTED`. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
 
 Exit codes: `0` completed analysis (any decision, or a clean SBOM); `1` invalid input or operational failure; `2` a verifier returned an operational `ERROR`; `3` `check-sbom --fail-on-affected` found an authoritative `AFFECTED`. Aggregate, non-sensitive validation results are recorded in [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md).
 

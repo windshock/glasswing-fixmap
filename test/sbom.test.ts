@@ -481,6 +481,71 @@ test("an unsupported ecosystem or range type is unknown, never guessed", () => {
   assert.equal(comparator.evaluate("1.5.0", gitRange), "unknown");
 });
 
+test("SemVer comparator supports Go and crates.io with conformance vectors", () => {
+  const comparator = new SemverComparator();
+
+  // Go modules use SemVer (a leading v is tolerated, not coercion).
+  const goRange = {
+    ecosystem: "Go",
+    range_type: "ECOSYSTEM",
+    events: [{ introduced: "1.0.0" }, { fixed: "1.6.4" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.supports("Go", "ECOSYSTEM"), true);
+  assert.equal(comparator.evaluate("v1.3.7", goRange), "affected");
+  assert.equal(comparator.evaluate("1.3.7", goRange), "affected");
+  assert.equal(comparator.evaluate("v1.6.4", goRange), "not_affected");
+  assert.equal(comparator.evaluate("v0.9.0", goRange), "not_affected");
+  assert.equal(comparator.evaluate("v1.3", goRange), "unknown"); // coercion is rejected
+
+  // crates.io uses SemVer.
+  const cargoRange = {
+    ecosystem: "crates.io",
+    range_type: "SEMVER",
+    events: [{ introduced: "1.0.0" }, { fixed: "2.0.0" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.supports("crates.io", "SEMVER"), true);
+  assert.equal(comparator.evaluate("1.5.0", cargoRange), "affected");
+  assert.equal(comparator.evaluate("2.0.0", cargoRange), "not_affected");
+
+  // Ecosystems with their own version scheme remain excluded.
+  assert.equal(comparator.supports("Maven", "ECOSYSTEM"), false);
+  assert.equal(comparator.supports("PyPI", "ECOSYSTEM"), false);
+  assert.equal(comparator.supports("Packagist", "ECOSYSTEM"), false);
+});
+
+test("reaches AFFECTED for a Go component via a golang PURL and authoritative range", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      {
+        type: "library",
+        name: "circl",
+        version: "v1.3.7",
+        purl: "pkg:golang/github.com/cloudflare/circl@v1.3.7",
+      },
+    ]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-GOAFF", "cloudflare/circl", "Go", "github.com/cloudflare/circl")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-GOAFF",
+        advisory: "GHSA-go-circl",
+        ecosystem: "Go",
+        package: "github.com/cloudflare/circl",
+        range_type: "ECOSYSTEM",
+        events: [{ introduced: "1.0.0" }, { fixed: "1.6.4" }],
+        provenance: "https://osv.dev/vulnerability/GHSA-go-circl",
+      },
+    ]),
+  });
+  const candidate = report.candidates.find((item) => item.identity_strength === "strong");
+  assert.ok(candidate, JSON.stringify(report, null, 2));
+  assert.equal(candidate!.range_assessment?.verdict, "affected");
+});
+
 test("the report conforms to schema/sbom-check.schema.json", async () => {
   const file = await writeSbom(
     cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),

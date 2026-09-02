@@ -25,17 +25,22 @@ export interface VersionComparator {
 }
 
 /**
- * SemVer comparator for npm and ranges that explicitly declare Semantic
- * Versioning. Security decisions use strict parsing: a version that would need
- * coercion is never forced into SemVer and yields `unknown`.
+ * SemVer comparator for ecosystems whose versions are genuine Semantic
+ * Versioning (npm, Go, crates.io). Security decisions use strict parsing: a
+ * version that would need coercion is never forced into SemVer and yields
+ * `unknown`. Ecosystems with their own version schemes (Maven, PyPI, Debian,
+ * RPM, Packagist) are intentionally excluded until each has its own comparator
+ * and conformance fixtures.
  */
 export class SemverComparator implements VersionComparator {
   readonly name = "semver";
 
+  private static readonly SEMVER_ECOSYSTEMS = new Set(["npm", "go", "crates.io"]);
+
   supports(ecosystem: string, rangeType: string): boolean {
     const type = rangeType.trim().toUpperCase();
     if (type !== "SEMVER" && type !== "ECOSYSTEM") return false;
-    return ecosystem.trim().toLowerCase() === "npm";
+    return SemverComparator.SEMVER_ECOSYSTEMS.has(ecosystem.trim().toLowerCase());
   }
 
   evaluate(version: string, range: AuthoritativeRange): RangeVerdict {

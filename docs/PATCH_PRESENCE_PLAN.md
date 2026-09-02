@@ -1,6 +1,6 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm comparator enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and additional ecosystem comparators.
+Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and additional ecosystem comparators (Maven, PyPI, Packagist).
 
 Last updated: 2026-09-02
 
@@ -426,7 +426,7 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 
 - Official CycloneDX 1.5/1.6/1.7 `JsonStrictValidator` validation, thin JSON projection, and `packageurl-js` canonicalization are implemented.
 - Exact-version official Syft schema (16.1.2) validation and the narrow `artifacts[]` projection are implemented; the schema is vendored under `schema/vendor/syft` with its upstream URL and SHA-256 recorded in `provenance.json`.
-- The SemVer comparator (npm) and its range evaluation are implemented behind the `VersionComparator` boundary; every other ecosystem or range type returns `UNKNOWN`. Coercion-requiring versions are rejected.
+- The SemVer comparator (npm, Go, crates.io) and its range evaluation are implemented behind the `VersionComparator` boundary; every other ecosystem or range type returns `UNKNOWN`. Coercion-requiring versions are rejected.
 - An unambiguous strong candidate is connected to `verify-source`; multiple strong candidates require `--component <purl>`.
 
 Remaining before `AFFECTED` is reachable from real data: the current dataset persists only collapsed `fixed_versions[]`, not an authoritative affected range with range type, `last_affected`/`limit` events, and provenance. The comparator machinery is complete and unit-tested against synthetic ranges, but `AFFECTED` will only be emitted once such ranges are persisted (a dedicated artifact) or consumed directly from OSV/GHSA/CVE. Until then, matched components remain candidate-only, never `AFFECTED`, consistent with the decision model.
@@ -442,14 +442,14 @@ Acceptance testing against real exported SBOMs surfaced two input realities the 
 
 `AFFECTED` is now reachable without inferring ranges or maintaining a curated range database. `sync-ranges` consumes OSV/GHSA records exactly as published and writes the full authoritative ranges to a companion artifact (`data/affected-ranges.json`, mirroring the `fix-impacts.json` pattern) with ecosystem, package, range type, events, and provenance; `fixmap.json` is unchanged. A live run over 30 GHSA-bearing findings collected real ranges across Packagist, npm, crates.io, Maven, and Go (for example `twig/twig` `[3.24.0, 3.26.0)`), confirming the parser works on published data.
 
-`check-sbom --ranges` consumes the artifact offline: for a strong-identity candidate with a version, it selects a comparator that explicitly supports the range's ecosystem and type and evaluates it, attaching a `range_assessment`. `AFFECTED` requires all three of strong identity, an authoritative range with provenance, and a supporting comparator; a name-only candidate is never evaluated, and any unresolved case stays `unknown`. The SemVer (npm) comparator is enabled; other ecosystems return `unknown` until each has conformance fixtures. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
+`check-sbom --ranges` consumes the artifact offline: for a strong-identity candidate with a version, it selects a comparator that explicitly supports the range's ecosystem and type and evaluates it, attaching a `range_assessment`. `AFFECTED` requires all three of strong identity, an authoritative range with provenance, and a supporting comparator; a name-only candidate is never evaluated, and any unresolved case stays `unknown`. The SemVer comparator covers npm, Go, and crates.io (all genuine SemVer, with conformance vectors); other ecosystems return `unknown` until each has its own comparator and fixtures. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
 
 ### Milestone 4 — Hardening and release (in progress)
 
 - Done: ran 16 real acceptance SBOMs plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
 - Done: confirmed existing outputs are byte-for-byte compatible — `data/fixmap.json` and `data/fixmap.csv` re-serialize identically through the current code, and `sync`/`report`/`validate` are unchanged.
 - Done: documented exit semantics (`0`/`1`/`2`/`3`) and limitations in the README and ACCEPTANCE.md.
-- Remaining: enable additional ecosystem comparators (Maven, Go, crates.io, Packagist), each only behind its own conformance fixtures.
+- Done: enabled Go and crates.io comparators (genuine SemVer) with conformance vectors. Remaining: Maven, PyPI, and Packagist comparators, each behind its own version scheme and fixtures.
 - Remaining: add scheduled `sync-impacts`/`sync-ranges` refresh only after rate limits and generated-diff size are measured.
 
 ## Definition of done
