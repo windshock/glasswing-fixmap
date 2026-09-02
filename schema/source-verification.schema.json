@@ -99,6 +99,7 @@
             "PATCH_SIGNATURE_ABSENT",
             "TARGET_FILE_ABSENT",
             "TARGET_PATH_MOVED",
+            "IMPACT_INCOMPLETE",
             "BACKEND_UNSUPPORTED",
             "BACKEND_ERROR"
           ]

@@ -325,6 +325,20 @@ export class GlasswingFingerprintVerifier implements SourceVerifier {
         );
         continue;
       }
+      // A partial extraction means some fix data is missing, so even a full set
+      // of matching hunks cannot prove the complete fix is present.
+      if (impact.extraction_status !== "complete") {
+        observations.push(
+          observation({
+            backend: this.name,
+            type: "IMPACT_INCOMPLETE",
+            strength: "informational",
+            repository: impact.repository,
+            commit: impact.commit,
+            detail: `fix impact extraction is ${impact.extraction_status}; the full fix is not proven even if extracted hunks match`,
+          }),
+        );
+      }
       for (const file of impact.files) {
         const paths = targetPaths(file);
         const targetFile = file.path_after ?? file.path_before ?? "<unknown>";

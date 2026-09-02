@@ -437,6 +437,30 @@ test("tolerates a component license carrying both id and name", async () => {
   assert.ok(report.warnings.some((warning) => warning.includes("does not fully conform")));
 });
 
+test("projects the CycloneDX root component (metadata.component), not only dependencies", async () => {
+  const file = await writeRaw(
+    JSON.stringify({
+      bomFormat: "CycloneDX",
+      specVersion: "1.6",
+      version: 1,
+      metadata: {
+        component: { type: "application", name: "my-app", version: "3.2.1", purl: "pkg:npm/my-app@3.2.1" },
+      },
+      components: [{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }],
+    }),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-ROOT", "acme/my-app", "npm", "my-app")],
+  });
+  assert.equal(report.package_component_count, 2); // root application + one dependency
+  assert.ok(
+    report.candidates.some(
+      (candidate) => candidate.component.name === "my-app" && candidate.match_type === "ecosystem_package",
+    ),
+  );
+});
+
 test("strict CycloneDX validation rejects a malformed document", async () => {
   const file = await writeSbom({ bomFormat: "CycloneDX", specVersion: "1.6", components: "not-an-array" });
   await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /failed strict schema validation/);

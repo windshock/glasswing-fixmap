@@ -467,9 +467,9 @@ P0 — done this session:
 - Fail-open policy paths (`cli.ts`): `--fail-on-affected` without `--ranges`, `--source` with an unreadable fix-impact dataset, and a malformed explicit `--component` PURL all now error instead of silently degrading.
 
 P1:
-- Partial-impact gating (`fusion.ts`): add an `IMPACT_INCOMPLETE` observation and prevent `VERIFIED_FIXED` whenever the relevant fix impact is not `complete`.
-- Multi-commit fix-set semantics: model `relation: all_of | any_of` and optional `branch`; a single matching commit is not proof the whole fix is present.
-- CycloneDX root component (`cyclonedx.ts`): also project `metadata.component` (and nested structure), so the BOM's primary application is not missed.
+- Done: partial-impact gating — the native verifier emits an `IMPACT_INCOMPLETE` observation for a non-`complete` fix impact, and fusion treats it as inconclusive so a partial extraction can no longer reach `VERIFIED_FIXED` even when every extracted hunk matches.
+- Done: CycloneDX root component — `metadata.component` and its nested structure are now projected, so the BOM's primary application is not missed.
+- Remaining: multi-commit fix-set semantics (`relation: all_of | any_of`, optional `branch`). Deferred because it needs a data-model design that fixmap does not currently carry; a naive "require every commit" default would wrongly fail legitimate branch-specific fixes (e.g. Rocket.Chat 7.x vs 8.x), so it must be modeled from real relation/branch evidence rather than assumed.
 
 P2:
 - Add a normal PR/push CI workflow (`npm ci && npm run check && npm test && npm run validate`), separate from the scheduled data-refresh workflow.

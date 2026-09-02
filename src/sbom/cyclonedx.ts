@@ -133,6 +133,13 @@ export class CycloneDxAdapter implements SbomAdapter {
     }
 
     const flattened: CycloneDxComponent[] = [];
+    // Include the BOM's primary/root component (the application the BOM
+    // describes) and its nested structure, not only the dependency list.
+    if (isRecord(document.metadata) && isRecord(document.metadata.component)) {
+      const root = document.metadata.component as CycloneDxComponent;
+      flattened.push(root);
+      flattenComponents(root.components, flattened);
+    }
     flattenComponents(document.components, flattened);
     const components: NormalizedComponent[] = [];
     for (const component of flattened) {

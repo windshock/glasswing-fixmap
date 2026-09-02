@@ -19,6 +19,7 @@ const INCONCLUSIVE_TYPES = new Set([
   "PATCH_SIGNATURE_ABSENT",
   "TARGET_FILE_ABSENT",
   "TARGET_PATH_MOVED",
+  "IMPACT_INCOMPLETE",
   "BACKEND_UNSUPPORTED",
   "BACKEND_ERROR",
 ]);
@@ -214,6 +215,7 @@ export function fuseVerificationEvidence(
       item.type === "FIX_COMMIT_ANCESTOR" ||
       item.type === "FIX_COMMIT_NOT_ANCESTOR" ||
       item.type === "FIX_POSTIMAGE_PRESENT" ||
+      item.type === "IMPACT_INCOMPLETE" ||
       item.type === "VULNERABLE_PATTERN_ABSENT",
   );
   return result("UNKNOWN", "low", [

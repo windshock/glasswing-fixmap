@@ -300,3 +300,34 @@ test("a pure-deletion fix is not VERIFIED_FIXED while the removed line remains",
   await git(repository, "checkout", "--detach", fixCommit);
   await check(repository, dataset, "VERIFIED_FIXED");
 });
+
+test("a partial fix impact never yields VERIFIED_FIXED even when every hunk matches", async (context) => {
+  const repository = await mkdtemp(path.join(os.tmpdir(), "glasswing-partial-test-"));
+  context.after(async () => rm(repository, { recursive: true, force: true }));
+  await git(repository, "init", "-b", "main");
+  await git(repository, "config", "user.name", "glasswing test");
+  await git(repository, "config", "user.email", "glasswing@example.invalid");
+  await git(repository, "remote", "add", "origin", "https://github.com/example/project.git");
+
+  await writeSource(repository, VULNERABLE_SOURCE);
+  const vulnerableCommit = await commitAll(repository, "vulnerable fixture");
+  await writeSource(repository, FIXED_SOURCE);
+  const fixCommit = await commitAll(repository, "fix parser");
+  const patch = await git(repository, "diff", vulnerableCommit, fixCommit, "--", "src/parser.c");
+  const dataset = impactDataset(fixCommit, patch);
+  // The extraction was incomplete: the full fix is not proven even if every
+  // extracted hunk matches.
+  dataset.impacts[0]!.extraction_status = "partial";
+  dataset.impacts[0]!.warnings = ["patch extraction was truncated"];
+  dataset.metadata.complete_count = 0;
+  dataset.metadata.partial_count = 1;
+
+  await git(repository, "checkout", "--detach", fixCommit);
+  const report = await check(repository, dataset, "UNKNOWN");
+  assert.ok(
+    report.backend_results
+      .flatMap((item) => item.observations)
+      .some((item) => item.type === "IMPACT_INCOMPLETE"),
+    JSON.stringify(report, null, 2),
+  );
+});
