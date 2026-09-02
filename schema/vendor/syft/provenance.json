@@ -1,0 +1,12 @@
+{
+  "description": "Pinned Anchore Syft native JSON schema used for offline, reproducible validation. Do not download a schema or transmit inventory at scan time.",
+  "schemas": [
+    {
+      "syft_schema_version": "16.1.2",
+      "file": "schema-16.1.2.json",
+      "upstream_url": "https://raw.githubusercontent.com/anchore/syft/main/schema/json/schema-16.1.2.json",
+      "sha256": "6cada84ac3f8057cb193ced94e60fdef13492cdbad12175a45011c5c02a2fb0a",
+      "json_schema_dialect": "https://json-schema.org/draft/2020-12/schema"
+    }
+  ]
+}

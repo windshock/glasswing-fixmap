@@ -54,7 +54,7 @@ This repository distinguishes between the existence of an upstream patch and the
 
 See [docs/METHODOLOGY.md](docs/METHODOLOGY.md) for the full methodology and confidence rules, and [docs/CROSS_VALIDATION.md](docs/CROSS_VALIDATION.md) for reviewed exceptions.
 
-The source-level extension is documented in [docs/PATCH_PRESENCE_PLAN.md](docs/PATCH_PRESENCE_PLAN.md). Phase 2a now adds evidence-backed `fix commit → file/function/patch → source` verification. Conservative SBOM candidate selection remains the next phase.
+The source-level extension is documented in [docs/PATCH_PRESENCE_PLAN.md](docs/PATCH_PRESENCE_PLAN.md). Phase 2a adds evidence-backed `fix commit → file/function/patch → source` verification, and Phase 3 adds conservative SBOM candidate selection that can bridge an unambiguous candidate into that verification.
 
 ## Data example
 
@@ -90,6 +90,7 @@ Actual records also contain confidence levels, source URLs, JSON field or page l
 glasswing-fixmap sync [options]
 glasswing-fixmap sync-impacts [options]
 glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
+glasswing-fixmap check-sbom --sbom <file> [options]
 glasswing-fixmap report [data/fixmap.json]
 glasswing-fixmap validate [data/fixmap.json]
 ```
@@ -123,6 +124,19 @@ Add `--json` for machine-readable stdout or `--output result.json` to write an a
 The backends are not voters. Git ancestry alone cannot prove that the current tree remains fixed because a later commit may revert the patch. A strong complete native post-image match can produce `VERIFIED_FIXED`; ancestry can corroborate it. Conflicting ancestry and pre-fix evidence produce `UNKNOWN` with `VERIFIER_CONFLICT`. `PATCH_NOT_FOUND` never implies `AFFECTED`, and operational verifier failures remain distinct from inconclusive evidence.
 
 The optional Vanir backend proposed in [GitHub issue #1](https://github.com/windshock/glasswing-fixmap/issues/1) is not a runtime dependency in Phase 2a. The `SourceVerifier` boundary and preserved backend metadata allow it to be evaluated later without coupling the core decision model to Vanir.
+
+Phase 3 reads a CycloneDX (1.5/1.6/1.7) or Syft native JSON SBOM, selects candidate components that map to Anthropic findings, and can bridge an unambiguous strong candidate into `verify-source`:
+
+```bash
+npm run check:sbom -- \
+  --sbom bom.cdx.json \
+  --source ./checkout \
+  --impacts data/fix-impacts.json
+```
+
+CycloneDX documents are validated with the official [`@cyclonedx/cyclonedx-library`](https://github.com/CycloneDX/cyclonedx-javascript-library) strict validator; Syft documents are validated against the pinned, checksum-recorded official schema under [schema/vendor/syft](schema/vendor/syft). PURLs are canonicalized with [`packageurl-js`](https://github.com/package-url/packageurl-js) and never repaired by hand. Component matching uses the priority `exact PURL > ecosystem + package > repository identity > normalized name`, so a Maven PostgreSQL JDBC component never matches the PostgreSQL server by name, and a valid but mismatched PURL defeats a coincidental name match. Reports follow [schema/sbom-check.schema.json](schema/sbom-check.schema.json), and an SBOM with no candidate Anthropic finding is a valid clean result rather than an error.
+
+An SBOM only selects candidates; it never proves a component is affected. `AFFECTED` still requires strong component identity, an authoritative OSV/GHSA/CVE range with provenance, and a comparator that explicitly supports the ecosystem and range type. The SemVer comparator (npm) and its range-evaluation are implemented and tested, but the current dataset does not yet persist authoritative ranges in full form, so real-world candidates conservatively remain candidate-only rather than `AFFECTED`. Persisting authoritative ranges is a separate, still-planned step.
 
 ## Manual overrides
 

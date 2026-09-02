@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/windshock/glasswing-fixmap/schema/sbom-check.schema.json",
+  "title": "Glasswing SBOM candidate-selection report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sbom",
+    "format",
+    "component_count",
+    "package_component_count",
+    "candidates",
+    "warnings"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "sbom": { "type": "string" },
+    "format": { "enum": ["cyclonedx", "syft"] },
+    "spec_version": { "type": "string" },
+    "component_count": { "type": "integer", "minimum": 0 },
+    "package_component_count": { "type": "integer", "minimum": 0 },
+    "candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/candidate" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ant_id",
+        "project",
+        "match_type",
+        "identity_strength",
+        "confidence",
+        "component",
+        "finding_identity"
+      ],
+      "properties": {
+        "ant_id": { "type": "string", "pattern": "^ANT-\\d{4}-[A-Z0-9]+$" },
+        "project": { "type": "string" },
+        "match_type": {
+          "enum": ["exact_purl", "ecosystem_package", "repository", "name_heuristic"]
+        },
+        "identity_strength": { "enum": ["strong", "weak"] },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "component": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_format", "name", "locations"],
+          "properties": {
+            "source_format": { "enum": ["cyclonedx", "syft"] },
+            "name": { "type": "string" },
+            "version": { "type": "string" },
+            "purl": { "type": "string" },
+            "repository": { "type": "string" },
+            "locations": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "finding_identity": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ecosystem": { "type": "string" },
+            "package": { "type": "string" }
+          }
+        },
+        "range_assessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["verdict", "reason"],
+          "properties": {
+            "verdict": { "enum": ["affected", "not_affected", "unknown"] },
+            "reason": { "type": "string" }
+          }
+        },
+        "verification": { "type": "object" }
+      }
+    }
+  }
+}

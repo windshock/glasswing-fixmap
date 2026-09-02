@@ -1,6 +1,6 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1 and 2a implemented; Phase 2b and Phase 3 planned
+Status: Phases 1, 2a, and 3 candidate selection implemented; Phase 2b planned. Phase 3 `AFFECTED` remains gated on persisting authoritative affected ranges (see Milestone 3).
 
 Last updated: 2026-09-02
 
@@ -420,12 +420,14 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - Preserve native and Vanir observations separately and report explicit conflicts as `UNKNOWN`.
 - Require differential fixtures and measured maintenance value before making Vanir a documented optional installation.
 
-### Milestone 3 — `check-sbom`
+### Milestone 3 — `check-sbom` (candidate selection implemented)
 
-- Add official CycloneDX validation, thin JSON projection, and `packageurl-js` canonicalization.
-- Add exact-version official Syft schema validation and the narrow `artifacts[]` projection required by the supplied samples.
-- Add comparator adapters only for explicitly supported ecosystem/range pairs; all others remain `UNKNOWN`.
-- Connect an unambiguous candidate to `verify-source`.
+- Official CycloneDX 1.5/1.6/1.7 `JsonStrictValidator` validation, thin JSON projection, and `packageurl-js` canonicalization are implemented.
+- Exact-version official Syft schema (16.1.2) validation and the narrow `artifacts[]` projection are implemented; the schema is vendored under `schema/vendor/syft` with its upstream URL and SHA-256 recorded in `provenance.json`.
+- The SemVer comparator (npm) and its range evaluation are implemented behind the `VersionComparator` boundary; every other ecosystem or range type returns `UNKNOWN`. Coercion-requiring versions are rejected.
+- An unambiguous strong candidate is connected to `verify-source`; multiple strong candidates require `--component <purl>`.
+
+Remaining before `AFFECTED` is reachable from real data: the current dataset persists only collapsed `fixed_versions[]`, not an authoritative affected range with range type, `last_affected`/`limit` events, and provenance. The comparator machinery is complete and unit-tested against synthetic ranges, but `AFFECTED` will only be emitted once such ranges are persisted (a dedicated artifact) or consumed directly from OSV/GHSA/CVE. Until then, matched components remain candidate-only, never `AFFECTED`, consistent with the decision model.
 
 ### Milestone 4 — Hardening and release
 

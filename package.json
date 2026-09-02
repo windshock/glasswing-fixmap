@@ -16,17 +16,24 @@
     "report": "tsx src/cli.ts report",
     "validate": "tsx src/cli.ts validate",
     "test": "tsx --test test/*.test.ts",
-    "verify": "npm run check && npm test && npm run validate"
+    "verify": "npm run check && npm test && npm run validate",
+    "check:sbom": "tsx src/cli.ts check-sbom"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "cheerio": "^1.1.2"
+    "@cyclonedx/cyclonedx-library": "10.2.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "ajv-formats-draft2019": "1.6.1",
+    "cheerio": "^1.1.2",
+    "packageurl-js": "2.0.1",
+    "semver": "7.8.5"
   },
   "devDependencies": {
     "@types/node": "^22.18.0",
-    "ajv": "8.20.0",
+    "@types/semver": "7.8.0",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   },

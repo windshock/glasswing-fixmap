@@ -9,6 +9,8 @@ import { syncFixmap } from "./sync.js";
 import { validateDataset } from "./validate.js";
 import { formatSourceVerification, writeSourceVerification } from "./verification/output.js";
 import { readImpactDataset, verifySource } from "./verification/verify.js";
+import { checkSbom } from "./sbom/check.js";
+import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
 
 const HELP = `glasswing-fixmap
 
@@ -18,6 +20,7 @@ Usage:
   glasswing-fixmap report [data/fixmap.json]
   glasswing-fixmap validate [data/fixmap.json]
   glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
+  glasswing-fixmap check-sbom --sbom <file> [options]
 
 Sync options:
   --output <dir>          Output directory (default: data)
@@ -43,6 +46,15 @@ Source verification options:
   --ant <ANT-ID>          Anthropic finding to verify (required)
   --source <dir>          Source checkout or package tree (required)
   --impacts <file>        Fix-impact input (default: data/fix-impacts.json)
+  --json                  Print the complete machine-readable report
+  --output <file>         Also write the JSON report atomically
+
+Check SBOM options:
+  --sbom <file>           CycloneDX (1.5/1.6/1.7) or Syft JSON SBOM (required)
+  --fixmap <file>         Findings input (default: data/fixmap.json)
+  --source <dir>          Verify an unambiguous strong candidate against a tree
+  --impacts <file>        Fix-impact input for --source (default: data/fix-impacts.json)
+  --component <purl>      Restrict source verification to one canonical PURL
   --json                  Print the complete machine-readable report
   --output <file>         Also write the JSON report atomically
 
@@ -74,6 +86,8 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--ant",
     "--source",
     "--impacts",
+    "--sbom",
+    "--component",
   ]);
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index]!;
@@ -189,6 +203,42 @@ async function main(): Promise<void> {
         : formatSourceVerification(report),
     );
     if (report.decision === "ERROR") process.exitCode = 2;
+    return;
+  }
+  if (args.command === "check-sbom") {
+    const sbom = args.values.get("--sbom");
+    if (!sbom) throw new Error("check-sbom requires --sbom <file>");
+    const fixmap = await readDataset(path.resolve(args.values.get("--fixmap") ?? "data/fixmap.json"));
+    const source = args.values.get("--source");
+    let impactDataset: FixImpactDataset | undefined;
+    if (source) {
+      const impactsPath = path.resolve(args.values.get("--impacts") ?? "data/fix-impacts.json");
+      try {
+        impactDataset = await readImpactDataset(impactsPath);
+      } catch {
+        process.stderr.write(
+          `Skipping source verification: unable to read fix impacts at ${impactsPath}\n`,
+        );
+      }
+    }
+    const component = args.values.get("--component");
+    const report = await checkSbom({
+      sbomFile: path.resolve(sbom),
+      findings: fixmap.findings,
+      ...(source ? { sourceRoot: path.resolve(source) } : {}),
+      ...(impactDataset ? { impactDataset } : {}),
+      ...(component ? { component } : {}),
+    });
+    const output = args.values.get("--output");
+    if (output) await writeSbomCheck(report, path.resolve(output));
+    process.stdout.write(
+      args.flags.has("--json")
+        ? `${JSON.stringify(report, null, 2)}\n`
+        : formatSbomCheck(report),
+    );
+    if (report.candidates.some((candidate) => candidate.verification?.decision === "ERROR")) {
+      process.exitCode = 2;
+    }
     return;
   }
   if (args.command !== "sync") throw new Error(`Unknown command: ${args.command}`);
