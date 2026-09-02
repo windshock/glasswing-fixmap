@@ -458,13 +458,13 @@ Priority order leads with the correctness/security bugs from issue #2, then feat
 
 **Issue #1 — Phase 2 multi-verifier source verification: essentially delivered.** Phase 2a (`SourceVerifier`, `GitAncestryVerifier`, `GlasswingFingerprintVerifier`, observation/evidence model, conservative fusion, `verify-source`, and the fixed/vulnerable/backported/reverted/moved/partial differential tests) and the Phase 2b real-Vanir evaluation are implemented. Candidate to close after publishing the Vanir differential write-up.
 
-**Issue #2 — hardening review. Several items are real correctness/security bugs in the current code; fix these first.**
+**Issue #2 — hardening review. The P0 correctness/security bugs are fixed; P1/P2 remain.**
 
-P0:
-- Deletion-heavy false positive (`native-fingerprint.ts`): `evaluateHunk` returns on the first `postimage` match before checking `preimage`. A pure-deletion or deletion-heavy hunk's postimage is mostly unchanged context that already exists in the vulnerable source, so a postimage match alone can wrongly yield `VERIFIED_FIXED`. Evaluate preimage/postimage/deleted/added together; a pure deletion must require deleted/preimage absence as corroboration. Add fixtures: pure deletion, both images present, duplicated vulnerable function.
-- Range `unknown` propagation (`check.ts assessRanges`): a `not_affected` from one range currently overrides an unresolved (`unknown`) range; when any applicable range is `unknown`, the result must stay `unknown`. Also preserve OSV `limit` events and `affected.versions[]`, plus range `repo`/`purl`, in the companion artifact rather than projecting them away; `versions[]` is exact positive evidence when range comparison is unavailable.
-- SBOM ↔ source binding (`check.ts` bridge): `check-sbom --source` does not confirm the checkout corresponds to the SBOM component/version. Add source-binding provenance (`VERIFIED` / `USER_ASSERTED` / `UNVERIFIED`) from VCS revision / repository identity / SBOM provenance; an unverified binding must stay visible and must not erase authoritative range evidence.
-- Fail-open policy paths (`cli.ts`): `--fail-on-affected` without `--ranges` → `ERROR`; `--source` with an unreadable/missing fix-impact dataset → `ERROR` (currently warns and skips); a malformed explicit `--component` PURL → `ERROR` (currently warns). Explicit security requests must not silently degrade to partial analysis.
+P0 — done this session:
+- Deletion-heavy false positive (`native-fingerprint.ts`): `evaluateHunk` now checks a still-present deleted line and the pre-fix image before any post-fix match, so a pure-deletion hunk's context overlap can no longer read as `VERIFIED_FIXED`. Pure-deletion regression test added.
+- Range `unknown` propagation (`check.ts assessRanges`): a `not_affected` no longer overrides an unresolved range — any applicable unresolved range keeps the result `unknown` (affected still dominates). OSV `limit` events are now preserved in the artifact. Remaining: also ingest `affected.versions[]` as exact positive evidence when range comparison is unavailable.
+- SBOM ↔ source binding (`check.ts` bridge): a `source_binding` provenance (`verified` / `user_asserted` / `unverified`) is recorded; a repository-identity conflict is `unverified`, otherwise `user_asserted` (version not machine-bound), surfaced as a warning, and source evidence stays separate from the range assessment. Remaining: emit `verified` once a VCS-revision/version binding exists.
+- Fail-open policy paths (`cli.ts`): `--fail-on-affected` without `--ranges`, `--source` with an unreadable fix-impact dataset, and a malformed explicit `--component` PURL all now error instead of silently degrading.
 
 P1:
 - Partial-impact gating (`fusion.ts`): add an `IMPACT_INCOMPLETE` observation and prevent `VERIFIED_FIXED` whenever the relevant fix impact is not `complete`.
