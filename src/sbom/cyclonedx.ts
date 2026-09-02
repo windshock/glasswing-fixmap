@@ -37,6 +37,19 @@ function validationInstancePaths(error: unknown): string[] | undefined {
   return paths;
 }
 
+/**
+ * A validation error is identity-critical only when it touches the structural
+ * shape of `components` or a field this adapter projects for identity. Cosmetic
+ * violations elsewhere (a non-UUID `serialNumber`, a license carrying both `id`
+ * and `name`, hashes, supplier) cannot corrupt a projected component identity,
+ * so they are tolerated with a warning rather than rejecting the document.
+ */
+function isIdentityCritical(path: string): boolean {
+  if (/(^|\/)components$/.test(path)) return true;
+  if (/(^|\/)components\/\d+$/.test(path)) return true;
+  return /(^|\/)components\/\d+\/(name|version|purl|cpe|type)$/.test(path);
+}
+
 function githubRepository(url: string): string | undefined {
   const match = url.trim().match(/github\.com[/:]([^/]+)\/([^/#?]+?)(?:\.git)?(?:[/#?].*)?$/i);
   return match?.[1] && match[2] ? `${match[1]}/${match[2]}` : undefined;
@@ -106,17 +119,16 @@ export class CycloneDxAdapter implements SbomAdapter {
     const warnings: string[] = [];
     if (validationError !== null) {
       const paths = validationInstancePaths(validationError);
-      const componentViolations = paths?.filter((path) => path.startsWith("/components")) ?? [];
-      // Reject when the error is opaque or when it touches component data; only
-      // tolerate cosmetic metadata violations (e.g. a non-UUID serialNumber),
-      // which cannot corrupt the projected component identities.
-      if (paths === undefined || componentViolations.length > 0) {
+      const criticalViolations = paths?.filter(isIdentityCritical) ?? [];
+      // Reject when the error is opaque or when it touches component identity;
+      // tolerate cosmetic violations that cannot corrupt a projected identity.
+      if (paths === undefined || criticalViolations.length > 0) {
         throw new Error(
           `CycloneDX ${specVersion} document failed strict schema validation: ${JSON.stringify(validationError)}`,
         );
       }
       warnings.push(
-        `CycloneDX ${specVersion} document does not fully conform to the official schema; proceeding for candidate selection despite ${paths.length} non-component violation(s): ${[...new Set(paths)].sort().join(", ")}`,
+        `CycloneDX ${specVersion} document does not fully conform to the official schema; proceeding for candidate selection despite ${paths.length} non-identity violation(s): ${[...new Set(paths)].sort().join(", ")}`,
       );
     }
 

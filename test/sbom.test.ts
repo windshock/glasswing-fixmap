@@ -218,6 +218,58 @@ test("an unsupported SBOM format is rejected", async () => {
   await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /Unsupported SBOM/);
 });
 
+async function writeRaw(text: string): Promise<string> {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "glasswing-sbom-"));
+  const file = path.join(directory, "multi.json");
+  await writeFile(file, text);
+  return file;
+}
+
+test("aggregates multiple newline-delimited CycloneDX documents", async () => {
+  const doc1 = cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]);
+  const doc2 = cyclonedx([{ type: "library", name: "express", version: "4.19.2", purl: "pkg:npm/express@4.19.2" }]);
+  const file = await writeRaw(`${JSON.stringify(doc1)}\n${JSON.stringify(doc2)}\n`);
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [
+      packageFinding("ANT-2026-LP", "stevemao/left-pad", "npm", "left-pad"),
+      packageFinding("ANT-2026-EX", "expressjs/express", "npm", "express"),
+    ],
+  });
+  assert.equal(report.document_count, 2);
+  assert.equal(report.component_count, 2);
+  assert.equal(report.candidates.length, 2);
+});
+
+test("aggregates concatenated pretty-printed documents and dedupes components", async () => {
+  const doc = cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]);
+  const file = await writeRaw(`${JSON.stringify(doc, null, 2)}\n${JSON.stringify(doc, null, 2)}\n`);
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-LP", "stevemao/left-pad", "npm", "left-pad")],
+  });
+  assert.equal(report.document_count, 2);
+  assert.equal(report.component_count, 1); // the identical component is deduplicated
+  assert.equal(report.candidates.length, 1);
+});
+
+test("tolerates a component license carrying both id and name", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      {
+        type: "library",
+        name: "nginx",
+        version: "1.25.0",
+        purl: "pkg:generic/nginx@1.25.0",
+        licenses: [{ license: { id: "BSD-2-Clause-FreeBSD", name: "nginx BSD-like", url: "http://nginx.com" } }],
+      },
+    ]),
+  );
+  const report = await checkSbom({ sbomFile: file, findings: [] });
+  assert.equal(report.package_component_count, 1);
+  assert.ok(report.warnings.some((warning) => warning.includes("does not fully conform")));
+});
+
 test("strict CycloneDX validation rejects a malformed document", async () => {
   const file = await writeSbom({ bomFormat: "CycloneDX", specVersion: "1.6", components: "not-an-array" });
   await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /failed strict schema validation/);

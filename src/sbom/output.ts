@@ -4,7 +4,7 @@ import type { SbomCheckReport } from "./types.js";
 export function formatSbomCheck(report: SbomCheckReport): string {
   const lines = [
     `SBOM: ${report.sbom}`,
-    `Format: ${report.format}${report.spec_version ? ` ${report.spec_version}` : ""}`,
+    `Format: ${report.format}${report.spec_version ? ` ${report.spec_version}` : ""}${report.document_count > 1 ? ` (${report.document_count} documents)` : ""}`,
     `Components: ${report.component_count} (${report.package_component_count} package)`,
     "",
   ];

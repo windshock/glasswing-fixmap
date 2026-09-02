@@ -6,12 +6,15 @@ import { verifySource } from "../verification/verify.js";
 import { canonicalizePurl } from "./purl.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
 import { SyftAdapter } from "./syft.js";
+import { parseJsonDocuments } from "./documents.js";
 import { selectCandidates } from "./matching.js";
 import {
   SBOM_CHECK_SCHEMA_VERSION,
   type ComponentCandidate,
+  type NormalizedComponent,
   type SbomAdapter,
   type SbomCheckReport,
+  type SbomParseResult,
 } from "./types.js";
 
 export interface CheckSbomOptions {
@@ -25,8 +28,8 @@ export interface CheckSbomOptions {
   adapters?: SbomAdapter[];
 }
 
-export async function readSbomDocument(file: string): Promise<unknown> {
-  return JSON.parse(await readFile(file, "utf8")) as unknown;
+export async function readSbomDocuments(file: string): Promise<unknown[]> {
+  return parseJsonDocuments(await readFile(file, "utf8"));
 }
 
 function isStrong(candidate: ComponentCandidate): boolean {
@@ -34,24 +37,56 @@ function isStrong(candidate: ComponentCandidate): boolean {
     (candidate.match_type === "exact_purl" || candidate.match_type === "ecosystem_package");
 }
 
+function componentKey(component: NormalizedComponent): string {
+  return [
+    component.source_format,
+    component.type ?? "",
+    component.name,
+    component.version ?? "",
+    component.purl ?? "",
+  ].join("|");
+}
+
 /**
  * Candidate selection over an SBOM, optionally bridging an unambiguous strong
- * candidate into source verification. An SBOM with no candidate Anthropic
- * finding is a valid clean result, not an error.
+ * candidate into source verification. Multiple concatenated documents in one
+ * file are each parsed and their components deduplicated and aggregated. An
+ * SBOM with no candidate Anthropic finding is a valid clean result, not an error.
  */
 export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckReport> {
-  const document = await readSbomDocument(options.sbomFile);
+  const documents = await readSbomDocuments(options.sbomFile);
   const adapters = options.adapters ?? [new CycloneDxAdapter(), new SyftAdapter()];
-  const adapter = adapters.find((item) => item.supports(document));
-  if (!adapter) {
+  const warnings: string[] = [];
+  const parsedResults: SbomParseResult[] = [];
+  for (let index = 0; index < documents.length; index += 1) {
+    const adapter = adapters.find((item) => item.supports(documents[index]));
+    if (!adapter) {
+      warnings.push(`Document ${index + 1} of ${documents.length} is not a supported SBOM format; skipped`);
+      continue;
+    }
+    const parsed = await adapter.parse(documents[index]);
+    parsedResults.push(parsed);
+    warnings.push(...parsed.warnings);
+  }
+  if (parsedResults.length === 0) {
     throw new Error(
       "Unsupported SBOM: expected CycloneDX JSON (1.5/1.6/1.7) or Syft native JSON (schema 16.1.2)",
     );
   }
 
-  const parsed = await adapter.parse(document);
-  const warnings = [...parsed.warnings];
-  const candidates = selectCandidates(parsed.components, options.findings);
+  const format = parsedResults[0]!.format;
+  const specVersion = parsedResults[0]!.spec_version;
+  const seenComponents = new Set<string>();
+  const components: NormalizedComponent[] = [];
+  for (const result of parsedResults) {
+    for (const component of result.components) {
+      const key = componentKey(component);
+      if (seenComponents.has(key)) continue;
+      seenComponents.add(key);
+      components.push(component);
+    }
+  }
+  const candidates = selectCandidates(components, options.findings);
 
   const selectedComponent = options.component ? canonicalizePurl(options.component) : undefined;
   if (options.component && !selectedComponent) {
@@ -107,19 +142,20 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
     }
   }
 
-  const packageComponentCount = parsed.components.filter(
+  const packageComponentCount = components.filter(
     (component) => component.type !== "file",
   ).length;
 
   const report: SbomCheckReport = {
     schema_version: SBOM_CHECK_SCHEMA_VERSION,
     sbom: path.resolve(options.sbomFile),
-    format: parsed.format,
-    component_count: parsed.components.length,
+    format,
+    document_count: documents.length,
+    component_count: components.length,
     package_component_count: packageComponentCount,
     candidates,
     warnings: [...new Set(warnings)].sort(),
   };
-  if (parsed.spec_version) report.spec_version = parsed.spec_version;
+  if (specVersion) report.spec_version = specVersion;
   return report;
 }

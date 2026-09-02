@@ -78,6 +78,7 @@ export interface SbomCheckReport {
   sbom: string;
   format: SbomFormat;
   spec_version?: string;
+  document_count: number;
   component_count: number;
   package_component_count: number;
   candidates: ComponentCandidate[];

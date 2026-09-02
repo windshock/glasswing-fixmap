@@ -8,6 +8,7 @@
     "schema_version",
     "sbom",
     "format",
+    "document_count",
     "component_count",
     "package_component_count",
     "candidates",
@@ -18,6 +19,7 @@
     "sbom": { "type": "string" },
     "format": { "enum": ["cyclonedx", "syft"] },
     "spec_version": { "type": "string" },
+    "document_count": { "type": "integer", "minimum": 1 },
     "component_count": { "type": "integer", "minimum": 0 },
     "package_component_count": { "type": "integer", "minimum": 0 },
     "candidates": {
