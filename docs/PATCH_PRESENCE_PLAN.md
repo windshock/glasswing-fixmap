@@ -452,12 +452,34 @@ Acceptance testing against real exported SBOMs surfaced two input realities the 
 - Done: enabled Go and crates.io comparators (genuine SemVer) with conformance vectors.
 - Done: end-to-end `verify-source` on a real SBOM candidate (`cloudflare/circl` `v1.3.7` → `TARGET_ABSENT`); raised the rename-discovery cap 250 → 2000 so a genuinely absent target on real-world repositories resolves to `TARGET_ABSENT` instead of a truncated `UNKNOWN`.
 
-### Next session — remaining work
+### Next session — GitHub issues #1–#3 reflected
 
-1. Additional ecosystem comparators, each behind its own version scheme and conformance fixtures: Maven (its own ordering), PyPI (PEP 440), Packagist (Composer). These unblock `AFFECTED` for the Maven/Packagist ranges `sync-ranges` already collects.
-2. Scheduled `sync-impacts`/`sync-ranges` refresh (GitHub Actions), only after rate limits and generated-diff size are measured.
-3. Optional: promote Vanir to a documented optional install (needs broader real-Vanir coverage measurement) and add a reusable Docker-based Vanir runner wrapper.
-4. Optional: re-evaluate the `exact_purl` vs `ecosystem_package` label if a finding-side PURL is ever added to the dataset.
+Priority order leads with the correctness/security bugs from issue #2, then feature and packaging work.
+
+**Issue #1 — Phase 2 multi-verifier source verification: essentially delivered.** Phase 2a (`SourceVerifier`, `GitAncestryVerifier`, `GlasswingFingerprintVerifier`, observation/evidence model, conservative fusion, `verify-source`, and the fixed/vulnerable/backported/reverted/moved/partial differential tests) and the Phase 2b real-Vanir evaluation are implemented. Candidate to close after publishing the Vanir differential write-up.
+
+**Issue #2 — hardening review. Several items are real correctness/security bugs in the current code; fix these first.**
+
+P0:
+- Deletion-heavy false positive (`native-fingerprint.ts`): `evaluateHunk` returns on the first `postimage` match before checking `preimage`. A pure-deletion or deletion-heavy hunk's postimage is mostly unchanged context that already exists in the vulnerable source, so a postimage match alone can wrongly yield `VERIFIED_FIXED`. Evaluate preimage/postimage/deleted/added together; a pure deletion must require deleted/preimage absence as corroboration. Add fixtures: pure deletion, both images present, duplicated vulnerable function.
+- Range `unknown` propagation (`check.ts assessRanges`): a `not_affected` from one range currently overrides an unresolved (`unknown`) range; when any applicable range is `unknown`, the result must stay `unknown`. Also preserve OSV `limit` events and `affected.versions[]`, plus range `repo`/`purl`, in the companion artifact rather than projecting them away; `versions[]` is exact positive evidence when range comparison is unavailable.
+- SBOM ↔ source binding (`check.ts` bridge): `check-sbom --source` does not confirm the checkout corresponds to the SBOM component/version. Add source-binding provenance (`VERIFIED` / `USER_ASSERTED` / `UNVERIFIED`) from VCS revision / repository identity / SBOM provenance; an unverified binding must stay visible and must not erase authoritative range evidence.
+- Fail-open policy paths (`cli.ts`): `--fail-on-affected` without `--ranges` → `ERROR`; `--source` with an unreadable/missing fix-impact dataset → `ERROR` (currently warns and skips); a malformed explicit `--component` PURL → `ERROR` (currently warns). Explicit security requests must not silently degrade to partial analysis.
+
+P1:
+- Partial-impact gating (`fusion.ts`): add an `IMPACT_INCOMPLETE` observation and prevent `VERIFIED_FIXED` whenever the relevant fix impact is not `complete`.
+- Multi-commit fix-set semantics: model `relation: all_of | any_of` and optional `branch`; a single matching commit is not proof the whole fix is present.
+- CycloneDX root component (`cyclonedx.ts`): also project `metadata.component` (and nested structure), so the BOM's primary application is not missed.
+
+P2:
+- Add a normal PR/push CI workflow (`npm ci && npm run check && npm test && npm run validate`), separate from the scheduled data-refresh workflow.
+
+**Issue #3 — AI adjudicator Skill (new deliverable).** A reusable `glasswing-adjudicator` Skill that gives an evidence-backed second opinion on unresolved results (`UNKNOWN`, `PATCH_NOT_FOUND`, `VERIFIER_CONFLICT`, unsupported comparator, missing range, package-identity ambiguity). It never overwrites the deterministic decision; it returns `CONFIRMED` / `LIKELY_TRUE_POSITIVE` / `LIKELY_FALSE_POSITIVE` / `INSUFFICIENT_EVIDENCE` with cited machine + upstream evidence, records contradictions and missing evidence, and never fabricates an affected range or auto-suppresses. The `cloudflare/circl` `v1.3.7` result (vulnerable subsystem introduced after the installed version → `TARGET_ABSENT`) is a canonical regression example.
+
+**Pre-existing feature work (unchanged priority, after the P0 fixes):**
+- Additional ecosystem comparators behind their own conformance fixtures: Maven (its own ordering), PyPI (PEP 440), Packagist (Composer) — these unblock `AFFECTED` for the Maven/Packagist ranges `sync-ranges` already collects.
+- Scheduled `sync-impacts`/`sync-ranges` refresh, only after rate limits and generated-diff size are measured.
+- Optional: promote Vanir to a documented optional install with a reusable Docker-based runner wrapper.
 
 ## Definition of done
 
