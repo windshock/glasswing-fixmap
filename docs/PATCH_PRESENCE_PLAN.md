@@ -431,6 +431,17 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 
 Remaining before `AFFECTED` is reachable from real data: the current dataset persists only collapsed `fixed_versions[]`, not an authoritative affected range with range type, `last_affected`/`limit` events, and provenance. The comparator machinery is complete and unit-tested against synthetic ranges, but `AFFECTED` will only be emitted once such ranges are persisted (a dedicated artifact) or consumed directly from OSV/GHSA/CVE. Until then, matched components remain candidate-only, never `AFFECTED`, consistent with the decision model.
 
+### Milestone 3b — real-world SBOM robustness (planned)
+
+Acceptance testing against real exported SBOMs surfaced two input realities the initial strict path did not handle. Both are scoped robustness fixes, not new analysis capability, and neither weakens a security gate.
+
+- Multi-document input: several exports concatenate multiple CycloneDX BOMs in one file, either as newline-delimited JSON or as back-to-back pretty-printed documents. A single `JSON.parse` fails on the second document. Parse each document in sequence, run the adapter on each, and aggregate components and candidates while reporting the document count.
+- Cosmetic-violation tolerance: real SBOMs commonly violate the official CycloneDX schema in fields irrelevant to component identity (a non-UUID `serialNumber`; a license carrying both `id` and `name`). Run the official validator, but hard-reject only when a violation touches a projected identity field (`name`, `version`, `purl`, `cpe`, `type`) or the structural shape of `components`; tolerate other violations with a warning, since projection is already type-guarded. Candidates from such a document stay conservative and non-gating.
+
+### Milestone 3c — `AFFECTED` via authoritative-range consumption (planned)
+
+Make `AFFECTED` reachable without inferring ranges or maintaining a curated range database. Persist the full authoritative ranges parsed from OSV/GHSA into a companion artifact (`data/affected-ranges.json`, mirroring the `fix-impacts.json` pattern) with ecosystem, package, range type, events, and provenance; keep `fixmap.json` unchanged. `check-sbom` consumes this artifact offline: for a strong-identity candidate with a version, it selects a comparator that explicitly supports the range's ecosystem and type and evaluates it. `AFFECTED` requires all three of strong identity, an authoritative range with provenance, and a supporting comparator; anything else stays `UNKNOWN`. A `--fail-on-affected` policy flag makes authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
+
 ### Milestone 4 — Hardening and release
 
 - Run the eight private acceptance samples and retain only aggregate, non-sensitive test notes.
