@@ -223,6 +223,34 @@ test("strict CycloneDX validation rejects a malformed document", async () => {
   await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /failed strict schema validation/);
 });
 
+test("tolerates a cosmetic metadata violation but never a component violation", async () => {
+  // A non-UUID serialNumber violates the official schema but cannot corrupt
+  // component identities, so candidate selection proceeds with a warning.
+  const tolerated = await writeSbom({
+    bomFormat: "CycloneDX",
+    specVersion: "1.6",
+    version: 1,
+    serialNumber: "urn:uuid:not-a-real-uuid",
+    components: [{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }],
+  });
+  const report = await checkSbom({
+    sbomFile: tolerated,
+    findings: [packageFinding("ANT-2026-TOLERATE", "stevemao/left-pad", "npm", "left-pad")],
+  });
+  assert.equal(report.package_component_count, 1);
+  assert.equal(report.candidates.length, 1);
+  assert.ok(report.warnings.some((warning) => warning.includes("does not fully conform")));
+
+  // A violation inside the components array is still a hard rejection.
+  const rejected = await writeSbom({
+    bomFormat: "CycloneDX",
+    specVersion: "1.6",
+    version: 1,
+    components: [{ type: "not-a-valid-type", name: "x" }],
+  });
+  await assert.rejects(() => checkSbom({ sbomFile: rejected, findings: [] }), /failed strict schema validation/);
+});
+
 test("SemVer comparator evaluates an authoritative npm range", () => {
   const comparator = new SemverComparator();
   const range = {

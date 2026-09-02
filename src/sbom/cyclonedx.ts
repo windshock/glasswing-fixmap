@@ -22,6 +22,21 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
+/**
+ * Extract Ajv instance paths from the official validator's error value, or
+ * `undefined` when the error is opaque. An opaque error is treated
+ * conservatively as a hard rejection by the caller.
+ */
+function validationInstancePaths(error: unknown): string[] | undefined {
+  if (!Array.isArray(error)) return undefined;
+  const paths: string[] = [];
+  for (const item of error) {
+    if (!isRecord(item) || typeof item.instancePath !== "string") return undefined;
+    paths.push(item.instancePath);
+  }
+  return paths;
+}
+
 function githubRepository(url: string): string | undefined {
   const match = url.trim().match(/github\.com[/:]([^/]+)\/([^/#?]+?)(?:\.git)?(?:[/#?].*)?$/i);
   return match?.[1] && match[2] ? `${match[1]}/${match[2]}` : undefined;
@@ -88,9 +103,20 @@ export class CycloneDxAdapter implements SbomAdapter {
 
     const validator = new Validation.JsonStrictValidator(version);
     const validationError = await validator.validate(JSON.stringify(document));
+    const warnings: string[] = [];
     if (validationError !== null) {
-      throw new Error(
-        `CycloneDX ${specVersion} document failed strict schema validation: ${JSON.stringify(validationError)}`,
+      const paths = validationInstancePaths(validationError);
+      const componentViolations = paths?.filter((path) => path.startsWith("/components")) ?? [];
+      // Reject when the error is opaque or when it touches component data; only
+      // tolerate cosmetic metadata violations (e.g. a non-UUID serialNumber),
+      // which cannot corrupt the projected component identities.
+      if (paths === undefined || componentViolations.length > 0) {
+        throw new Error(
+          `CycloneDX ${specVersion} document failed strict schema validation: ${JSON.stringify(validationError)}`,
+        );
+      }
+      warnings.push(
+        `CycloneDX ${specVersion} document does not fully conform to the official schema; proceeding for candidate selection despite ${paths.length} non-component violation(s): ${[...new Set(paths)].sort().join(", ")}`,
       );
     }
 
@@ -101,6 +127,6 @@ export class CycloneDxAdapter implements SbomAdapter {
       const projected = projectComponent(component);
       if (projected) components.push(projected);
     }
-    return { format: "cyclonedx", spec_version: specVersion, components, warnings: [] };
+    return { format: "cyclonedx", spec_version: specVersion, components, warnings };
   }
 }
