@@ -185,6 +185,53 @@ function evaluateHunk(
   const additions = signatures(hunk, "added");
   const deletions = signatures(hunk, "deleted");
   const postimage = postimages.find((signature) => sourceContainsSignature(source, signature));
+  const preimage = preimages.find((signature) => sourceContainsSignature(source, signature));
+  const matchingAdditions = additions.filter((signature) => sourceContainsSignature(source, signature));
+  const matchingDeletions = deletions.filter((signature) => sourceContainsSignature(source, signature));
+
+  // A removed line still present means the deletion was not applied. This is
+  // checked before any post-fix match, because a deletion-heavy hunk's post
+  // image is mostly unchanged context that already exists in the vulnerable
+  // source, so a post-image match alone must never imply the fix is present.
+  if (matchingDeletions.length > 0) {
+    return observation({
+      backend,
+      type: "VULNERABLE_PATTERN_PRESENT",
+      strength: "moderate",
+      repository: impact.repository,
+      commit: impact.commit,
+      targetFile,
+      actualFile,
+      hunkIndex,
+      detail: "one or more meaningful deleted-line signatures remain present",
+      evidence: matchingDeletions.flatMap((signature) =>
+        signatureEvidence(signature, actualFile, hunkIndex),
+      ),
+    });
+  }
+
+  // The pre-fix image being present — with or without post-image context
+  // overlap — is evidence the fix is absent, not present.
+  if (preimage) {
+    return observation({
+      backend,
+      type: "FIX_PREIMAGE_PRESENT",
+      strength: moved ? "moderate" : signatureStrength(preimage, hunk),
+      repository: impact.repository,
+      commit: impact.commit,
+      targetFile,
+      actualFile,
+      hunkIndex,
+      detail: moved
+        ? "pre-fix hunk image is present under a different path"
+        : "pre-fix hunk image is present",
+      evidence: signatureEvidence(preimage, actualFile, hunkIndex),
+    });
+  }
+
+  // Post-fix image present, pre-fix image absent, and no removed line remains:
+  // the fix is present (the deletion-absence check above is the corroboration a
+  // pure-deletion hunk requires).
   if (postimage) {
     return observation({
       backend,
@@ -202,9 +249,7 @@ function evaluateHunk(
     });
   }
 
-  const matchingAdditions = additions.filter((signature) => sourceContainsSignature(source, signature));
-  const matchingDeletions = deletions.filter((signature) => sourceContainsSignature(source, signature));
-  if (additions.length > 0 && matchingAdditions.length === additions.length && matchingDeletions.length === 0) {
+  if (additions.length > 0 && matchingAdditions.length === additions.length) {
     return observation({
       backend,
       type: "FIX_POSTIMAGE_PRESENT",
@@ -216,40 +261,6 @@ function evaluateHunk(
       hunkIndex,
       detail: "all meaningful added-line signatures are present and deleted-line signatures are absent",
       evidence: matchingAdditions.flatMap((signature) =>
-        signatureEvidence(signature, actualFile, hunkIndex),
-      ),
-    });
-  }
-
-  const preimage = preimages.find((signature) => sourceContainsSignature(source, signature));
-  if (preimage) {
-    return observation({
-      backend,
-      type: "FIX_PREIMAGE_PRESENT",
-      strength: moved ? "moderate" : signatureStrength(preimage, hunk),
-      repository: impact.repository,
-      commit: impact.commit,
-      targetFile,
-      actualFile,
-      hunkIndex,
-      detail: moved
-        ? "pre-fix hunk image is present under a different path"
-        : "pre-fix hunk image is present",
-      evidence: signatureEvidence(preimage, actualFile, hunkIndex),
-    });
-  }
-  if (matchingDeletions.length > 0) {
-    return observation({
-      backend,
-      type: "VULNERABLE_PATTERN_PRESENT",
-      strength: "moderate",
-      repository: impact.repository,
-      commit: impact.commit,
-      targetFile,
-      actualFile,
-      hunkIndex,
-      detail: "one or more meaningful deleted-line signatures remain present",
-      evidence: matchingDeletions.flatMap((signature) =>
         signatureEvidence(signature, actualFile, hunkIndex),
       ),
     });

@@ -256,3 +256,47 @@ test("differentially verifies fixed, vulnerable, backported, reverted, and ambig
   });
   assert.equal(thirdPartyOnly.decision, "UNKNOWN");
 });
+
+test("a pure-deletion fix is not VERIFIED_FIXED while the removed line remains", async (context) => {
+  const repository = await mkdtemp(path.join(os.tmpdir(), "glasswing-deletion-test-"));
+  context.after(async () => rm(repository, { recursive: true, force: true }));
+  await git(repository, "init", "-b", "main");
+  await git(repository, "config", "user.name", "glasswing test");
+  await git(repository, "config", "user.email", "glasswing@example.invalid");
+  await git(repository, "remote", "add", "origin", "https://github.com/example/project.git");
+
+  // The fix is a pure deletion of one dangerous line; the post-fix image is
+  // entirely unchanged context that already exists in the vulnerable source.
+  const vulnerable = `int process(const char *input) {
+  validate_length_of_incoming_request(input);
+  dangerous_unchecked_call_with_user_input(input, 0);
+  return finalize_processing(input);
+}
+`;
+  const fixed = `int process(const char *input) {
+  validate_length_of_incoming_request(input);
+  return finalize_processing(input);
+}
+`;
+  await writeSource(repository, vulnerable);
+  const vulnerableCommit = await commitAll(repository, "vulnerable fixture");
+  await writeSource(repository, fixed);
+  const fixCommit = await commitAll(repository, "fix: remove dangerous call");
+  const patch = await git(repository, "diff", vulnerableCommit, fixCommit, "--", "src/parser.c");
+  const dataset = impactDataset(fixCommit, patch);
+
+  // The removed line is still present in the vulnerable tree: the post-fix
+  // context match alone must not read as fixed.
+  await git(repository, "checkout", "--detach", vulnerableCommit);
+  const stillVulnerable = await check(repository, dataset, "PATCH_NOT_FOUND");
+  assert.ok(
+    stillVulnerable.backend_results
+      .flatMap((item) => item.observations)
+      .some((item) => item.type === "VULNERABLE_PATTERN_PRESENT"),
+    JSON.stringify(stillVulnerable, null, 2),
+  );
+
+  // The removed line is gone and the context remains in the fixed tree.
+  await git(repository, "checkout", "--detach", fixCommit);
+  await check(repository, dataset, "VERIFIED_FIXED");
+});
