@@ -412,6 +412,47 @@ test("parses authoritative ranges from an OSV record and skips identity-less ent
   assert.equal(identityLess.length, 0);
 });
 
+test("keeps affected.versions and emits a versions-only record with no usable range", () => {
+  const records = parseAuthoritativeRanges(
+    { id: "GHSA-v", affected: [{ package: { ecosystem: "PyPI", name: "requests" }, versions: ["2.19.0", "2.19.1"] }] },
+    "ANT-2026-VER",
+    "https://osv.dev/vulnerability/GHSA-v",
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.range_type, "EXACT");
+  assert.deepEqual(records[0]!.events, []);
+  assert.deepEqual(records[0]!.versions, ["2.19.0", "2.19.1"]);
+  assert.deepEqual(validateAffectedRangeDataset(rangeDataset(records)), []);
+});
+
+test("an exactly-listed affected version reaches AFFECTED even without a comparator", async () => {
+  // Maven has no comparator, but the version is explicitly published as affected.
+  const file = await writeSbom(
+    cyclonedx([
+      { type: "library", name: "guava", version: "31.0", purl: "pkg:maven/com.google.guava/guava@31.0" },
+    ]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-EXV", "google/guava", "Maven", "com.google.guava:guava")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-EXV",
+        advisory: "GHSA-exact",
+        ecosystem: "Maven",
+        package: "com.google.guava:guava",
+        range_type: "EXACT",
+        events: [],
+        versions: ["31.0"],
+        provenance: "https://osv.dev/vulnerability/GHSA-exact",
+      },
+    ]),
+  });
+  const candidate = report.candidates.find((item) => item.identity_strength === "strong");
+  assert.ok(candidate);
+  assert.equal(candidate!.range_assessment?.verdict, "affected");
+});
+
 test("validates and rejects a malformed affected-range dataset", () => {
   assert.deepEqual(validateAffectedRangeDataset(rangeDataset([npmRange("ANT-2026-OK", "x", "0", "1.0.0")])), []);
   const malformed = rangeDataset([

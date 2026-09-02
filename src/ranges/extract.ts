@@ -15,12 +15,19 @@ interface OsvRange {
 interface OsvAffected {
   package?: { ecosystem?: string; name?: string };
   ranges?: OsvRange[];
+  versions?: unknown;
 }
 
 export interface OsvRangeRecord {
   id?: string;
   aliases?: string[];
   affected?: OsvAffected[];
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 function pickEvent(event: OsvEvent): AffectedRangeEvent | undefined {
@@ -36,9 +43,9 @@ function pickEvent(event: OsvEvent): AffectedRangeEvent | undefined {
 
 /**
  * Project the authoritative affected ranges from a single OSV record for one
- * finding. Only ranges with a resolvable ecosystem, package, and at least one
- * usable event are kept; identity-less or empty ranges are skipped rather than
- * guessed.
+ * finding. Only entries with a resolvable ecosystem and package are kept;
+ * `affected.versions[]` is preserved as exact positive evidence, including for
+ * entries that publish versions but no usable range.
  */
 export function parseAuthoritativeRanges(
   record: OsvRangeRecord,
@@ -51,18 +58,38 @@ export function parseAuthoritativeRanges(
     const ecosystem = affected.package?.ecosystem;
     const packageName = affected.package?.name;
     if (!ecosystem || !packageName) continue;
+    const versions = stringArray(affected.versions);
+
+    let emitted = 0;
     for (const range of affected.ranges ?? []) {
       const events = (range.events ?? [])
         .map(pickEvent)
         .filter((event): event is AffectedRangeEvent => event !== undefined);
       if (events.length === 0) continue;
-      results.push({
+      const rangeRecord: AffectedRangeRecord = {
         ant_id: antId,
         advisory,
         ecosystem,
         package: packageName,
         range_type: range.type ?? "UNSPECIFIED",
         events,
+        provenance,
+      };
+      if (versions.length > 0) rangeRecord.versions = versions;
+      results.push(rangeRecord);
+      emitted += 1;
+    }
+
+    // Exact affected versions with no usable range are still positive evidence.
+    if (emitted === 0 && versions.length > 0) {
+      results.push({
+        ant_id: antId,
+        advisory,
+        ecosystem,
+        package: packageName,
+        range_type: "EXACT",
+        events: [],
+        versions,
         provenance,
       });
     }

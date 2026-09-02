@@ -44,7 +44,6 @@
         "range_type": { "type": "string" },
         "events": {
           "type": "array",
-          "minItems": 1,
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -55,6 +54,10 @@
               "limit": { "type": "string" }
             }
           }
+        },
+        "versions": {
+          "type": "array",
+          "items": { "type": "string" }
         },
         "provenance": { "type": "string" }
       }

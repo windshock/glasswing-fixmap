@@ -26,6 +26,7 @@ function rangeKey(record: AffectedRangeRecord): string {
     record.package,
     record.range_type,
     JSON.stringify(record.events),
+    JSON.stringify(record.versions ?? []),
   ].join("|");
 }
 

@@ -56,6 +56,14 @@ function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAsse
   let notAffected = false;
   let unresolved = false;
   for (const range of ranges) {
+    // Exact positive evidence: the version is explicitly published as affected,
+    // usable even when no range comparator supports the ecosystem.
+    if (range.versions && range.versions.includes(version)) {
+      return {
+        verdict: "affected",
+        reason: `version ${version} is explicitly listed as affected (${range.advisory}, ${range.provenance})`,
+      };
+    }
     const comparator = selectComparator(range.ecosystem, range.range_type);
     if (!comparator) {
       // An applicable range with no supporting comparator is unresolved, not absent.

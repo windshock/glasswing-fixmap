@@ -37,8 +37,13 @@ export function validateAffectedRangeDataset(dataset: AffectedRangeDataset): str
         errors.push(`${prefix}: missing ${field}`);
       }
     }
-    if (!Array.isArray(range.events) || range.events.length === 0) {
-      errors.push(`${prefix}: events must be a non-empty array`);
+    if (!Array.isArray(range.events)) {
+      errors.push(`${prefix}: events must be an array`);
+    } else if (
+      range.events.length === 0 &&
+      (!Array.isArray(range.versions) || range.versions.length === 0)
+    ) {
+      errors.push(`${prefix}: must have at least one event or exact version`);
     }
   });
   if (dataset.metadata?.record_count !== dataset.ranges.length) {

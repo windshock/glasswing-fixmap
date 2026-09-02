@@ -20,6 +20,8 @@ export interface AffectedRangeRecord {
   package: string;
   range_type: string;
   events: AffectedRangeEvent[];
+  /** Exact affected versions published in OSV `affected.versions[]`, if any. */
+  versions?: string[];
   provenance: string;
 }
 
