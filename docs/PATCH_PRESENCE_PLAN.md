@@ -479,7 +479,7 @@ P2 — done:
 **Pre-existing feature work (unchanged priority, after the P0 fixes):**
 - Maven and Packagist comparators (PyPI PEP 440 is done) behind their own conformance fixtures, once a well-maintained JS library exists for each — these unblock `AFFECTED` for the Maven/Packagist ranges `sync-ranges` already collects.
 - Scheduled `sync-impacts`/`sync-ranges` refresh, only after rate limits and generated-diff size are measured.
-- Optional: promote Vanir to a documented optional install with a reusable Docker-based runner wrapper.
+- Done: reusable Docker-based Vanir runner wrapper (`tools/vanir-docker-runner` + `tools/Dockerfile.vanir`) so `verify-source --vanir-runner` drives the real Vanir detector in a `linux/amd64` container. Remaining (optional): promote Vanir to a documented optional install after broader real-Vanir coverage measurement.
 
 ## Definition of done
 

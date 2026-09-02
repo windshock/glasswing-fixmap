@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Reusable Docker-based Vanir runner for `verify-source --vanir-runner`.
+#
+# Vanir ships prebuilt x86-64 ELF parsers only, so it does not run natively on
+# macOS. This wrapper runs the real Vanir detector in a linux/amd64 container,
+# bind-mounting the exact host paths the verifier passes so the signature files,
+# the report prefix, and the source tree resolve identically inside the
+# container. It is a drop-in for the `runner` the VanirVerifier execFile()s:
+#
+#   glasswing-fixmap verify-source \
+#     --ant ANT-2026-XXXX --source ./checkout \
+#     --vanir-runner tools/vanir-docker-runner \
+#     --vanir-signatures sigs.osv.json
+#
+# Build the image once (fast subsequent runs):
+#   docker build -f tools/Dockerfile.vanir -t glasswing-vanir:latest tools
+# Override the image with GLASSWING_VANIR_IMAGE if desired.
+#
+# macOS note: the report prefix lives under the system temp dir; Docker Desktop
+# must be allowed to share it (Settings -> Resources -> File Sharing). /Users and
+# /private are shared by default.
+set -euo pipefail
+
+image="${GLASSWING_VANIR_IMAGE:-glasswing-vanir:latest}"
+mounts=()
+seen=":"
+
+add_mount() {
+  # Mount the containing directory even when the target itself does not exist
+  # yet (the report prefix is a path Vanir writes to).
+  local target="$1" dir
+  if [ -d "$target" ]; then dir="$target"; else dir="$(dirname "$target")"; fi
+  [ -d "$dir" ] || return 0
+  dir="$(cd "$dir" && pwd)"
+  case "$seen" in *":$dir:"*) return 0 ;; esac
+  seen="$seen$dir:"
+  mounts+=(-v "$dir:$dir")
+}
+
+for arg in "$@"; do
+  case "$arg" in
+    --vulnerability_file_name=*) add_mount "${arg#*=}" ;;
+    --report_file_name_prefix=*) add_mount "${arg#*=}" ;;
+    /*) add_mount "$arg" ;;
+  esac
+done
+
+exec docker run --rm --platform linux/amd64 "${mounts[@]}" "$image" \
+  python -m vanir.detector_runner "$@"

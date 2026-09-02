@@ -1,0 +1,6 @@
+# Prebuilt image for tools/vanir-docker-runner. Vanir's prebuilt parsers are
+# x86-64 ELF, so the image is pinned to linux/amd64.
+#   docker build -f tools/Dockerfile.vanir -t glasswing-vanir:latest tools
+FROM --platform=linux/amd64 python:3.12-slim
+RUN pip install --no-cache-dir vanir
+ENTRYPOINT []
