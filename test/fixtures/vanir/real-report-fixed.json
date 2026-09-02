@@ -1,0 +1,5 @@
+{
+    "options": "--vulnerability_file_name=/work/sigs.json --report_file_name_prefix=/work/report_fixed --verbosity=-1 offline_directory_scanner /work/target_fixed",
+    "covered_cves": [],
+    "missing_patches": []
+}

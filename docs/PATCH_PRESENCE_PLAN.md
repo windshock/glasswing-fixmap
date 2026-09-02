@@ -1,6 +1,6 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is wired opt-in behind the `SourceVerifier` interface with fake-runner differential fixtures; promotion to a documented optional dependency still needs real differential coverage data. Phase 3 `AFFECTED` remains gated on persisting authoritative affected ranges (see Milestone 3).
+Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` remains gated on persisting authoritative affected ranges (see Milestone 3).
 
 Last updated: 2026-09-02
 
@@ -414,11 +414,13 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - Implement path, hunk-context, and exact/strong signature checks.
 - Produce text and JSON decisions under the strict decision model.
 
-### Milestone 2b — optional Vanir evaluation (opt-in wiring implemented)
+### Milestone 2b — optional Vanir evaluation (validated against real Vanir 1.1.0)
 
 - Vanir runs only behind `SourceVerifier` and only when `--vanir-runner`/`--vanir-signatures` are supplied; absence or unsupported languages do not break native verification.
 - Native and Vanir observations are preserved separately, and explicit conflicts remain `UNKNOWN`.
-- Fake-runner differential fixtures cover graceful absence, missing-patch → `PATCH_NOT_FOUND`, and clean scan → `UNKNOWN`. Measured maintenance value against a real Vanir install is still required before documenting it as an optional installation.
+- Fake-runner differential fixtures cover graceful absence, missing-patch → `PATCH_NOT_FOUND`, and clean scan → `UNKNOWN`.
+- The integration was exercised against the real Vanir 1.1.0 package end to end in a `linux/amd64` container (Vanir ships prebuilt x86-64 ELF parsers only, so it does not run natively on macOS). Vanir generated Function and Line signatures from a Git fix commit and produced a real differential: the pre-fix tree reported `missing_patches`, the post-fix tree reported none. The captured signature file and both reports are checked in under `test/fixtures/vanir/` and drive a regression test.
+- This surfaced a real bug the fake-runner fixtures could not: Vanir's own sign generator writes signatures under `affected.database_specific.vanir_signatures`, but the parser read only `ecosystem_specific`, so real signature files selected zero signatures and returned `BACKEND_UNSUPPORTED`. The parser now reads either location, matching Vanir's own precedence. Vanir's Git-ecosystem signature generation applies to C/C++/Java findings that carry a GitHub fix commit, so it is a genuine optional complement; making it a documented installation still requires broader coverage measurement.
 
 ### Milestone 3 — `check-sbom` (candidate selection implemented)
 

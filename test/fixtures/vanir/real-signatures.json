@@ -1,0 +1,63 @@
+[
+  {
+    "id": "TEST-VANIR-0001",
+    "modified": "2026-01-01T00:00:00Z",
+    "summary": "off-by-one",
+    "affected": [
+      {
+        "ranges": [
+          {
+            "type": "GIT",
+            "repo": "file:///work/repo",
+            "events": [
+              {
+                "introduced": "0"
+              },
+              {
+                "fixed": "26a564a79945622cdbaea676abeffc3f682b6267"
+              }
+            ]
+          }
+        ],
+        "database_specific": {
+          "vanir_signatures": [
+            {
+              "id": "TEST-VANIR-0001-3e8b2d22",
+              "signature_type": "Function",
+              "signature_version": "v1",
+              "source": "file:///work/repo@26a564a79945622cdbaea676abeffc3f682b6267",
+              "target": {
+                "file": "src/parser.c",
+                "function": "parse_packet"
+              },
+              "deprecated": false,
+              "digest": {
+                "function_hash": "303535797137354686844382287166632298123",
+                "length": 196
+              }
+            },
+            {
+              "id": "TEST-VANIR-0001-51bf61bd",
+              "signature_type": "Line",
+              "signature_version": "v1",
+              "source": "file:///work/repo@26a564a79945622cdbaea676abeffc3f682b6267",
+              "target": {
+                "file": "src/parser.c"
+              },
+              "deprecated": false,
+              "digest": {
+                "line_hashes": [
+                  "307422677633784219847588310179325938351",
+                  "125587224350585569486570367835158568540",
+                  "262084117321852321833547010182545009160",
+                  "113617382534879710656290986811903691500"
+                ],
+                "threshold": 0.9
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,25 @@
+{
+    "options": "--vulnerability_file_name=/work/sigs.json --report_file_name_prefix=/work/report_vuln --verbosity=-1 offline_directory_scanner /work/target_vuln",
+    "covered_cves": [],
+    "missing_patches": [
+        {
+            "ID": "TEST-VANIR-0001",
+            "CVE": [],
+            "OSV": "Not published.",
+            "details": [
+                {
+                    "unpatched_code": "src/parser.c::parse_packet",
+                    "patch": "file:///work/repo@26a564a79945622cdbaea676abeffc3f682b6267",
+                    "is_non_target_match": false,
+                    "matched_signature": "TEST-VANIR-0001-3e8b2d22"
+                },
+                {
+                    "unpatched_code": "src/parser.c",
+                    "patch": "file:///work/repo@26a564a79945622cdbaea676abeffc3f682b6267",
+                    "is_non_target_match": false,
+                    "matched_signature": "TEST-VANIR-0001-51bf61bd"
+                }
+            ]
+        }
+    ]
+}

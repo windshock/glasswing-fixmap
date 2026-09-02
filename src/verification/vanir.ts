@@ -94,9 +94,21 @@ function collectSignatures(document: unknown, targetIds: Set<string>): {
     if (![...identifiers].some((identifier) => targetIds.has(identifier))) continue;
     if (!Array.isArray(item.affected)) continue;
     for (const affected of item.affected) {
-      if (!isRecord(affected) || !isRecord(affected.ecosystem_specific)) continue;
-      const signatures = affected.ecosystem_specific.vanir_signatures;
-      if (!Array.isArray(signatures)) continue;
+      if (!isRecord(affected)) continue;
+      // Vanir stores signatures under database_specific (the sign generator's
+      // own output) or ecosystem_specific; its loader prefers database_specific.
+      const fromDatabase = isRecord(affected.database_specific)
+        ? affected.database_specific.vanir_signatures
+        : undefined;
+      const fromEcosystem = isRecord(affected.ecosystem_specific)
+        ? affected.ecosystem_specific.vanir_signatures
+        : undefined;
+      const signatures = Array.isArray(fromDatabase)
+        ? fromDatabase
+        : Array.isArray(fromEcosystem)
+          ? fromEcosystem
+          : undefined;
+      if (!signatures) continue;
       for (const signature of signatures) {
         if (!isRecord(signature) || signature.deprecated === true || typeof signature.id !== "string") {
           continue;

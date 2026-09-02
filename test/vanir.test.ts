@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chmod, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import Ajv2020 from "ajv/dist/2020.js";
 import type { FixImpactDataset } from "../src/impact/types.js";
@@ -148,4 +149,50 @@ test("Vanir clean scan is inconclusive, not proof of a fix", async (context) => 
   assert.ok(vanir!.observations.some((item) => item.type === "VULNERABLE_PATTERN_ABSENT"));
   assert.equal(report.decision, "UNKNOWN");
   assert.ok(report.reasons.some((item) => item.code === "INSUFFICIENT_EVIDENCE"));
+});
+
+test("parses REAL Vanir 1.1.0 output (database_specific signatures + missing_patches)", async (context) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "glasswing-vanir-"));
+  context.after(async () => rm(directory, { recursive: true, force: true }));
+  const fixtureDir = fileURLToPath(new URL("./fixtures/vanir/", import.meta.url));
+  const realSignatures = path.join(fixtureDir, "real-signatures.json");
+  const vulnerableReport = JSON.parse(
+    await readFile(path.join(fixtureDir, "real-report-vulnerable.json"), "utf8"),
+  );
+  const fixedReport = JSON.parse(
+    await readFile(path.join(fixtureDir, "real-report-fixed.json"), "utf8"),
+  );
+
+  // The captured signatures live under affected.database_specific.vanir_signatures.
+  // The previous parser read only ecosystem_specific, so it would have selected
+  // zero signatures and returned BACKEND_UNSUPPORTED instead of a real decision.
+  const run = (report: unknown): Promise<SourceVerificationReport> =>
+    writeRunner(directory, report).then((runner) =>
+      verifySource({
+        antId: ANT_ID,
+        sourceRoot: directory,
+        impactDataset: impactDataset(),
+        verifiers: [
+          new VanirVerifier({
+            runner,
+            signatureFiles: [realSignatures],
+            vulnerabilityIds: ["TEST-VANIR-0001"],
+          }),
+        ],
+      }),
+    );
+
+  const vulnerable = await run(vulnerableReport);
+  const vanir = vulnerable.backend_results.find((backend) => backend.backend.name === "vanir");
+  assert.equal(vanir!.execution_status, "completed", JSON.stringify(vulnerable, null, 2));
+  assert.ok(vanir!.observations.some((item) => item.type === "VULNERABLE_PATTERN_PRESENT"));
+  assert.equal(vulnerable.decision, "PATCH_NOT_FOUND");
+
+  const fixed = await run(fixedReport);
+  assert.ok(
+    fixed.backend_results
+      .find((backend) => backend.backend.name === "vanir")!
+      .observations.some((item) => item.type === "VULNERABLE_PATTERN_ABSENT"),
+  );
+  assert.equal(fixed.decision, "UNKNOWN");
 });
