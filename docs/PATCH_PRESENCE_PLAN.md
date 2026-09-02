@@ -449,8 +449,15 @@ Acceptance testing against real exported SBOMs surfaced two input realities the 
 - Done: ran 16 real acceptance SBOMs plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
 - Done: confirmed existing outputs are byte-for-byte compatible — `data/fixmap.json` and `data/fixmap.csv` re-serialize identically through the current code, and `sync`/`report`/`validate` are unchanged.
 - Done: documented exit semantics (`0`/`1`/`2`/`3`) and limitations in the README and ACCEPTANCE.md.
-- Done: enabled Go and crates.io comparators (genuine SemVer) with conformance vectors. Remaining: Maven, PyPI, and Packagist comparators, each behind its own version scheme and fixtures.
-- Remaining: add scheduled `sync-impacts`/`sync-ranges` refresh only after rate limits and generated-diff size are measured.
+- Done: enabled Go and crates.io comparators (genuine SemVer) with conformance vectors.
+- Done: end-to-end `verify-source` on a real SBOM candidate (`cloudflare/circl` `v1.3.7` → `TARGET_ABSENT`); raised the rename-discovery cap 250 → 2000 so a genuinely absent target on real-world repositories resolves to `TARGET_ABSENT` instead of a truncated `UNKNOWN`.
+
+### Next session — remaining work
+
+1. Additional ecosystem comparators, each behind its own version scheme and conformance fixtures: Maven (its own ordering), PyPI (PEP 440), Packagist (Composer). These unblock `AFFECTED` for the Maven/Packagist ranges `sync-ranges` already collects.
+2. Scheduled `sync-impacts`/`sync-ranges` refresh (GitHub Actions), only after rate limits and generated-diff size are measured.
+3. Optional: promote Vanir to a documented optional install (needs broader real-Vanir coverage measurement) and add a reusable Docker-based Vanir runner wrapper.
+4. Optional: re-evaluate the `exact_purl` vs `ecosystem_package` label if a finding-side PURL is ever added to the dataset.
 
 ## Definition of done
 

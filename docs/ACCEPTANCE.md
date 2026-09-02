@@ -41,6 +41,25 @@ correctly yields zero package candidates).
 
 No incorrect security decision was produced by any corpus input.
 
+## Source verification (end-to-end on a real candidate)
+
+One Linux agent SBOM in the corpus produced a single repository-identity
+candidate: the Go library `cloudflare/circl` at `v1.3.7`, matching finding
+`ANT-2026-7R9KHDAS` (a BLS signature-forgery issue fixed in `v1.6.4`). The
+candidate was carried into `verify-source` against the finding's fix commit:
+
+- `sync-impacts` extracted the fix commit's changed files (`sign/bls/bls.go`,
+  `sign/bls/bls_test.go`).
+- A read-only checkout of `circl` at `v1.3.7` was inspected.
+- Result: `TARGET_ABSENT` — the vulnerable `sign/bls/` package does not exist in
+  `v1.3.7` (it was added later), so that finding does not apply to this version.
+  `git-ancestry` independently reported `FIX_COMMIT_NOT_ANCESTOR`.
+
+This exercised the rename-discovery cap: at 250 candidates a genuinely absent
+target on a 511-file repository resolved only to a truncated `UNKNOWN`. The cap
+was raised to 2000 so a real absent target now resolves to `TARGET_ABSENT`,
+while remaining bounded.
+
 ## Vanir backend (real Vanir 1.1.0)
 
 The opt-in Vanir backend was validated end to end against the real Vanir 1.1.0

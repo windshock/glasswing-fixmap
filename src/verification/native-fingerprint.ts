@@ -19,7 +19,9 @@ import type {
 
 const MAX_SOURCE_FILE_BYTES = 5 * 1024 * 1024;
 const MAX_DISCOVERY_FILES = 5000;
-const MAX_RENAME_CANDIDATES = 250;
+// Rename discovery must cover real-world repositories so that a genuinely absent
+// target resolves to TARGET_ABSENT rather than a truncated, ambiguous UNKNOWN.
+const MAX_RENAME_CANDIDATES = 2000;
 const MIN_MEANINGFUL_LENGTH = 16;
 
 interface SourceFile {
