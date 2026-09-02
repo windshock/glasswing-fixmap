@@ -10,7 +10,7 @@ import { fingerprintPatch } from "../src/impact/fingerprint.js";
 import type { FixImpactDataset } from "../src/impact/types.js";
 import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
-import { SemverComparator } from "../src/sbom/comparator.js";
+import { Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
 import { parseAuthoritativeRanges } from "../src/ranges/extract.js";
@@ -610,10 +610,55 @@ test("SemVer comparator supports Go and crates.io with conformance vectors", () 
   assert.equal(comparator.evaluate("1.5.0", cargoRange), "affected");
   assert.equal(comparator.evaluate("2.0.0", cargoRange), "not_affected");
 
-  // Ecosystems with their own version scheme remain excluded.
+  // Ecosystems with their own version scheme are handled elsewhere or excluded.
   assert.equal(comparator.supports("Maven", "ECOSYSTEM"), false);
   assert.equal(comparator.supports("PyPI", "ECOSYSTEM"), false);
   assert.equal(comparator.supports("Packagist", "ECOSYSTEM"), false);
+});
+
+test("PEP 440 comparator evaluates PyPI ranges with conformance vectors", () => {
+  const comparator = new Pep440Comparator();
+  const range = {
+    ecosystem: "PyPI",
+    range_type: "ECOSYSTEM",
+    events: [{ introduced: "2.0.0" }, { fixed: "2.19.0" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.supports("PyPI", "ECOSYSTEM"), true);
+  assert.equal(comparator.evaluate("2.10.0", range), "affected");
+  assert.equal(comparator.evaluate("2.19.0", range), "not_affected");
+  assert.equal(comparator.evaluate("1.9.0", range), "not_affected");
+  // PEP 440 accepts two-part and pre-release versions; junk is unknown.
+  assert.equal(comparator.evaluate("2.5", range), "affected");
+  assert.equal(comparator.evaluate("2.19.0rc1", range), "affected");
+  assert.equal(comparator.evaluate("not-a-version", range), "unknown");
+  // Non-PyPI ecosystems are not handled by this comparator.
+  assert.equal(comparator.supports("npm", "ECOSYSTEM"), false);
+  assert.equal(comparator.supports("Maven", "ECOSYSTEM"), false);
+});
+
+test("reaches AFFECTED for a PyPI component via a pypi PURL and authoritative range", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "requests", version: "2.10.0", purl: "pkg:pypi/requests@2.10.0" }]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-PYPI", "psf/requests", "PyPI", "requests")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-PYPI",
+        advisory: "GHSA-pypi",
+        ecosystem: "PyPI",
+        package: "requests",
+        range_type: "ECOSYSTEM",
+        events: [{ introduced: "2.0.0" }, { fixed: "2.19.0" }],
+        provenance: "https://osv.dev/vulnerability/GHSA-pypi",
+      },
+    ]),
+  });
+  const candidate = report.candidates.find((item) => item.identity_strength === "strong");
+  assert.ok(candidate, JSON.stringify(report, null, 2));
+  assert.equal(candidate!.range_assessment?.verdict, "affected");
 });
 
 test("reaches AFFECTED for a Go component via a golang PURL and authoritative range", async () => {
