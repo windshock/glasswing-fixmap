@@ -9,6 +9,10 @@ import { syncFixmap } from "./sync.js";
 import { validateDataset } from "./validate.js";
 import { formatSourceVerification, writeSourceVerification } from "./verification/output.js";
 import { readImpactDataset, verifySource } from "./verification/verify.js";
+import { GitAncestryVerifier } from "./verification/git-ancestry.js";
+import { GlasswingFingerprintVerifier } from "./verification/native-fingerprint.js";
+import { VanirVerifier } from "./verification/vanir.js";
+import type { SourceVerifier } from "./verification/types.js";
 import { checkSbom } from "./sbom/check.js";
 import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
 
@@ -48,6 +52,9 @@ Source verification options:
   --impacts <file>        Fix-impact input (default: data/fix-impacts.json)
   --json                  Print the complete machine-readable report
   --output <file>         Also write the JSON report atomically
+  --vanir-runner <path>   Opt in to the Vanir backend with this runner
+  --vanir-signatures <f>  Vanir OSV signature file(s), comma-separated
+  --vanir-vuln <id,...>   Extra vulnerability IDs to select Vanir signatures
 
 Check SBOM options:
   --sbom <file>           CycloneDX (1.5/1.6/1.7) or Syft JSON SBOM (required)
@@ -88,6 +95,9 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--impacts",
     "--sbom",
     "--component",
+    "--vanir-runner",
+    "--vanir-signatures",
+    "--vanir-vuln",
   ]);
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index]!;
@@ -190,10 +200,38 @@ async function main(): Promise<void> {
     const impactDataset = await readImpactDataset(
       path.resolve(args.values.get("--impacts") ?? "data/fix-impacts.json"),
     );
+    const verifiers: SourceVerifier[] = [
+      new GitAncestryVerifier(),
+      new GlasswingFingerprintVerifier(),
+    ];
+    const vanirRunner = args.values.get("--vanir-runner");
+    const vanirSignatures = args.values.get("--vanir-signatures");
+    if (vanirRunner || vanirSignatures) {
+      if (!vanirRunner || !vanirSignatures) {
+        throw new Error("Vanir requires both --vanir-runner and --vanir-signatures");
+      }
+      const signatureFiles = vanirSignatures
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+        .map((file) => path.resolve(file));
+      const vulnerabilityIds = (args.values.get("--vanir-vuln") ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean);
+      verifiers.push(
+        new VanirVerifier({
+          runner: path.resolve(vanirRunner),
+          signatureFiles,
+          ...(vulnerabilityIds.length > 0 ? { vulnerabilityIds } : {}),
+        }),
+      );
+    }
     const report = await verifySource({
       antId,
       sourceRoot: path.resolve(source),
       impactDataset,
+      verifiers,
     });
     const output = args.values.get("--output");
     if (output) await writeSourceVerification(report, path.resolve(output));

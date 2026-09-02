@@ -123,7 +123,7 @@ Add `--json` for machine-readable stdout or `--output result.json` to write an a
 
 The backends are not voters. Git ancestry alone cannot prove that the current tree remains fixed because a later commit may revert the patch. A strong complete native post-image match can produce `VERIFIED_FIXED`; ancestry can corroborate it. Conflicting ancestry and pre-fix evidence produce `UNKNOWN` with `VERIFIER_CONFLICT`. `PATCH_NOT_FOUND` never implies `AFFECTED`, and operational verifier failures remain distinct from inconclusive evidence.
 
-The optional Vanir backend proposed in [GitHub issue #1](https://github.com/windshock/glasswing-fixmap/issues/1) is not a runtime dependency in Phase 2a. The `SourceVerifier` boundary and preserved backend metadata allow it to be evaluated later without coupling the core decision model to Vanir.
+The optional Vanir backend proposed in [GitHub issue #1](https://github.com/windshock/glasswing-fixmap/issues/1) is not a default backend. It runs only when you opt in with `--vanir-runner <path> --vanir-signatures <file>`, entirely behind the `SourceVerifier` boundary, so the core decision model stays decoupled from Vanir. When absent it is reported as `unsupported` rather than failing verification; its missing-patch findings normalize to `PATCH_NOT_FOUND` and a clean scan to `UNKNOWN`, never a standalone proof of fix.
 
 Phase 3 reads a CycloneDX (1.5/1.6/1.7) or Syft native JSON SBOM, selects candidate components that map to Anthropic findings, and can bridge an unambiguous strong candidate into `verify-source`:
 

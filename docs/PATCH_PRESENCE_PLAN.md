@@ -1,6 +1,6 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1, 2a, and 3 candidate selection implemented; Phase 2b planned. Phase 3 `AFFECTED` remains gated on persisting authoritative affected ranges (see Milestone 3).
+Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is wired opt-in behind the `SourceVerifier` interface with fake-runner differential fixtures; promotion to a documented optional dependency still needs real differential coverage data. Phase 3 `AFFECTED` remains gated on persisting authoritative affected ranges (see Milestone 3).
 
 Last updated: 2026-09-02
 
@@ -236,7 +236,7 @@ Conservative rules:
 
 Text output summarizes backend observations, decision, confidence, and reason codes. JSON output follows `schema/source-verification.schema.json` and preserves every backend observation and evidence item so CI consumers do not need to parse terminal text. The implementation does not fetch, modify, build, or execute the inspected source.
 
-Phase 2b will evaluate Vanir as an optional backend behind the same interface. It is deliberately not a Phase 2a dependency: adoption requires differential fixtures to demonstrate useful coverage beyond the native verifier, graceful absence behavior, acceptable runtime/setup cost, and evidence that can be normalized without weakening the decision model.
+Phase 2b evaluates Vanir as an optional backend behind the same interface. It is deliberately not a default backend: `verify-source` runs `git-ancestry` and `glasswing-fingerprint` by default and only adds Vanir when the operator supplies `--vanir-runner` and `--vanir-signatures`. Fake-runner differential fixtures now demonstrate graceful absence (an unavailable runner is `unsupported`, never `ERROR`/`AFFECTED`), missing-patch normalization to `PATCH_NOT_FOUND`, and a clean scan normalized to `UNKNOWN` rather than a proof of fix. Making Vanir a documented optional installation still requires measured differential coverage beyond the native verifier and acceptable runtime/setup cost.
 
 ## Phase 3 — SBOM candidate selection
 
@@ -414,11 +414,11 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - Implement path, hunk-context, and exact/strong signature checks.
 - Produce text and JSON decisions under the strict decision model.
 
-### Milestone 2b — optional Vanir evaluation
+### Milestone 2b — optional Vanir evaluation (opt-in wiring implemented)
 
-- Add Vanir only behind `SourceVerifier`; absence or unsupported languages must not break native verification.
-- Preserve native and Vanir observations separately and report explicit conflicts as `UNKNOWN`.
-- Require differential fixtures and measured maintenance value before making Vanir a documented optional installation.
+- Vanir runs only behind `SourceVerifier` and only when `--vanir-runner`/`--vanir-signatures` are supplied; absence or unsupported languages do not break native verification.
+- Native and Vanir observations are preserved separately, and explicit conflicts remain `UNKNOWN`.
+- Fake-runner differential fixtures cover graceful absence, missing-patch → `PATCH_NOT_FOUND`, and clean scan → `UNKNOWN`. Measured maintenance value against a real Vanir install is still required before documenting it as an optional installation.
 
 ### Milestone 3 — `check-sbom` (candidate selection implemented)
 
