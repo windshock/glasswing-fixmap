@@ -151,7 +151,9 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
 
   const selectedComponent = options.component ? canonicalizePurl(options.component) : undefined;
   if (options.component && !selectedComponent) {
-    warnings.push(`Ignoring malformed --component PURL: ${options.component}`);
+    // An explicit component selector must not silently degrade into scanning
+    // every candidate.
+    throw new Error(`Malformed --component PURL: ${options.component}`);
   }
 
   if (options.sourceRoot && options.impactDataset) {

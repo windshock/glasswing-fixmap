@@ -249,6 +249,16 @@ test("an unsupported SBOM format is rejected", async () => {
   await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /Unsupported SBOM/);
 });
 
+test("a malformed explicit --component PURL is a hard error, not a silent scan", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),
+  );
+  await assert.rejects(
+    () => checkSbom({ sbomFile: file, findings: [], component: "not a purl" }),
+    /Malformed --component/,
+  );
+});
+
 async function writeRaw(text: string): Promise<string> {
   const directory = await mkdtemp(path.join(os.tmpdir(), "glasswing-sbom-"));
   const file = path.join(directory, "multi.json");

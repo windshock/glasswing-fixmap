@@ -260,21 +260,24 @@ async function main(): Promise<void> {
   if (args.command === "check-sbom") {
     const sbom = args.values.get("--sbom");
     if (!sbom) throw new Error("check-sbom requires --sbom <file>");
+    const rangesFile = args.values.get("--ranges");
+    // Explicit security-policy requests must fail fast rather than silently
+    // degrade into a partial analysis.
+    if (args.flags.has("--fail-on-affected") && !rangesFile) {
+      throw new Error(
+        "--fail-on-affected requires --ranges <file>; authoritative AFFECTED cannot be evaluated without ranges",
+      );
+    }
     const fixmap = await readDataset(path.resolve(args.values.get("--fixmap") ?? "data/fixmap.json"));
     const source = args.values.get("--source");
     let impactDataset: FixImpactDataset | undefined;
     if (source) {
-      const impactsPath = path.resolve(args.values.get("--impacts") ?? "data/fix-impacts.json");
-      try {
-        impactDataset = await readImpactDataset(impactsPath);
-      } catch {
-        process.stderr.write(
-          `Skipping source verification: unable to read fix impacts at ${impactsPath}\n`,
-        );
-      }
+      // An explicit --source requires readable fix impacts; do not silently skip.
+      impactDataset = await readImpactDataset(
+        path.resolve(args.values.get("--impacts") ?? "data/fix-impacts.json"),
+      );
     }
     const component = args.values.get("--component");
-    const rangesFile = args.values.get("--ranges");
     const rangeDataset = rangesFile
       ? await readAffectedRangeDataset(path.resolve(rangesFile))
       : undefined;
