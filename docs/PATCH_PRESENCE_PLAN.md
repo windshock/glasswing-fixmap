@@ -471,8 +471,8 @@ P1:
 - Done: CycloneDX root component — `metadata.component` and its nested structure are now projected, so the BOM's primary application is not missed.
 - Remaining: multi-commit fix-set semantics (`relation: all_of | any_of`, optional `branch`). Deferred because it needs a data-model design that fixmap does not currently carry; a naive "require every commit" default would wrongly fail legitimate branch-specific fixes (e.g. Rocket.Chat 7.x vs 8.x), so it must be modeled from real relation/branch evidence rather than assumed.
 
-P2:
-- Add a normal PR/push CI workflow (`npm ci && npm run check && npm test && npm run validate`), separate from the scheduled data-refresh workflow.
+P2 — done:
+- Added `.github/workflows/ci.yml` running `npm ci`, `npm run check`, `npm test`, and `npm run validate` on push to `main` and on pull requests, separate from the scheduled data-refresh workflow, with read-only permissions and no untrusted input.
 
 **Issue #3 — AI adjudicator Skill (new deliverable).** A reusable `glasswing-adjudicator` Skill that gives an evidence-backed second opinion on unresolved results (`UNKNOWN`, `PATCH_NOT_FOUND`, `VERIFIER_CONFLICT`, unsupported comparator, missing range, package-identity ambiguity). It never overwrites the deterministic decision; it returns `CONFIRMED` / `LIKELY_TRUE_POSITIVE` / `LIKELY_FALSE_POSITIVE` / `INSUFFICIENT_EVIDENCE` with cited machine + upstream evidence, records contradictions and missing evidence, and never fabricates an affected range or auto-suppresses. The `cloudflare/circl` `v1.3.7` result (vulnerable subsystem introduced after the installed version → `TARGET_ABSENT`) is a canonical regression example.
 
