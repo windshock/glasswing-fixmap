@@ -54,7 +54,7 @@ This repository distinguishes between the existence of an upstream patch and the
 
 See [docs/METHODOLOGY.md](docs/METHODOLOGY.md) for the full methodology and confidence rules, and [docs/CROSS_VALIDATION.md](docs/CROSS_VALIDATION.md) for reviewed exceptions.
 
-The planned source-level extension is documented in [docs/PATCH_PRESENCE_PLAN.md](docs/PATCH_PRESENCE_PLAN.md). It preserves the current fixmap workflow while adding evidence-backed `fix commit → file/function/patch → source` verification and conservative SBOM candidate selection.
+The source-level extension is documented in [docs/PATCH_PRESENCE_PLAN.md](docs/PATCH_PRESENCE_PLAN.md). Phase 2a now adds evidence-backed `fix commit → file/function/patch → source` verification. Conservative SBOM candidate selection remains the next phase.
 
 ## Data example
 
@@ -89,6 +89,7 @@ Actual records also contain confidence levels, source URLs, JSON field or page l
 ```text
 glasswing-fixmap sync [options]
 glasswing-fixmap sync-impacts [options]
+glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
 glasswing-fixmap report [data/fixmap.json]
 glasswing-fixmap validate [data/fixmap.json]
 ```
@@ -103,7 +104,25 @@ GITHUB_TOKEN=... npm run sync:impacts -- \
   --output .cache/fix-impacts.sample.json
 ```
 
-A token is required for a full run unless all responses are already cached for `--offline` use. A full run writes `data/fix-impacts.json` by default. The generated artifact follows [schema/fix-impacts.schema.json](schema/fix-impacts.schema.json). Source-tree decisions and SBOM candidate selection remain the next implementation phases; `sync-impacts` alone does not claim that a build is fixed or affected.
+A token is required for a full run unless all responses are already cached for `--offline` use. A full run writes `data/fix-impacts.json` by default. The generated artifact follows [schema/fix-impacts.schema.json](schema/fix-impacts.schema.json). `sync-impacts` alone does not claim that a build is fixed or affected.
+
+Phase 2a verifies one finding against a read-only source checkout or package source tree:
+
+```bash
+npm run verify:source -- \
+  --ant ANT-2026-P23DVQM2 \
+  --source ../wolfssl \
+  --impacts data/fix-impacts.json
+```
+
+Add `--json` for machine-readable stdout or `--output result.json` to write an atomic JSON report conforming to [schema/source-verification.schema.json](schema/source-verification.schema.json). The command runs two independent evidence producers:
+
+- `git-ancestry` validates GitHub repository identity and tests whether a known fix commit is an ancestor of `HEAD`, without fetching missing history.
+- `glasswing-fingerprint` checks relevant files and normalized pre-image/post-image signatures without modifying, building, or executing the source.
+
+The backends are not voters. Git ancestry alone cannot prove that the current tree remains fixed because a later commit may revert the patch. A strong complete native post-image match can produce `VERIFIED_FIXED`; ancestry can corroborate it. Conflicting ancestry and pre-fix evidence produce `UNKNOWN` with `VERIFIER_CONFLICT`. `PATCH_NOT_FOUND` never implies `AFFECTED`, and operational verifier failures remain distinct from inconclusive evidence.
+
+The optional Vanir backend proposed in [GitHub issue #1](https://github.com/windshock/glasswing-fixmap/issues/1) is not a runtime dependency in Phase 2a. The `SourceVerifier` boundary and preserved backend metadata allow it to be evaluated later without coupling the core decision model to Vanir.
 
 ## Manual overrides
 

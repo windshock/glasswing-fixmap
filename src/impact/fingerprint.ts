@@ -40,6 +40,24 @@ function digest(kind: PatchSignatureKind, normalized: string): string {
     .digest("hex");
 }
 
+export function sourceContainsSignature(source: string, signature: PatchSignature): boolean {
+  if (
+    signature.algorithm !== PATCH_SIGNATURE_ALGORITHM ||
+    signature.kind === "combined" ||
+    signature.line_count < 1
+  ) {
+    return false;
+  }
+  const lines = source.replace(/\r\n?/g, "\n").split("\n").map(normalizePatchLine);
+  if (signature.line_count > lines.length) return false;
+  for (let start = 0; start + signature.line_count <= lines.length; start += 1) {
+    const normalized = lines.slice(start, start + signature.line_count).join("\n");
+    if (Buffer.byteLength(normalized, "utf8") !== signature.normalized_length) continue;
+    if (digest(signature.kind, normalized) === signature.digest) return true;
+  }
+  return false;
+}
+
 function contentSignature(
   kind: Exclude<PatchSignatureKind, "combined">,
   lines: string[],

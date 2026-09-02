@@ -7,6 +7,8 @@ import type { FixImpactDataset } from "./impact/types.js";
 import { readDataset } from "./output.js";
 import { syncFixmap } from "./sync.js";
 import { validateDataset } from "./validate.js";
+import { formatSourceVerification, writeSourceVerification } from "./verification/output.js";
+import { readImpactDataset, verifySource } from "./verification/verify.js";
 
 const HELP = `glasswing-fixmap
 
@@ -15,6 +17,7 @@ Usage:
   glasswing-fixmap sync-impacts [options]
   glasswing-fixmap report [data/fixmap.json]
   glasswing-fixmap validate [data/fixmap.json]
+  glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
 
 Sync options:
   --output <dir>          Output directory (default: data)
@@ -35,6 +38,13 @@ Impact sync options:
   --concurrency <n>       Concurrent requests (default: 4)
   --offline               Use cached responses only
   --strict                Fail on the first extraction error
+
+Source verification options:
+  --ant <ANT-ID>          Anthropic finding to verify (required)
+  --source <dir>          Source checkout or package tree (required)
+  --impacts <file>        Fix-impact input (default: data/fix-impacts.json)
+  --json                  Print the complete machine-readable report
+  --output <file>         Also write the JSON report atomically
 
 Environment:
   GITHUB_TOKEN or GH_TOKEN is required for practical --verify-github and full
@@ -61,6 +71,9 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--only",
     "--concurrency",
     "--fixmap",
+    "--ant",
+    "--source",
+    "--impacts",
   ]);
   for (let index = 0; index < rest.length; index += 1) {
     const argument = rest[index]!;
@@ -153,6 +166,29 @@ async function main(): Promise<void> {
       onProgress: (message) => process.stderr.write(`${message}\n`),
     });
     printImpactReport(dataset);
+    return;
+  }
+  if (args.command === "verify-source") {
+    const antId = args.values.get("--ant");
+    const source = args.values.get("--source");
+    if (!antId) throw new Error("verify-source requires --ant <ANT-ID>");
+    if (!source) throw new Error("verify-source requires --source <dir>");
+    const impactDataset = await readImpactDataset(
+      path.resolve(args.values.get("--impacts") ?? "data/fix-impacts.json"),
+    );
+    const report = await verifySource({
+      antId,
+      sourceRoot: path.resolve(source),
+      impactDataset,
+    });
+    const output = args.values.get("--output");
+    if (output) await writeSourceVerification(report, path.resolve(output));
+    process.stdout.write(
+      args.flags.has("--json")
+        ? `${JSON.stringify(report, null, 2)}\n`
+        : formatSourceVerification(report),
+    );
+    if (report.decision === "ERROR") process.exitCode = 2;
     return;
   }
   if (args.command !== "sync") throw new Error(`Unknown command: ${args.command}`);

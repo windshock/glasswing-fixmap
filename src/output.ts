@@ -44,7 +44,7 @@ export function datasetCsv(dataset: FixmapDataset): string {
   return [columns, ...rows].map((row) => row.map(csvCell).join(",")).join("\n") + "\n";
 }
 
-async function atomicWrite(file: string, contents: string): Promise<void> {
+export async function atomicWrite(file: string, contents: string): Promise<void> {
   await mkdir(path.dirname(file), { recursive: true });
   const temporary = `${file}.${process.pid}.tmp`;
   await writeFile(temporary, contents, "utf8");

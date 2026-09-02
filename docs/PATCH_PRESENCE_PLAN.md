@@ -1,8 +1,8 @@
 # Patch-Presence Verification Plan
 
-Status: Phase 1 implemented; Phases 2 and 3 planned
+Status: Phases 1 and 2a implemented; Phase 2b and Phase 3 planned
 
-Last updated: 2026-09-01
+Last updated: 2026-09-02
 
 ## Objective
 
@@ -38,14 +38,14 @@ The result should answer a narrow, defensible question: **is the upstream fix ac
 
 | Decision | Required evidence | Explicitly does not mean |
 | --- | --- | --- |
-| `VERIFIED_FIXED` | The fix commit is an ancestor of the inspected Git checkout, or a strong patch signature is present in the target source | Every build made from the package name or version is fixed |
+| `VERIFIED_FIXED` | The Glasswing-native verifier establishes complete post-fix patch presence with strong evidence, optionally corroborated by matching Git ancestry | Every build made from the package name or version is fixed |
 | `TARGET_ABSENT` | The component is present, but the vulnerability-relevant file or function is absent and no rename/refactor ambiguity remains | Fixed or vulnerable |
 | `PATCH_NOT_FOUND` | The target file/function is present, but the fix signature is not found | Affected or exploitable |
 | `AFFECTED` | An authoritative OSV/GHSA/CVE range covers the identified component version | Inferred from `PATCH_NOT_FOUND` or from being older than a known fixed release |
 | `UNKNOWN` | Evidence is insufficient because of a rename, refactor, ambiguous component identity, missing source, or inconclusive signatures | A tool failure |
 | `ERROR` | Parsing, I/O, network, Git, or another verification operation failed | An inconclusive security result |
 
-Every result also records confidence, supporting evidence, and machine-readable reasons. Only commit ancestry or a strong signature match can produce `VERIFIED_FIXED` in the first implementation. Fuzzy or partial matches remain `UNKNOWN` with reduced confidence.
+Every result also records confidence, supporting evidence, and machine-readable reasons. Git ancestry alone cannot produce `VERIFIED_FIXED`, because a later commit may have reverted or partially altered the fix. A complete strong post-image match can produce `VERIFIED_FIXED`; complete moderate native evidence requires matching ancestry for corroboration. Fuzzy, moved, partial, or internally contradictory evidence remains `UNKNOWN` with reduced confidence.
 
 ## Architecture
 
@@ -152,10 +152,13 @@ The generated artifact contains paths, ranges, function/context labels, hashes, 
 Verification output is a separate object rather than persistent state in `fixmap.json`:
 
 ```ts
-interface VerificationResult {
+interface SourceVerificationReport {
+  schema_version: "1.0.0";
   ant_id: string;
-  component?: ComponentIdentity;
   source: string;
+  impact_schema_version: string;
+  targets: Array<{ repository: string; commit: string }>;
+  backend_results: VerifierResult[];
   decision:
     | "VERIFIED_FIXED"
     | "TARGET_ABSENT"
@@ -164,9 +167,7 @@ interface VerificationResult {
     | "UNKNOWN"
     | "ERROR";
   confidence: "high" | "medium" | "low";
-  checks: VerificationCheck[];
-  evidence: Evidence[];
-  reasons: string[];
+  reasons: DecisionReason[];
 }
 ```
 
@@ -212,24 +213,30 @@ glasswing-fixmap verify-source \
   --json
 ```
 
+Phase 2a is implemented through a narrow `SourceVerifier` interface. Each backend returns its name, version, execution status, observations, evidence, and warnings. Backends are evidence producers rather than voters; the fusion layer applies one conservative decision policy after retaining their raw output.
+
 Verification order:
 
 1. Resolve the ANT finding and its impact records.
 2. Treat the source directory as read-only and validate repository identity when Git metadata is available.
-3. Prefer local `git merge-base --is-ancestor <fix> HEAD` when the exact repository and commit are available. Do not fetch missing history by default.
-4. Otherwise inspect relevant current/previous paths, function context, and added/deleted/context signatures.
+3. Run local `git merge-base --is-ancestor <fix> HEAD` when the exact repository and commit are available. Do not fetch missing history by default.
+4. Independently inspect relevant current/previous paths, hunk context, and added/deleted pre-image/post-image signatures.
 5. Apply the decision table without promoting an absence of evidence into an affected conclusion.
 
 Conservative rules:
 
-- Exact ancestry in the correct repository produces `VERIFIED_FIXED` with high confidence.
-- A strong match requires the target path plus several consistent added/context signatures and no contradictory deleted signature.
+- Exact ancestry in the correct repository is corroborating evidence, not a final decision by itself.
+- A strong native match requires complete post-image evidence for one fix impact and no missing, moved, pre-fix, unsupported, or failed checks for that impact.
+- Complete moderate native evidence plus matching ancestry can produce `VERIFIED_FIXED` with medium confidence.
+- Ancestry plus a pre-image or missing expected signature produces `UNKNOWN` with `VERIFIER_CONFLICT`; this explicitly covers later reverts.
 - A fuzzy, partial, renamed, or refactored match produces `UNKNOWN`, not `VERIFIED_FIXED`.
 - `TARGET_ABSENT` is used only when component identity is established and absence is not plausibly caused by a rename or incomplete source checkout.
 - `PATCH_NOT_FOUND` requires the relevant path/function to be present. It does not fail an affected/vulnerable gate by itself.
 - An old product version with a verified backport may still be `VERIFIED_FIXED`.
 
-Text output will summarize the target path, function, signatures, decision, and confidence. JSON output preserves every check and reason so CI consumers do not need to parse terminal text.
+Text output summarizes backend observations, decision, confidence, and reason codes. JSON output follows `schema/source-verification.schema.json` and preserves every backend observation and evidence item so CI consumers do not need to parse terminal text. The implementation does not fetch, modify, build, or execute the inspected source.
+
+Phase 2b will evaluate Vanir as an optional backend behind the same interface. It is deliberately not a Phase 2a dependency: adoption requires differential fixtures to demonstrate useful coverage beyond the native verifier, graceful absence behavior, acceptable runtime/setup cost, and evidence that can be normalized without weakening the decision model.
 
 ## Phase 3 — SBOM candidate selection
 
@@ -401,11 +408,17 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - Reuse HTTP cache, offline mode, token handling, deterministic sorting, and evidence conventions.
 - Generate and validate `data/fix-impacts.json` without changing `fixmap.json`.
 
-### Milestone 2 — `verify-source`
+### Milestone 2a — `verify-source` (implemented)
 
 - Implement safe local Git ancestry checks.
 - Implement path, hunk-context, and exact/strong signature checks.
 - Produce text and JSON decisions under the strict decision model.
+
+### Milestone 2b — optional Vanir evaluation
+
+- Add Vanir only behind `SourceVerifier`; absence or unsupported languages must not break native verification.
+- Preserve native and Vanir observations separately and report explicit conflicts as `UNKNOWN`.
+- Require differential fixtures and measured maintenance value before making Vanir a documented optional installation.
 
 ### Milestone 3 — `check-sbom`
 

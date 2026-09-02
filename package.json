@@ -12,6 +12,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "sync": "tsx src/cli.ts sync",
     "sync:impacts": "tsx src/cli.ts sync-impacts",
+    "verify:source": "tsx src/cli.ts verify-source",
     "report": "tsx src/cli.ts report",
     "validate": "tsx src/cli.ts validate",
     "test": "tsx --test test/*.test.ts",
