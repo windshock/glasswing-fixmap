@@ -18,6 +18,11 @@ export function formatSbomCheck(report: SbomCheckReport): string {
       lines.push(
         `  ${candidate.ant_id}  ${candidate.match_type} (${candidate.confidence})  ${identity}`,
       );
+      if (candidate.range_assessment) {
+        lines.push(
+          `    range: ${candidate.range_assessment.verdict.toUpperCase()} — ${candidate.range_assessment.reason}`,
+        );
+      }
       if (candidate.verification) {
         lines.push(
           `    verify-source: ${candidate.verification.decision} (${candidate.verification.confidence})`,

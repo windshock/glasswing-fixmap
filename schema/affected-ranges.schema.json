@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/windshock/glasswing-fixmap/schema/affected-ranges.schema.json",
+  "title": "Glasswing authoritative affected ranges",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "ranges"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "generated_from", "finding_count", "record_count"],
+      "properties": {
+        "schema_version": { "const": "1.0.0" },
+        "generated_from": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fixmap_schema_version", "source_as_of", "source_url"],
+          "properties": {
+            "fixmap_schema_version": { "type": "string" },
+            "source_as_of": { "type": "string" },
+            "source_url": { "type": "string" }
+          }
+        },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "record_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "ranges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/range" }
+    }
+  },
+  "$defs": {
+    "range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ant_id", "advisory", "ecosystem", "package", "range_type", "events", "provenance"],
+      "properties": {
+        "ant_id": { "type": "string", "pattern": "^ANT-\\d{4}-[A-Z0-9]+$" },
+        "advisory": { "type": "string" },
+        "ecosystem": { "type": "string" },
+        "package": { "type": "string" },
+        "range_type": { "type": "string" },
+        "events": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "introduced": { "type": "string" },
+              "fixed": { "type": "string" },
+              "last_affected": { "type": "string" }
+            }
+          }
+        },
+        "provenance": { "type": "string" }
+      }
+    }
+  }
+}

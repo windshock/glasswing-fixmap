@@ -13,6 +13,37 @@ import { checkSbom } from "../src/sbom/check.js";
 import { SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
+import { parseAuthoritativeRanges } from "../src/ranges/extract.js";
+import { validateAffectedRangeDataset } from "../src/ranges/read.js";
+import type { AffectedRangeDataset, AffectedRangeRecord } from "../src/ranges/types.js";
+
+function rangeDataset(ranges: AffectedRangeRecord[]): AffectedRangeDataset {
+  return {
+    metadata: {
+      schema_version: "1.0.0",
+      generated_from: {
+        fixmap_schema_version: "1.0.0",
+        source_as_of: "2026-09-02T00:00:00Z",
+        source_url: "https://red.anthropic.com/2026/cvd/data/payload.json",
+      },
+      finding_count: new Set(ranges.map((range) => range.ant_id)).size,
+      record_count: ranges.length,
+    },
+    ranges,
+  };
+}
+
+function npmRange(antId: string, packageName: string, introduced: string, fixed: string): AffectedRangeRecord {
+  return {
+    ant_id: antId,
+    advisory: "GHSA-test-0001",
+    ecosystem: "npm",
+    package: packageName,
+    range_type: "ECOSYSTEM",
+    events: [{ introduced }, { fixed }],
+    provenance: "https://osv.dev/vulnerability/GHSA-test-0001",
+  };
+}
 
 const execFileAsync = promisify(execFile);
 
@@ -253,6 +284,106 @@ test("aggregates concatenated pretty-printed documents and dedupes components", 
   assert.equal(report.candidates.length, 1);
 });
 
+test("reaches AFFECTED for strong identity and an authoritative range covering the version", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.5.0", purl: "pkg:npm/left-pad@1.5.0" }]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-AFF", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-AFF", "left-pad", "1.0.0", "2.0.0")]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.identity_strength, "strong");
+  assert.equal(candidate.range_assessment?.verdict, "affected");
+});
+
+test("a version outside the authoritative range is not_affected, never AFFECTED", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "2.1.0", purl: "pkg:npm/left-pad@2.1.0" }]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-NAF", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-NAF", "left-pad", "1.0.0", "2.0.0")]),
+  });
+  assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
+});
+
+test("an unsupported ecosystem range stays unknown, never AFFECTED", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      { type: "library", name: "guava", version: "31.0", purl: "pkg:maven/com.google.guava/guava@31.0" },
+    ]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-MVN", "google/guava", "Maven", "com.google.guava:guava")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-MVN",
+        advisory: "GHSA-maven",
+        ecosystem: "Maven",
+        package: "com.google.guava:guava",
+        range_type: "MAVEN",
+        events: [{ introduced: "30.0" }, { fixed: "32.0" }],
+        provenance: "https://osv.dev/vulnerability/GHSA-maven",
+      },
+    ]),
+  });
+  const candidate = report.candidates.find((item) => item.identity_strength === "strong");
+  assert.ok(candidate);
+  assert.equal(candidate!.range_assessment?.verdict, "unknown");
+});
+
+test("a name-only candidate is never AFFECTED even with an authoritative range", async () => {
+  // No PURL -> name heuristic only -> weak identity -> no range assessment at all.
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "left-pad", version: "1.5.0" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-WNM", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-WNM", "left-pad", "1.0.0", "2.0.0")]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.match_type, "name_heuristic");
+  assert.equal(candidate.range_assessment, undefined);
+});
+
+test("parses authoritative ranges from an OSV record and skips identity-less entries", () => {
+  const records = parseAuthoritativeRanges(
+    {
+      id: "GHSA-abcd",
+      affected: [
+        {
+          package: { ecosystem: "npm", name: "left-pad" },
+          ranges: [{ type: "ECOSYSTEM", events: [{ introduced: "1.0.0" }, { fixed: "2.0.0" }] }],
+        },
+      ],
+    },
+    "ANT-2026-OSV",
+    "https://osv.dev/vulnerability/GHSA-abcd",
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.ecosystem, "npm");
+  assert.equal(records[0]!.range_type, "ECOSYSTEM");
+  assert.deepEqual(records[0]!.events, [{ introduced: "1.0.0" }, { fixed: "2.0.0" }]);
+
+  const identityLess = parseAuthoritativeRanges(
+    { id: "GHSA-x", affected: [{ ranges: [{ type: "GIT", events: [{ fixed: "deadbeef" }] }] }] },
+    "ANT-2026-OSV",
+    "p",
+  );
+  assert.equal(identityLess.length, 0);
+});
+
+test("validates and rejects a malformed affected-range dataset", () => {
+  assert.deepEqual(validateAffectedRangeDataset(rangeDataset([npmRange("ANT-2026-OK", "x", "0", "1.0.0")])), []);
+  const malformed = rangeDataset([
+    { ant_id: "not-an-ant", advisory: "", ecosystem: "npm", package: "x", range_type: "ECOSYSTEM", events: [], provenance: "p" },
+  ]);
+  assert.ok(validateAffectedRangeDataset(malformed).length > 0);
+});
+
 test("tolerates a component license carrying both id and name", async () => {
   const file = await writeSbom(
     cyclonedx([
@@ -357,7 +488,9 @@ test("the report conforms to schema/sbom-check.schema.json", async () => {
   const report = await checkSbom({
     sbomFile: file,
     findings: [packageFinding("ANT-2026-SCHEMA", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-SCHEMA", "left-pad", "1.0.0", "2.0.0")]),
   });
+  assert.equal(report.candidates[0]!.range_assessment?.verdict, "affected");
   const schemaText = await readFile(
     new URL("../schema/sbom-check.schema.json", import.meta.url),
     "utf8",

@@ -15,6 +15,8 @@ import { VanirVerifier } from "./verification/vanir.js";
 import type { SourceVerifier } from "./verification/types.js";
 import { checkSbom } from "./sbom/check.js";
 import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
+import { syncAffectedRanges } from "./ranges/sync.js";
+import { readAffectedRangeDataset } from "./ranges/read.js";
 
 const HELP = `glasswing-fixmap
 
@@ -25,6 +27,7 @@ Usage:
   glasswing-fixmap validate [data/fixmap.json]
   glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
   glasswing-fixmap check-sbom --sbom <file> [options]
+  glasswing-fixmap sync-ranges [options]
 
 Sync options:
   --output <dir>          Output directory (default: data)
@@ -62,8 +65,18 @@ Check SBOM options:
   --source <dir>          Verify an unambiguous strong candidate against a tree
   --impacts <file>        Fix-impact input for --source (default: data/fix-impacts.json)
   --component <purl>      Restrict source verification to one canonical PURL
+  --ranges <file>         Authoritative ranges for AFFECTED (data/affected-ranges.json)
+  --fail-on-affected      Exit non-zero when an authoritative AFFECTED is found
   --json                  Print the complete machine-readable report
   --output <file>         Also write the JSON report atomically
+
+Range sync options:
+  --fixmap <file>         Input fixmap (default: data/fixmap.json)
+  --output <file>         Output file (default: data/affected-ranges.json)
+  --cache <dir>           HTTP cache directory (default: .cache/http)
+  --only <ANT,...>        Collect ranges only for selected ANT IDs
+  --concurrency <n>       Concurrent requests (default: 4)
+  --offline               Use cached responses only
 
 Environment:
   GITHUB_TOKEN or GH_TOKEN is required for practical --verify-github and full
@@ -95,6 +108,7 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--impacts",
     "--sbom",
     "--component",
+    "--ranges",
     "--vanir-runner",
     "--vanir-signatures",
     "--vanir-vuln",
@@ -260,12 +274,17 @@ async function main(): Promise<void> {
       }
     }
     const component = args.values.get("--component");
+    const rangesFile = args.values.get("--ranges");
+    const rangeDataset = rangesFile
+      ? await readAffectedRangeDataset(path.resolve(rangesFile))
+      : undefined;
     const report = await checkSbom({
       sbomFile: path.resolve(sbom),
       findings: fixmap.findings,
       ...(source ? { sourceRoot: path.resolve(source) } : {}),
       ...(impactDataset ? { impactDataset } : {}),
       ...(component ? { component } : {}),
+      ...(rangeDataset ? { rangeDataset } : {}),
     });
     const output = args.values.get("--output");
     if (output) await writeSbomCheck(report, path.resolve(output));
@@ -274,9 +293,40 @@ async function main(): Promise<void> {
         ? `${JSON.stringify(report, null, 2)}\n`
         : formatSbomCheck(report),
     );
+    const affected = report.candidates.some(
+      (candidate) => candidate.range_assessment?.verdict === "affected",
+    );
     if (report.candidates.some((candidate) => candidate.verification?.decision === "ERROR")) {
       process.exitCode = 2;
+    } else if (affected && args.flags.has("--fail-on-affected")) {
+      process.exitCode = 3;
     }
+    return;
+  }
+  if (args.command === "sync-ranges") {
+    const concurrency = Number(args.values.get("--concurrency") ?? "4");
+    if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 16) {
+      throw new Error("--concurrency must be an integer between 1 and 16");
+    }
+    const client = new HttpClient({
+      cacheDirectory: path.resolve(args.values.get("--cache") ?? ".cache/http"),
+      offline: args.flags.has("--offline"),
+    });
+    const fixmap = await readDataset(path.resolve(args.values.get("--fixmap") ?? "data/fixmap.json"));
+    const onlyValue = args.values.get("--only");
+    const dataset = await syncAffectedRanges({
+      client,
+      fixmap,
+      outputFile: path.resolve(args.values.get("--output") ?? "data/affected-ranges.json"),
+      concurrency,
+      ...(onlyValue
+        ? { only: new Set(onlyValue.split(",").map((value) => value.trim()).filter(Boolean)) }
+        : {}),
+      onProgress: (message) => process.stderr.write(`${message}\n`),
+    });
+    process.stdout.write(
+      `Authoritative ranges: ${dataset.metadata.record_count} across ${dataset.metadata.finding_count} findings\n`,
+    );
     return;
   }
   if (args.command !== "sync") throw new Error(`Unknown command: ${args.command}`);

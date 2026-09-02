@@ -91,6 +91,7 @@ glasswing-fixmap sync [options]
 glasswing-fixmap sync-impacts [options]
 glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
 glasswing-fixmap check-sbom --sbom <file> [options]
+glasswing-fixmap sync-ranges [options]
 glasswing-fixmap report [data/fixmap.json]
 glasswing-fixmap validate [data/fixmap.json]
 ```
@@ -138,7 +139,14 @@ npm run check:sbom -- \
 
 CycloneDX documents are validated with the official [`@cyclonedx/cyclonedx-library`](https://github.com/CycloneDX/cyclonedx-javascript-library) strict validator; Syft documents are validated against the pinned, checksum-recorded official schema under [schema/vendor/syft](schema/vendor/syft). PURLs are canonicalized with [`packageurl-js`](https://github.com/package-url/packageurl-js) and never repaired by hand. Component matching uses the priority `exact PURL > ecosystem + package > repository identity > normalized name`, so a Maven PostgreSQL JDBC component never matches the PostgreSQL server by name, and a valid but mismatched PURL defeats a coincidental name match. Reports follow [schema/sbom-check.schema.json](schema/sbom-check.schema.json), and an SBOM with no candidate Anthropic finding is a valid clean result rather than an error. Real-world inputs are handled robustly: a file containing several concatenated CycloneDX documents (newline-delimited or pretty-printed) is parsed document by document and its components deduplicated, and a document that violates the official schema only in fields irrelevant to component identity (a non-UUID `serialNumber`, a license carrying both `id` and `name`) is processed with a warning instead of being rejected.
 
-An SBOM only selects candidates; it never proves a component is affected. `AFFECTED` still requires strong component identity, an authoritative OSV/GHSA/CVE range with provenance, and a comparator that explicitly supports the ecosystem and range type. The SemVer comparator (npm) and its range-evaluation are implemented and tested, but the current dataset does not yet persist authoritative ranges in full form, so real-world candidates conservatively remain candidate-only rather than `AFFECTED`. Persisting authoritative ranges is a separate, still-planned step.
+An SBOM only selects candidates; it never proves a component is affected. `AFFECTED` requires strong component identity, an authoritative OSV/GHSA/CVE range with provenance, and a comparator that explicitly supports the ecosystem and range type. `sync-ranges` collects those ranges from OSV/GHSA exactly as published into `data/affected-ranges.json`, and `check-sbom --ranges data/affected-ranges.json` consumes them offline to attach a `range_assessment` to strong candidates:
+
+```bash
+npm run sync:ranges
+npm run check:sbom -- --sbom bom.cdx.json --ranges data/affected-ranges.json --fail-on-affected
+```
+
+The SemVer (npm) comparator is enabled; other ecosystems return `unknown` until each has conformance fixtures, and a name-only candidate is never evaluated for `AFFECTED`. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
 
 ## Manual overrides
 

@@ -3,7 +3,9 @@ import path from "node:path";
 import type { FindingRecord } from "../types.js";
 import type { FixImpactDataset } from "../impact/types.js";
 import { verifySource } from "../verification/verify.js";
-import { canonicalizePurl } from "./purl.js";
+import type { AffectedRangeDataset, AffectedRangeRecord } from "../ranges/types.js";
+import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
+import { selectComparator } from "./comparator.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
 import { SyftAdapter } from "./syft.js";
 import { parseJsonDocuments } from "./documents.js";
@@ -12,6 +14,7 @@ import {
   SBOM_CHECK_SCHEMA_VERSION,
   type ComponentCandidate,
   type NormalizedComponent,
+  type RangeAssessment,
   type SbomAdapter,
   type SbomCheckReport,
   type SbomParseResult,
@@ -25,7 +28,42 @@ export interface CheckSbomOptions {
   impactDataset?: FixImpactDataset;
   /** Restrict source verification to the component with this canonical PURL. */
   component?: string;
+  /** Authoritative affected ranges used to reach an AFFECTED verdict. */
+  rangeDataset?: AffectedRangeDataset;
   adapters?: SbomAdapter[];
+}
+
+/**
+ * Evaluate a strong-identity candidate's version against its authoritative
+ * ranges. AFFECTED requires a comparator that explicitly supports the range's
+ * ecosystem and type; anything unresolved stays `unknown`, never guessed.
+ */
+function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAssessment {
+  let sawComparator = false;
+  let notAffected = false;
+  for (const range of ranges) {
+    const comparator = selectComparator(range.ecosystem, range.range_type);
+    if (!comparator) continue;
+    sawComparator = true;
+    const verdict = comparator.evaluate(version, range);
+    if (verdict === "affected") {
+      return {
+        verdict: "affected",
+        reason: `version ${version} is within an authoritative ${range.ecosystem} range (${range.advisory}, ${range.provenance})`,
+      };
+    }
+    if (verdict === "not_affected") notAffected = true;
+  }
+  if (!sawComparator) {
+    return {
+      verdict: "unknown",
+      reason: "no comparator explicitly supports the authoritative range ecosystem or type",
+    };
+  }
+  if (notAffected) {
+    return { verdict: "not_affected", reason: `version ${version} is outside every authoritative affected range` };
+  }
+  return { verdict: "unknown", reason: "authoritative ranges did not resolve for this version" };
 }
 
 export async function readSbomDocuments(file: string): Promise<unknown[]> {
@@ -87,6 +125,24 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
     }
   }
   const candidates = selectCandidates(components, options.findings);
+
+  if (options.rangeDataset) {
+    const ranges = options.rangeDataset.ranges;
+    for (const candidate of candidates) {
+      if (candidate.identity_strength !== "strong" || !candidate.component.version) continue;
+      const parsed = candidate.component.purl ? canonicalizePurl(candidate.component.purl) : undefined;
+      const componentKey = parsed ? identityKeyForParsedPurl(parsed) : undefined;
+      if (!componentKey) continue;
+      const applicable = ranges.filter(
+        (range) =>
+          range.ant_id === candidate.ant_id &&
+          findingIdentityKey(range.ecosystem, range.package) === componentKey,
+      );
+      if (applicable.length > 0) {
+        candidate.range_assessment = assessRanges(candidate.component.version, applicable);
+      }
+    }
+  }
 
   const selectedComponent = options.component ? canonicalizePurl(options.component) : undefined;
   if (options.component && !selectedComponent) {
