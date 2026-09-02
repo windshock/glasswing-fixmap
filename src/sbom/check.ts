@@ -39,12 +39,15 @@ export interface CheckSbomOptions {
  * ecosystem and type; anything unresolved stays `unknown`, never guessed.
  */
 function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAssessment {
-  let sawComparator = false;
   let notAffected = false;
+  let unresolved = false;
   for (const range of ranges) {
     const comparator = selectComparator(range.ecosystem, range.range_type);
-    if (!comparator) continue;
-    sawComparator = true;
+    if (!comparator) {
+      // An applicable range with no supporting comparator is unresolved, not absent.
+      unresolved = true;
+      continue;
+    }
     const verdict = comparator.evaluate(version, range);
     if (verdict === "affected") {
       return {
@@ -53,11 +56,13 @@ function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAsse
       };
     }
     if (verdict === "not_affected") notAffected = true;
+    else unresolved = true;
   }
-  if (!sawComparator) {
+  // A not_affected result from one range must never override an unresolved range.
+  if (unresolved) {
     return {
       verdict: "unknown",
-      reason: "no comparator explicitly supports the authoritative range ecosystem or type",
+      reason: "at least one applicable authoritative range is unresolved; a not_affected result does not override it",
     };
   }
   if (notAffected) {

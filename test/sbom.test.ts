@@ -310,6 +310,32 @@ test("a version outside the authoritative range is not_affected, never AFFECTED"
   assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
 });
 
+test("an unresolved authoritative range keeps the result unknown despite a not_affected range", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "2.1.0", purl: "pkg:npm/left-pad@2.1.0" }]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-UNR", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([
+      // Range A resolves to not_affected (2.1.0 is >= the fixed boundary).
+      npmRange("ANT-2026-UNR", "left-pad", "1.0.0", "2.0.0"),
+      // Range B is applicable (same npm identity) but its boundary is not valid
+      // SemVer, so the comparator cannot resolve it -> unresolved.
+      {
+        ant_id: "ANT-2026-UNR",
+        advisory: "GHSA-unresolved",
+        ecosystem: "npm",
+        package: "left-pad",
+        range_type: "SEMVER",
+        events: [{ introduced: "1.0" }, { fixed: "2.0" }],
+        provenance: "https://osv.dev/vulnerability/GHSA-unresolved",
+      },
+    ]),
+  });
+  assert.equal(report.candidates[0]!.range_assessment?.verdict, "unknown");
+});
+
 test("an unsupported ecosystem range stays unknown, never AFFECTED", async () => {
   const file = await writeSbom(
     cyclonedx([

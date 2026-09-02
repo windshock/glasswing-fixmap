@@ -51,7 +51,8 @@
             "properties": {
               "introduced": { "type": "string" },
               "fixed": { "type": "string" },
-              "last_affected": { "type": "string" }
+              "last_affected": { "type": "string" },
+              "limit": { "type": "string" }
             }
           }
         },

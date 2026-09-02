@@ -28,7 +28,9 @@ function pickEvent(event: OsvEvent): AffectedRangeEvent | undefined {
   if (typeof event.introduced === "string") picked.introduced = event.introduced;
   if (typeof event.fixed === "string") picked.fixed = event.fixed;
   if (typeof event.last_affected === "string") picked.last_affected = event.last_affected;
-  // `limit` is a housekeeping bound, not an affected boundary, and is dropped.
+  // `limit` is a housekeeping bound rather than an affected boundary, but it is
+  // preserved so the published range is not projected away.
+  if (typeof event.limit === "string") picked.limit = event.limit;
   return Object.keys(picked).length > 0 ? picked : undefined;
 }
 

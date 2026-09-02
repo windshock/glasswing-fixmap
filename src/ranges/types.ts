@@ -4,6 +4,7 @@ export interface AffectedRangeEvent {
   introduced?: string;
   fixed?: string;
   last_affected?: string;
+  limit?: string;
 }
 
 /**
