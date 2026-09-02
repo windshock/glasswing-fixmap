@@ -25,7 +25,7 @@ export function formatSbomCheck(report: SbomCheckReport): string {
       }
       if (candidate.verification) {
         lines.push(
-          `    verify-source: ${candidate.verification.decision} (${candidate.verification.confidence})`,
+          `    verify-source: ${candidate.verification.decision} (${candidate.verification.confidence}, source binding: ${candidate.source_binding ?? "user_asserted"})`,
         );
       }
     }

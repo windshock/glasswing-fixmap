@@ -4,6 +4,7 @@ import type { FindingRecord } from "../types.js";
 import type { FixImpactDataset } from "../impact/types.js";
 import { verifySource } from "../verification/verify.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../ranges/types.js";
+import type { SourceVerificationReport } from "../verification/types.js";
 import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
 import { selectComparator } from "./comparator.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
@@ -18,7 +19,20 @@ import {
   type SbomAdapter,
   type SbomCheckReport,
   type SbomParseResult,
+  type SourceBinding,
 } from "./types.js";
+
+/**
+ * Provenance of a `--source` binding. Repository identity conflict is
+ * `unverified`; otherwise the checkout is only `user_asserted`, because its
+ * version is not machine-bound to the SBOM component. `verified` is reserved for
+ * a future VCS-revision/version binding and is not emitted automatically.
+ */
+function sourceBinding(report: SourceVerificationReport): SourceBinding {
+  const observations = report.backend_results.flatMap((backend) => backend.observations);
+  if (observations.some((item) => item.type === "SOURCE_REPOSITORY_MISMATCH")) return "unverified";
+  return "user_asserted";
+}
 
 export interface CheckSbomOptions {
   sbomFile: string;
@@ -201,7 +215,17 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
         }
       }
       const verification = verifiedAnts.get(candidate.ant_id);
-      if (verification) candidate.verification = verification;
+      if (verification) {
+        candidate.verification = verification;
+        candidate.source_binding = sourceBinding(verification);
+        // Source evidence is kept separate from range evidence and must not be
+        // read as confirming the SBOM component version.
+        if (candidate.source_binding !== "verified") {
+          warnings.push(
+            `${candidate.ant_id}: source binding is ${candidate.source_binding}; verify-source evidence does not confirm the checkout matches the SBOM component version and does not override authoritative range evidence`,
+          );
+        }
+      }
     }
   }
 

@@ -674,4 +674,7 @@ test("bridges an exact-PURL candidate into verify-source", async (context) => {
   assert.ok(bridged, JSON.stringify(report, null, 2));
   assert.equal(bridged!.match_type, "ecosystem_package");
   assert.equal(bridged!.verification!.decision, "VERIFIED_FIXED");
+  // The checkout's version is not machine-bound to the SBOM component version.
+  assert.equal(bridged!.source_binding, "user_asserted");
+  assert.ok(report.warnings.some((warning) => warning.includes("source binding is user_asserted")));
 });

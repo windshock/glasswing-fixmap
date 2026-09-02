@@ -82,7 +82,8 @@
             "reason": { "type": "string" }
           }
         },
-        "verification": { "type": "object" }
+        "verification": { "type": "object" },
+        "source_binding": { "enum": ["verified", "user_asserted", "unverified"] }
       }
     }
   }

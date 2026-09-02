@@ -43,6 +43,14 @@ export type CandidateConfidence = "high" | "medium" | "low";
 /** Result of evaluating an authoritative affected range against a version. */
 export type RangeVerdict = "affected" | "not_affected" | "unknown";
 
+/**
+ * How strongly the inspected `--source` tree is bound to the SBOM component.
+ * `verified` requires machine-confirmed repository AND version correspondence;
+ * `user_asserted` means the operator pointed `--source` at a tree without that
+ * confirmation; `unverified` means the checkout's repository identity conflicts.
+ */
+export type SourceBinding = "verified" | "user_asserted" | "unverified";
+
 export interface RangeAssessment {
   verdict: RangeVerdict;
   /** Why the verdict was reached — always explains an `unknown` conservatively. */
@@ -71,6 +79,8 @@ export interface ComponentCandidate {
   range_assessment?: RangeAssessment;
   /** Present only when `--source` resolves an unambiguous candidate. */
   verification?: SourceVerificationReport;
+  /** Provenance of the `--source` binding; present whenever `verification` is. */
+  source_binding?: SourceBinding;
 }
 
 export interface SbomCheckReport {
