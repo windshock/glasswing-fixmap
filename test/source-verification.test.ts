@@ -331,3 +331,78 @@ test("a partial fix impact never yields VERIFIED_FIXED even when every hunk matc
     JSON.stringify(report, null, 2),
   );
 });
+
+test("a multi-commit fix requires every applicable commit to be present", async (context) => {
+  const repository = await mkdtemp(path.join(os.tmpdir(), "glasswing-multi-test-"));
+  context.after(async () => rm(repository, { recursive: true, force: true }));
+  await git(repository, "init", "-b", "main");
+  await git(repository, "config", "user.name", "glasswing test");
+  await git(repository, "config", "user.email", "glasswing@example.invalid");
+  await git(repository, "remote", "add", "origin", "https://github.com/example/project.git");
+
+  const alphaVulnerable = "int alpha(const char *p){ return process_alpha_input_unchecked(p); }\n";
+  const alphaFixed = "int alpha(const char *p){ return process_alpha_input_checked_safely(p); }\n";
+  const betaVulnerable = "int beta(const char *p){ return process_beta_input_unchecked(p); }\n";
+  const betaFixed = "int beta(const char *p){ return process_beta_input_checked_safely(p); }\n";
+  const writeFiles = async (alpha: string, beta: string): Promise<void> => {
+    await mkdir(path.join(repository, "src"), { recursive: true });
+    await writeFile(path.join(repository, "src/alpha.c"), alpha);
+    await writeFile(path.join(repository, "src/beta.c"), beta);
+  };
+
+  await writeFiles(alphaVulnerable, betaVulnerable);
+  const base = await commitAll(repository, "vulnerable");
+  await writeFiles(alphaFixed, betaVulnerable);
+  const commitA = await commitAll(repository, "fix alpha");
+  await writeFiles(alphaFixed, betaFixed);
+  const commitB = await commitAll(repository, "fix beta");
+  const fingerprintA = fingerprintPatch(
+    await git(repository, "diff", base, commitA, "--", "src/alpha.c"),
+    "src/alpha.c",
+    "src/alpha.c",
+  );
+  const fingerprintB = fingerprintPatch(
+    await git(repository, "diff", commitA, commitB, "--", "src/beta.c"),
+    "src/beta.c",
+    "src/beta.c",
+  );
+  const impact = (commit: string, file: string, fingerprint: ReturnType<typeof fingerprintPatch>) => ({
+    repository: "example/project",
+    commit,
+    ant_ids: [ANT_ID],
+    extraction_status: "complete" as const,
+    files: [
+      { path_before: file, path_after: file, status: "modified" as const, patch_available: true, hunks: fingerprint.hunks },
+    ],
+    evidence: [{ source: "github_repository" as const, url: `https://github.com/example/project/commit/${commit}` }],
+    warnings: [],
+  });
+  const dataset: FixImpactDataset = {
+    metadata: {
+      schema_version: "1.0.0",
+      generated_from: {
+        fixmap_schema_version: "1.0.0",
+        source_as_of: "2026-09-02T00:00:00Z",
+        source_url: "https://red.anthropic.com/2026/cvd/data/payload.json",
+      },
+      finding_count: 1,
+      impact_count: 2,
+      complete_count: 2,
+      partial_count: 0,
+      error_count: 0,
+    },
+    impacts: [impact(commitA, "src/alpha.c", fingerprintA), impact(commitB, "src/beta.c", fingerprintB)].sort(
+      (a, b) => `${a.repository}@${a.commit}`.localeCompare(`${b.repository}@${b.commit}`),
+    ),
+  };
+
+  // Both fix commits are applied in the checkout.
+  await git(repository, "checkout", "--detach", commitB);
+  await check(repository, dataset, "VERIFIED_FIXED");
+
+  // One required commit is reverted: a single matching commit is not proof.
+  await git(repository, "checkout", "-B", "partial-fix", commitB);
+  await writeFile(path.join(repository, "src/beta.c"), betaVulnerable);
+  await commitAll(repository, "revert beta fix");
+  await check(repository, dataset, "UNKNOWN");
+});

@@ -66,6 +66,24 @@ function candidateIsNativelyComplete(observations: VerificationObservation[]): b
     !observations.some((item) => VULNERABLE_TYPES.has(item.type));
 }
 
+const APPLICABLE_TYPES = new Set([
+  "FIX_POSTIMAGE_PRESENT",
+  "FIX_PREIMAGE_PRESENT",
+  "VULNERABLE_PATTERN_PRESENT",
+  "PATCH_SIGNATURE_ABSENT",
+  "TARGET_PATH_MOVED",
+]);
+
+/**
+ * An impact is applicable to this source when its target files were found and
+ * evaluated. An impact whose files are all absent belongs to a different branch
+ * or version and does not block a fix conclusion; a co-required commit whose
+ * files are present but unapplied does.
+ */
+function impactIsApplicable(observations: VerificationObservation[]): boolean {
+  return observations.some((item) => APPLICABLE_TYPES.has(item.type));
+}
+
 /**
  * Combine evidence conservatively. Verifier backends produce observations; they
  * are not voters, and backend count never increases confidence by itself.
@@ -111,31 +129,50 @@ export function fuseVerificationEvidence(
     ]);
   }
 
-  for (const impact of impacts) {
-    const nativeCandidate = forImpact(fingerprintObservations, impact);
-    if (!candidateIsNativelyComplete(nativeCandidate)) continue;
-    const postimages = nativeCandidate.filter((item) => item.type === "FIX_POSTIMAGE_PRESENT");
-    const strong = postimages.some((item) => item.strength === "strong");
-    const candidateAncestry = forImpact(ancestry, impact);
-    if (strong || candidateAncestry.length > 0) {
-      const reasons = [
+  // Every impact applicable to this source must be complete and strong-or-
+  // corroborated. A single matching commit is not proof of a multi-commit fix,
+  // while a branch-specific commit whose files are absent does not block one.
+  const applicableImpacts = impacts.filter((impact) =>
+    impactIsApplicable(forImpact(fingerprintObservations, impact)),
+  );
+  const verifiedFixed = applicableImpacts.length > 0 &&
+    applicableImpacts.every((impact) => {
+      const native = forImpact(fingerprintObservations, impact);
+      if (!candidateIsNativelyComplete(native)) return false;
+      const strong = native.some(
+        (item) => item.type === "FIX_POSTIMAGE_PRESENT" && item.strength === "strong",
+      );
+      return strong || forImpact(ancestry, impact).length > 0;
+    });
+  if (verifiedFixed) {
+    const postimages = applicableImpacts.flatMap((impact) =>
+      forImpact(fingerprintObservations, impact).filter(
+        (item) => item.type === "FIX_POSTIMAGE_PRESENT",
+      ),
+    );
+    const candidateAncestry = applicableImpacts.flatMap((impact) => forImpact(ancestry, impact));
+    const everyStrong = applicableImpacts.every((impact) =>
+      forImpact(fingerprintObservations, impact).some(
+        (item) => item.type === "FIX_POSTIMAGE_PRESENT" && item.strength === "strong",
+      ),
+    );
+    const reasons = [
+      reason(
+        "NATIVE_POSTIMAGE_MATCH",
+        "All inspectable patch hunks reported by glasswing-fingerprint match the post-fix source image.",
+        postimages,
+      ),
+    ];
+    if (candidateAncestry.length > 0) {
+      reasons.push(
         reason(
-          "NATIVE_POSTIMAGE_MATCH",
-          "All inspectable patch hunks reported by glasswing-fingerprint match the post-fix source image.",
-          postimages,
+          "ANCESTRY_CORROBORATED",
+          "Git ancestry independently corroborates the native patch match.",
+          candidateAncestry,
         ),
-      ];
-      if (candidateAncestry.length > 0) {
-        reasons.push(
-          reason(
-            "ANCESTRY_CORROBORATED",
-            "Git ancestry independently corroborates the native patch match.",
-            candidateAncestry,
-          ),
-        );
-      }
-      return result("VERIFIED_FIXED", strong ? "high" : "medium", reasons);
+      );
     }
+    return result("VERIFIED_FIXED", everyStrong ? "high" : "medium", reasons);
   }
 
   if (ancestry.length > 0 && signatureAbsent.length > 0) {
