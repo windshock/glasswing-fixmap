@@ -444,12 +444,13 @@ Acceptance testing against real exported SBOMs surfaced two input realities the 
 
 `check-sbom --ranges` consumes the artifact offline: for a strong-identity candidate with a version, it selects a comparator that explicitly supports the range's ecosystem and type and evaluates it, attaching a `range_assessment`. `AFFECTED` requires all three of strong identity, an authoritative range with provenance, and a supporting comparator; a name-only candidate is never evaluated, and any unresolved case stays `unknown`. The SemVer (npm) comparator is enabled; other ecosystems return `unknown` until each has conformance fixtures. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
 
-### Milestone 4 — Hardening and release
+### Milestone 4 — Hardening and release (in progress)
 
-- Run the eight private acceptance samples and retain only aggregate, non-sensitive test notes.
-- Confirm all existing commands and generated outputs are byte-for-byte compatible where expected.
-- Document limitations, confidence, exit semantics, and reproducible examples.
-- Add scheduled impact refresh only after rate limits and generated-diff size are measured.
+- Done: ran 16 real acceptance SBOMs plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
+- Done: confirmed existing outputs are byte-for-byte compatible — `data/fixmap.json` and `data/fixmap.csv` re-serialize identically through the current code, and `sync`/`report`/`validate` are unchanged.
+- Done: documented exit semantics (`0`/`1`/`2`/`3`) and limitations in the README and ACCEPTANCE.md.
+- Remaining: enable additional ecosystem comparators (Maven, Go, crates.io, Packagist), each only behind its own conformance fixtures.
+- Remaining: add scheduled `sync-impacts`/`sync-ranges` refresh only after rate limits and generated-diff size are measured.
 
 ## Definition of done
 
