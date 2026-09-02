@@ -89,7 +89,7 @@ function syft(artifacts: unknown[]): Record<string, unknown> {
   };
 }
 
-test("selects an exact PURL candidate with high confidence", async () => {
+test("selects a PURL identity candidate with strong, high confidence", async () => {
   const file = await writeSbom(
     cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),
   );
@@ -98,7 +98,9 @@ test("selects an exact PURL candidate with high confidence", async () => {
     findings: [packageFinding("ANT-2026-LEFTPAD", "stevemao/left-pad", "npm", "left-pad")],
   });
   assert.equal(report.candidates.length, 1);
-  assert.equal(report.candidates[0]!.match_type, "exact_purl");
+  // Findings carry no PURL, so the honest strongest label is ecosystem_package.
+  assert.equal(report.candidates[0]!.match_type, "ecosystem_package");
+  assert.equal(report.candidates[0]!.identity_strength, "strong");
   assert.equal(report.candidates[0]!.confidence, "high");
   assert.equal(report.package_component_count, 1);
 });
@@ -158,8 +160,11 @@ test("a malformed PURL is never repaired into an exact match", async () => {
     sbomFile: file,
     findings: [packageFinding("ANT-2026-BADPURL", "stevemao/left-pad", "npm", "left-pad")],
   });
-  // No valid PURL and the name still matches, so at most a weak heuristic — never exact.
+  // No valid PURL and the name still matches, so at most a weak heuristic — never
+  // a strong identity match.
+  assert.ok(!report.candidates.some((candidate) => candidate.identity_strength === "strong"));
   assert.ok(!report.candidates.some((candidate) => candidate.match_type === "exact_purl"));
+  assert.ok(!report.candidates.some((candidate) => candidate.match_type === "ecosystem_package"));
 });
 
 test("a file-only CycloneDX document produces zero package candidates", async () => {
@@ -204,8 +209,8 @@ test("CycloneDX and Syft forms of the same PURL normalize to the same candidate 
   assert.equal(cdx.candidates.length, 1);
   assert.equal(syftReport.candidates.length, 1);
   assert.equal(cdx.candidates[0]!.component.purl, syftReport.candidates[0]!.component.purl);
-  assert.equal(cdx.candidates[0]!.match_type, "exact_purl");
-  assert.equal(syftReport.candidates[0]!.match_type, "exact_purl");
+  assert.equal(cdx.candidates[0]!.match_type, "ecosystem_package");
+  assert.equal(syftReport.candidates[0]!.match_type, "ecosystem_package");
 });
 
 test("an unsupported SBOM format is rejected", async () => {
@@ -353,6 +358,6 @@ test("bridges an exact-PURL candidate into verify-source", async (context) => {
   });
   const bridged = report.candidates.find((candidate) => candidate.verification);
   assert.ok(bridged, JSON.stringify(report, null, 2));
-  assert.equal(bridged!.match_type, "exact_purl");
+  assert.equal(bridged!.match_type, "ecosystem_package");
   assert.equal(bridged!.verification!.decision, "VERIFIED_FIXED");
 });

@@ -148,7 +148,11 @@ export function selectCandidates(
     };
 
     if (identityKey) {
-      for (const finding of index.byIdentity.get(identityKey) ?? []) emit(finding, "exact_purl");
+      // Findings carry no authoritative PURL, so the strongest identity we can
+      // assert is version/qualifier-stripped ecosystem + package equality — not
+      // canonical PURL string equality. Label it honestly as ecosystem_package;
+      // exact_purl is reserved for a future finding model that carries PURLs.
+      for (const finding of index.byIdentity.get(identityKey) ?? []) emit(finding, "ecosystem_package");
     }
     if (repository) {
       for (const finding of index.byRepository.get(repository.toLowerCase()) ?? []) {
