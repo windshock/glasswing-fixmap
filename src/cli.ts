@@ -90,6 +90,22 @@ interface ParsedArguments {
   flags: Set<string>;
 }
 
+const COMMON_OPTIONS = ["--help", "-h"] as const;
+
+// Per-command option allowlist. An unknown option (e.g. a typo like
+// `--fail-on-affectd`) is rejected rather than silently accepted, so a
+// misspelled security gate cannot quietly disable a check.
+const COMMAND_OPTIONS: Record<string, readonly string[]> = {
+  sync: ["--output", "--cache", "--overrides", "--only", "--concurrency", "--offline", "--verify-github", "--strict", ...COMMON_OPTIONS],
+  "sync-impacts": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", "--strict", ...COMMON_OPTIONS],
+  "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
+  "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
+  "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
+  report: [...COMMON_OPTIONS],
+  validate: [...COMMON_OPTIONS],
+  help: [...COMMON_OPTIONS],
+};
+
 function parseArguments(argv: string[]): ParsedArguments {
   const command = argv[0] && !argv[0].startsWith("-") ? argv[0] : "sync";
   const rest = command === argv[0] ? argv.slice(1) : argv;
@@ -124,6 +140,15 @@ function parseArguments(argv: string[]): ParsedArguments {
       flags.add(argument);
     } else {
       positional.push(argument);
+    }
+  }
+  const allowed = COMMAND_OPTIONS[command];
+  if (allowed) {
+    const allowedSet = new Set(allowed);
+    for (const option of [...values.keys(), ...flags]) {
+      if (!allowedSet.has(option)) {
+        throw new Error(`Unknown option ${option} for command '${command}'`);
+      }
     }
   }
   return { command, positional, values, flags };
