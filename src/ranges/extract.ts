@@ -95,9 +95,89 @@ export function parseAuthoritativeRanges(
         events: [],
         versions,
         provenance,
+        source: "osv",
       };
       if (purl) versionsRecord.purl = purl;
       results.push(versionsRecord);
+    }
+  }
+  for (const record of results) record.source = "osv";
+  return results;
+}
+
+interface CveVersion {
+  version?: string;
+  versionType?: string;
+  status?: string;
+  lessThan?: string;
+  lessThanOrEqual?: string;
+}
+
+interface CveAffected {
+  vendor?: string;
+  product?: string;
+  packageName?: string;
+  cpes?: unknown;
+  versions?: CveVersion[];
+}
+
+export interface CveRangeRecord {
+  cveMetadata?: { cveId?: string };
+  containers?: { cna?: { affected?: CveAffected[] }; adp?: Array<{ affected?: CveAffected[] }> };
+}
+
+/**
+ * Project authoritative affected ranges from a CVE List V5 record. Ranges are
+ * keyed by CVE product (with any CPEs) since CVE records carry no package
+ * ecosystem; versions are consumed exactly as published (`version`/`lessThan`/
+ * `lessThanOrEqual`), never reconstructed. GIT version types are skipped.
+ */
+export function parseCveRanges(
+  record: CveRangeRecord,
+  antId: string,
+  provenance: string,
+): AffectedRangeRecord[] {
+  const advisory = record.cveMetadata?.cveId ?? "unknown";
+  const affectedEntries = [
+    ...(record.containers?.cna?.affected ?? []),
+    ...(record.containers?.adp ?? []).flatMap((container) => container.affected ?? []),
+  ];
+  const results: AffectedRangeRecord[] = [];
+  const seen = new Set<string>();
+  for (const affected of affectedEntries) {
+    const product = affected.packageName ?? affected.product;
+    if (!product) continue;
+    const cpes = stringArray(affected.cpes);
+    for (const entry of affected.versions ?? []) {
+      if (entry.status !== "affected") continue;
+      if (entry.versionType?.toLowerCase() === "git") continue;
+      if (typeof entry.version !== "string") continue;
+      const events: AffectedRangeEvent[] = [];
+      const versions: string[] = [];
+      if (typeof entry.lessThan === "string" && !entry.lessThan.includes("*")) {
+        events.push({ introduced: entry.version }, { fixed: entry.lessThan });
+      } else if (typeof entry.lessThanOrEqual === "string" && !entry.lessThanOrEqual.includes("*")) {
+        events.push({ introduced: entry.version }, { last_affected: entry.lessThanOrEqual });
+      } else {
+        versions.push(entry.version);
+      }
+      const rangeRecord: AffectedRangeRecord = {
+        ant_id: antId,
+        advisory,
+        source: "cve_list_v5",
+        ecosystem: "cve",
+        package: product,
+        product,
+        range_type: "SEMVER",
+        events,
+        provenance,
+      };
+      if (cpes.length > 0) rangeRecord.cpes = cpes;
+      if (versions.length > 0) rangeRecord.versions = versions;
+      const key = `${product}|${JSON.stringify(events)}|${JSON.stringify(versions)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      results.push(rangeRecord);
     }
   }
   return results;

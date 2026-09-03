@@ -16,8 +16,14 @@ export interface AffectedRangeEvent {
 export interface AffectedRangeRecord {
   ant_id: string;
   advisory: string;
+  /** Where the range was published: an OSV/GHSA ecosystem range or a CVE record. */
+  source?: "osv" | "cve_list_v5";
   ecosystem: string;
   package: string;
+  /** CVE List V5 product/vendor name, used to match name-only components. */
+  product?: string;
+  /** CPE strings published alongside the range, used to match by CPE. */
+  cpes?: string[];
   /** Canonical PURL from OSV `affected.package.purl`, when published. */
   purl?: string;
   range_type: string;

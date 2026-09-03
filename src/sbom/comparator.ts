@@ -102,7 +102,9 @@ const pep440Ops: VersionOps = {
 export class SemverComparator implements VersionComparator {
   readonly name = "semver";
 
-  private static readonly SEMVER_ECOSYSTEMS = new Set(["npm", "go", "crates.io"]);
+  // "cve" is a sentinel for CVE List V5 product ranges, whose versions are
+  // evaluated as SemVer; a value that is not strict SemVer yields `unknown`.
+  private static readonly SEMVER_ECOSYSTEMS = new Set(["npm", "go", "crates.io", "cve"]);
 
   supports(ecosystem: string, rangeType: string): boolean {
     const type = rangeType.trim().toUpperCase();

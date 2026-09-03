@@ -13,7 +13,7 @@ import { checkSbom } from "../src/sbom/check.js";
 import { Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
-import { parseAuthoritativeRanges } from "../src/ranges/extract.js";
+import { parseAuthoritativeRanges, parseCveRanges } from "../src/ranges/extract.js";
 import { validateAffectedRangeDataset } from "../src/ranges/read.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../src/ranges/types.js";
 
@@ -37,11 +37,29 @@ function npmRange(antId: string, packageName: string, introduced: string, fixed:
   return {
     ant_id: antId,
     advisory: "GHSA-test-0001",
+    source: "osv",
     ecosystem: "npm",
     package: packageName,
     range_type: "ECOSYSTEM",
     events: [{ introduced }, { fixed }],
     provenance: "https://osv.dev/vulnerability/GHSA-test-0001",
+  };
+}
+
+const CVE_PROVENANCE =
+  "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/CVE-2026-45447.json";
+
+function cveRange(antId: string, product: string, introduced: string, fixed: string): AffectedRangeRecord {
+  return {
+    ant_id: antId,
+    advisory: "CVE-2026-45447",
+    source: "cve_list_v5",
+    ecosystem: "cve",
+    package: product,
+    product,
+    range_type: "SEMVER",
+    events: [{ introduced }, { fixed }],
+    provenance: CVE_PROVENANCE,
   };
 }
 
@@ -454,6 +472,78 @@ test("a name-only candidate is never AFFECTED even with an authoritative range",
   const candidate = report.candidates[0]!;
   assert.equal(candidate.match_type, "name_heuristic");
   assert.equal(candidate.range_assessment, undefined);
+});
+
+test("a CVE List V5 product range reaches AFFECTED for a name-only component", async () => {
+  // openssl 3.0.7 carries no PURL: name_heuristic, weak identity. A CVE List V5
+  // range is keyed by product (CVE records have no package ecosystem), so it
+  // still applies by name and resolves deterministically via the SemVer comparator.
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "openssl", version: "3.0.7" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.match_type, "name_heuristic");
+  assert.equal(candidate.identity_strength, "weak");
+  assert.equal(candidate.range_assessment?.verdict, "affected");
+});
+
+test("a CVE List V5 product range is not_affected for an already-patched name-only component", async () => {
+  // 3.0.21 is the fixed boundary (exclusive): outside the affected range.
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "openssl", version: "3.0.21" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]),
+  });
+  assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
+});
+
+test("a CVE List V5 product range matches case-insensitively by product name", async () => {
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "OpenSSL", version: "3.0.7" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]),
+  });
+  assert.equal(report.candidates[0]!.range_assessment?.verdict, "affected");
+});
+
+test("parses CVE List V5 affected ranges keyed by product, skipping git version types", () => {
+  const records = parseCveRanges(
+    {
+      cveMetadata: { cveId: "CVE-2026-45447" },
+      containers: {
+        cna: {
+          affected: [
+            {
+              vendor: "openssl",
+              product: "openssl",
+              versions: [
+                { version: "3.0.0", status: "affected", versionType: "semver", lessThan: "3.0.21" },
+                { version: "3.4.0", status: "affected", versionType: "semver", lessThanOrEqual: "3.4.5" },
+                // A git range carries a commit boundary, not a comparable version.
+                { version: "abc123", status: "affected", versionType: "git", lessThan: "def456" },
+                // An unaffected entry is not an affected range.
+                { version: "2.0.0", status: "unaffected" },
+              ],
+            },
+          ],
+        },
+      },
+    },
+    "ANT-2026-OSSL",
+    CVE_PROVENANCE,
+  );
+  assert.equal(records.length, 2);
+  assert.equal(records[0]!.source, "cve_list_v5");
+  assert.equal(records[0]!.ecosystem, "cve");
+  assert.equal(records[0]!.product, "openssl");
+  assert.equal(records[0]!.range_type, "SEMVER");
+  assert.deepEqual(records[0]!.events, [{ introduced: "3.0.0" }, { fixed: "3.0.21" }]);
+  assert.deepEqual(records[1]!.events, [{ introduced: "3.4.0" }, { last_affected: "3.4.5" }]);
 });
 
 test("parses authoritative ranges from an OSV record and skips identity-less entries", () => {

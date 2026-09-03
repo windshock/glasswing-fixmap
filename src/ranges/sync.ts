@@ -1,7 +1,13 @@
 import type { HttpClient } from "../http.js";
 import { atomicWrite } from "../output.js";
 import type { FixmapDataset } from "../types.js";
-import { parseAuthoritativeRanges, type OsvRangeRecord } from "./extract.js";
+import { cveRecordRawUrl } from "../urls.js";
+import {
+  parseAuthoritativeRanges,
+  parseCveRanges,
+  type CveRangeRecord,
+  type OsvRangeRecord,
+} from "./extract.js";
 import { validateAffectedRangeDataset } from "./read.js";
 import {
   AFFECTED_RANGE_SCHEMA_VERSION,
@@ -67,6 +73,11 @@ export async function syncAffectedRanges(options: SyncRangesOptions): Promise<Af
       const url = `https://api.osv.dev/v1/vulns/${encodeURIComponent(advisoryId)}`;
       const osv = await options.client.getOptionalJson<OsvRangeRecord>(url);
       if (osv) records.push(...parseAuthoritativeRanges(osv, finding.ant_id, url));
+    }
+    for (const cveId of finding.cve_ids) {
+      const cveUrl = cveRecordRawUrl(cveId);
+      const cve = await options.client.getOptionalJson<CveRangeRecord>(cveUrl);
+      if (cve) records.push(...parseCveRanges(cve, finding.ant_id, cveUrl));
     }
     options.onProgress?.(`${finding.ant_id}: ${records.length} authoritative range(s)`);
     return records;

@@ -39,8 +39,11 @@
       "properties": {
         "ant_id": { "type": "string", "pattern": "^ANT-\\d{4}-[A-Z0-9]+$" },
         "advisory": { "type": "string" },
+        "source": { "enum": ["osv", "cve_list_v5"] },
         "ecosystem": { "type": "string" },
         "package": { "type": "string" },
+        "product": { "type": "string" },
+        "cpes": { "type": "array", "items": { "type": "string" } },
         "purl": { "type": "string" },
         "range_type": { "type": "string" },
         "repo": { "type": "string" },

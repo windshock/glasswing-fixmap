@@ -321,8 +321,11 @@ async function main(): Promise<void> {
         ? `${JSON.stringify(report, null, 2)}\n`
         : formatSbomCheck(report),
     );
+    // Only a strong-identity (PURL/CPE) AFFECTED gates; a name-only CVE-range
+    // match is surfaced for review but must not fail the process.
     const affected = report.candidates.some(
-      (candidate) => candidate.range_assessment?.verdict === "affected",
+      (candidate) =>
+        candidate.identity_strength === "strong" && candidate.range_assessment?.verdict === "affected",
     );
     if (report.candidates.some((candidate) => candidate.verification?.decision === "ERROR")) {
       process.exitCode = 2;

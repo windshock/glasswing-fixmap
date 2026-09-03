@@ -113,6 +113,25 @@ function componentKey(component: NormalizedComponent): string {
 }
 
 /**
+ * Whether an authoritative range applies to a candidate. A CVE List V5 product
+ * range matches by component name (CVE records carry no package ecosystem), so
+ * it can be evaluated even for a name-only, weak-identity candidate. An OSV
+ * package-ecosystem range still requires strong PURL identity.
+ */
+function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidate): boolean {
+  if (range.ant_id !== candidate.ant_id) return false;
+  if (range.source === "cve_list_v5") {
+    return Boolean(range.product) &&
+      range.product!.toLowerCase() === candidate.component.name.toLowerCase();
+  }
+  if (candidate.identity_strength !== "strong") return false;
+  const parsed = candidate.component.purl ? canonicalizePurl(candidate.component.purl) : undefined;
+  const componentKey = parsed ? identityKeyForParsedPurl(parsed) : undefined;
+  if (!componentKey) return false;
+  return findingIdentityKey(range.ecosystem, range.package) === componentKey;
+}
+
+/**
  * Candidate selection over an SBOM, optionally bridging an unambiguous strong
  * candidate into source verification. Multiple concatenated documents in one
  * file are each parsed and their components deduplicated and aggregated. An
@@ -159,15 +178,8 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   if (options.rangeDataset) {
     const ranges = options.rangeDataset.ranges;
     for (const candidate of candidates) {
-      if (candidate.identity_strength !== "strong" || !candidate.component.version) continue;
-      const parsed = candidate.component.purl ? canonicalizePurl(candidate.component.purl) : undefined;
-      const componentKey = parsed ? identityKeyForParsedPurl(parsed) : undefined;
-      if (!componentKey) continue;
-      const applicable = ranges.filter(
-        (range) =>
-          range.ant_id === candidate.ant_id &&
-          findingIdentityKey(range.ecosystem, range.package) === componentKey,
-      );
+      if (!candidate.component.version) continue;
+      const applicable = ranges.filter((range) => rangeAppliesTo(range, candidate));
       if (applicable.length > 0) {
         candidate.range_assessment = assessRanges(candidate.component.version, applicable);
       }

@@ -494,6 +494,31 @@ An external review found real defects; all are now fixed and covered by tests, i
 7. P2 Vanir reproducibility — pin the base image digest and Vanir version, record the real Vanir version, and preserve the report's SHA-256 rather than a deleted temp path.
 8. CycloneDX 1.4 input support — the official JS library already supports 1.2–1.7, so accept 1.4 (thin projection unchanged); a dedicated BOM up-conversion remains an optional future feature via `cyclonedx-cli`.
 
+## Improvement — consume CVE List V5 ranges (2026-09-03)
+
+Acceptance testing on name+version-only SBOMs (Palo Alto product line, IRMS)
+showed the recurring pattern: a component like `openssl 3.0.7` matches an
+Anthropic finding whose authoritative affected range (`introduced 3.0.0`,
+`fixed 3.0.21`) already came from CVE List V5, yet the deterministic engine kept
+it low-confidence because `sync-ranges` consumed only OSV, so the range never
+reached `affected-ranges.json`, and the component carries no PURL. That version
+math is deterministic and belongs in the engine, not the AI adjudicator.
+
+- `sync-ranges` also consumes the CVE List V5 record for each finding's CVE and
+  emits its `affected[].versions[]` ranges (`version`/`lessThan`/
+  `lessThanOrEqual`) into `affected-ranges.json`, keyed by CVE product (with any
+  CPEs), exactly as published — not reconstructed from `fixed_versions[]`.
+- `check-sbom` applies a CVE-product range to a candidate by CPE or by component
+  name and evaluates the version, attaching a `range_assessment`. A name-only
+  match remains weak identity: it is surfaced for review but does not gate
+  `--fail-on-affected`, which still requires strong (PURL/CPE) identity.
+- The adjudicator Skill is then reserved for cases an authoritative range cannot
+  resolve (feature introduced after the installed version like `circl`, product
+  namesake mismatch, backport/refactor, verifier conflict).
+- Scope note: glasswing is not a general SBOM-vs-CVE scanner (that is grype /
+  trivy / osv-scanner). It consumes the authoritative ranges of its own
+  Anthropic findings and adds the fix→source verification those tools lack.
+
 ## Definition of done
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.
