@@ -483,7 +483,7 @@ P2 — done:
 
 ## Review fixes (external review, 2026-09-03)
 
-An external review found real defects to fix before "done", addressed in this order:
+An external review found real defects; all are now fixed and covered by tests, in this order (each line states the defect and the fix applied):
 
 1. P0 multi-commit fix — `fusion.ts` excluded impacts whose files are absent, so one matching commit could return `VERIFIED_FIXED` while another required commit was simply missing. With unknown relation, treat the fix set as `all_of`: every impact must be verified present and complete, otherwise `UNKNOWN`. Add optional `relation` (`all_of`/`any_of`) and `branch` to `FixImpact`.
 2. P0 OSV `limit` — the comparator ignored `limit` events, so a version at/after an exclusive `limit` read as `affected`. Evaluate `limit` as an exclusive upper bound. Also preserve `affected.package.purl` and `ranges[].repo` in the range artifact (previously dropped).
