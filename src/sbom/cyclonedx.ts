@@ -3,6 +3,7 @@ import { canonicalizePurl } from "./purl.js";
 import type { NormalizedComponent, SbomAdapter, SbomParseResult } from "./types.js";
 
 const SUPPORTED_SPEC_VERSIONS: Record<string, Spec.Version> = {
+  "1.4": Spec.Version.v1dot4,
   "1.5": Spec.Version.v1dot5,
   "1.6": Spec.Version.v1dot6,
   "1.7": Spec.Version.v1dot7,

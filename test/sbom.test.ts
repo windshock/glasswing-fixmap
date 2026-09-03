@@ -157,6 +157,18 @@ test("Maven identity is case-sensitive; case-different coordinates do not match"
   assert.equal(matched.candidates[0]!.match_type, "ecosystem_package");
 });
 
+test("accepts CycloneDX 1.4 input", async () => {
+  const file = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }], "1.4"),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-CDX14", "stevemao/left-pad", "npm", "left-pad")],
+  });
+  assert.equal(report.spec_version, "1.4");
+  assert.equal(report.candidates[0]!.match_type, "ecosystem_package");
+});
+
 test("a Maven PostgreSQL JDBC component does not match the PostgreSQL server by name", async () => {
   const file = await writeSbom(
     cyclonedx([
