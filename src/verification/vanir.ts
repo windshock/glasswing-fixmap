@@ -200,7 +200,7 @@ function reportMatchesTarget(
 function missingPatchObservations(
   backend: string,
   entries: JsonRecord[],
-  reportFile: string,
+  reportDigest: string,
   signatureEvidence: VerificationEvidence[],
 ): VerificationObservation[] {
   const observations: VerificationObservation[] = [];
@@ -213,7 +213,7 @@ function missingPatchObservations(
           type: "VULNERABLE_PATTERN_PRESENT",
           strength: "moderate",
           detail: `Vanir reported a missing patch for ${String(entry.ID ?? "the selected vulnerability")}`,
-          evidence: [{ kind: "file", locator: reportFile }, ...signatureEvidence],
+          evidence: [{ kind: "file", locator: "vanir-report", value: reportDigest }, ...signatureEvidence],
         }),
       );
       continue;
@@ -234,7 +234,8 @@ function missingPatchObservations(
           ...(targetFile && targetFile !== "<unknown>" ? { targetFile, actualFile: targetFile } : {}),
           detail: `Vanir matched vulnerable signature ${signatureId}`,
           evidence: [
-            { kind: "signature", locator: reportFile, value: signatureId },
+            { kind: "signature", locator: "vanir-report", value: signatureId },
+            { kind: "file", locator: "vanir-report", value: reportDigest },
             ...signatureEvidence,
           ],
         }),
@@ -269,7 +270,11 @@ export class VanirVerifier implements SourceVerifier {
     try {
       await access(this.runner, constants.X_OK);
       const resolvedRunner = await realpath(this.runner);
-      runnerVersion = `sha256:${await sha256File(resolvedRunner)}`;
+      // Identifies the exact runner invoked; reproducibility of the underlying
+      // Vanir comes from pinning the runner's image/version (see
+      // tools/Dockerfile.vanir), which this hash anchors together with the
+      // preserved report digest below.
+      runnerVersion = `runner:sha256:${await sha256File(resolvedRunner)}`;
     } catch (error) {
       return {
         backend: { name: this.name, version: runnerVersion },
@@ -408,18 +413,21 @@ export class VanirVerifier implements SourceVerifier {
       }
       const report = await readLimitedJson(reportFile, MAX_REPORT_FILE_BYTES);
       if (!isRecord(report)) throw new Error("Vanir JSON report must be an object");
+      // Preserve the report's digest as stable provenance; the temp file itself
+      // is removed in `finally`, so evidence must not point at that path.
+      const reportDigest = `sha256:${await sha256File(reportFile)}`;
       const missing = missingPatchEntries(report).filter((entry) =>
         reportMatchesTarget(entry, targetIds, selected.ids),
       );
       const observations = missing.length > 0
-        ? missingPatchObservations(this.name, missing, reportFile, selected.evidence)
+        ? missingPatchObservations(this.name, missing, reportDigest, selected.evidence)
         : [
             observation({
               backend: this.name,
               type: "VULNERABLE_PATTERN_ABSENT",
               strength: "informational",
               detail: "Vanir completed with selected signatures and reported no matching vulnerable pattern; this is not proof of a fix",
-              evidence: [{ kind: "file", locator: reportFile }, ...selected.evidence],
+              evidence: [{ kind: "file", locator: "vanir-report", value: reportDigest }, ...selected.evidence],
             }),
           ];
       return {
