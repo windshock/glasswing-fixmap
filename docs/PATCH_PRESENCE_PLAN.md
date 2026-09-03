@@ -551,64 +551,164 @@ Fix:
   unresolvable (FIPS/distro variants, the JDBC-driver namesake), which is the
   correct, small surface for human/AI adjudication.
 
-## Improvement roadmap — next (2026-09-03)
+## Improvement roadmap — hardening before CPE/VEX (2026-09-03, issue #4)
 
-Prioritized from the full sample sweep (101 SBOMs; after the OpenSSL comparator:
-`affected 42 / not_affected 72 / unknown 3`) and the adjudication feedback loop.
-This section is a plan only — not yet implemented. Recommended order:
-Tier 1.1 → 1.2 → 1.3 → 1.4, then Tier 2/3.
+The pipeline now runs SBOM → component identity → authoritative range →
+source/patch verification → residual `UNKNOWN` → AI adjudication → human
+disposition → planned persisted decision / VEX. Before CPE-based strong identity
+and a persisted VEX/adjudication store turn these results into stronger
+automation, the trust-boundary issues below must close: **a weak, non-gating hint
+today can become an incorrect BLOCK or suppression once CPE and VEX are wired
+in.** This section is a plan only — not yet implemented. It supersedes and
+reorganizes the earlier four-item roadmap; the correctness / fail-closed work
+(Tier 0) now precedes CPE, VEX, and distro normalization.
 
-### Tier 1 — high value, unblocked, clearly scoped
+Design invariant:
+> Deterministic coverage should expand until only the genuinely ambiguous long
+> tail reaches AI. Persist evidence and human disposition first; export VEX
+> second. VEX must not become a shortcut around weak identity, stale evidence, or
+> unresolved provenance.
 
-1. **Persist adjudication results (adjudication / VEX store).** The deterministic
-   engine is already idempotent — same SBOM + same committed datasets → same verdict,
-   offline, no Skill call. But Skill adjudications are not persisted anywhere, so the
-   same residual `UNKNOWN` is re-adjudicated on every run. Add a store:
-   - Key: `(ant_id, component identity [purl/cpe or name@version], evidence_hash)`,
-     where `evidence_hash` covers the component version, the authoritative range's
-     provenance / `source_as_of`, and the `machine_decision`.
-   - Reuse a stored review when the inputs are unchanged (no Skill call). **Invalidate**
-     when the version, the range, or the machine decision changes — this is the fail-safe
-     that stops a stale "false positive → suppressed" from surviving after the evidence
-     moved (no fail-open). Suppression stays explicit and human-approved (`approved_by`).
-   - Prefer emitting/consuming standard **VEX** so it interoperates with
-     grype / trivy / osv-scanner. This promotes "VEX output" from the deferred list below
-     for the adjudication-persistence use case specifically.
+### Tier 0 — correctness / fail-closed (highest priority)
 
-2. **CPE-based matching in `check-sbom`.** SBOM adapters already capture
-   `component.cpes` (`cyclonedx.ts`, `syft.ts`) and range records carry `cpes`, but
-   `MatchType` has no CPE variant and `rangeAppliesTo` matches CVE ranges by product
-   *name* only — the CPE data is discarded. Add a `cpe_match` strong-identity type; match
-   CVE ranges by CPE first, fall back to name; let a CPE mismatch exclude. Effect: enables
-   real `--fail-on-affected` gating (the entire sample is currently weak/name-only → zero
-   gates) and root-fixes the `postgresql 42.4.0` JDBC-vs-server namesake deterministically
-   (distinct CPE), removing it from the Skill queue.
+1. **Preserve and honor CVE List V5 `versionType`.** `parseCveRanges()` flattens
+   every CVE record to `ecosystem: "cve"`, `range_type: "SEMVER"` and discards
+   `versionType` (only `git` is skipped); `CveVersionComparator` then treats the
+   `cve` sentinel as OpenSSL-classic / three-part ordering universally. But `cve`
+   is a *provenance* category, not a version scheme. Preserve the authoritative
+   `versionType` and dispatch explicitly: `semver` → node-semver; `git` → source
+   verification, never string comparison; `rpm`/`debian`/`maven`/… →
+   ecosystem-specific comparator when supported; OpenSSL product + compatible
+   classic form → the dedicated OpenSSL comparator; unknown/custom scheme with no
+   proven comparator → `UNKNOWN`. No universal "CVE comparator". (Supersedes the
+   `cve`-sentinel design of the OpenSSL-comparator section above.) Ref:
+   CVEProject/cve-schema `schema/docs/versions.md`.
 
-3. **distro / vendor version-normalizer comparator.** Execute the Skill's feedback
-   loop: strip an orthogonal build flavor (`_p3`, `.el8`, `+deb12u1`, `-1ubuntu2`,
-   `-fips3.1`) to the base upstream version, apply the range, and use the coverage-dominant
-   shortcut (`introduced: 0` / whole base line in range). Resolves the `libyang 0.16_p3`
-   class deterministically to `AFFECTED`. Keep the guardrail: a distro revision may carry a
-   backport, and anything still unparseable (a truncated base patch like `3.4-fips3.1`)
-   stays `UNKNOWN` — never coerced.
+2. **Preserve / evaluate CVE List V5 `changes[]`.** The range-projection path
+   ignores within-line status transitions (e.g. affected → unaffected at 2.5.2 →
+   affected at 2.6.0 → unaffected at 2.6.3), which can flatten a non-contiguous
+   range into a broad false `AFFECTED`. Preferred: preserve `changes[]` in the
+   range artifact, evaluate transitions per the declared `versionType`, keep
+   provenance for every boundary. Minimum fail-safe if deferred: any entry with
+   `changes[]` → mark the range unsupported / `UNKNOWN`; never emit a gating
+   `AFFECTED` from the simplified interval.
 
-4. **Wire `sync-ranges` + `sync-impacts` into the daily workflow.** Now unblocked:
-   measured 27s over 93 findings, so the rate-limit concern that deferred this is resolved.
-   `.github/workflows/update-data.yml` runs only `sync` + `verify` today, so
-   `affected-ranges.json` / `fix-impacts.json` would silently go stale.
+3. **Explicit `--source` must not fail open.** `checkSbom()` catches
+   `verifySource()` exceptions and converts them to warnings, so an explicitly
+   requested source verification can exit 0 without ever completing. Required:
+   `check-sbom --source …` + `verifySource()` throws / cannot execute →
+   operational `ERROR` + non-zero exit. A best-effort warning is acceptable only
+   when source verification was not explicitly part of the command contract.
 
-### Tier 2 — medium
+4. **Validate external `--ranges` input before use.** `readAffectedRangeDataset()`
+   does a raw `JSON.parse(… as AffectedRangeDataset)`, so a user-supplied or
+   modified ranges file reaches the decision engine unvalidated. Change the path
+   to read → structural / schema / semantic validation → snapshot-compatibility
+   validation → evaluate. Malformed security-decision input must fail closed.
 
-5. **`UNKNOWN` reason categorization + batch reporting.** Emit the residual cause
-   (missing-comparator / non-parseable-version / name-only-identity) in the report so
-   triage routes to the adjudicator automatically, and add a `--dir` / summary mode for
-   scanning many SBOMs at once.
-6. **Maven / Debian / RPM / Packagist comparators.** Pending a well-maintained JS
-   implementation plus conformance fixtures (partially blocked).
+### Tier 1 — evidence integrity
 
-### Tier 3 — deferred
+5. **Bind fixmap / ranges / impacts to one snapshot.** Companion datasets carry
+   only partial `generated_from` (schema version, `source_as_of`, source URL).
+   Propagate and validate at least `fixmap_schema_version`, `source_as_of`,
+   `source_revision`, and a `source_manifest` digest. At scan time, reject or
+   explicitly mark incompatible / stale companions rather than silently combining
+   a newer fixmap with older ranges/impacts.
 
-7. **Vanir promotion** to a documented optional install.
+6. **Atomic scheduled refresh of all companion datasets.**
+   `.github/workflows/update-data.yml` refreshes `fixmap` only. Run `sync` +
+   `sync-ranges` + `sync-impacts` + snapshot-compatibility validation + verify /
+   test → one data PR. (Now unblocked: `sync-ranges` measured 27s over 93
+   findings.) Prevents stale range / impact data pairing with a newer fixmap.
+
+7. **Real CPE 2.3 matching (not string equality).** Adapters already preserve
+   CPEs and range records can carry CPEs; adding CPE as a strong identity source
+   eliminates name-collision cases (JDBC driver vs database server). CPE 2.3 has
+   wildcard / ANY / NA semantics, so do **not** implement `componentCpe ===
+   rangeCpe`; use CPE 2.3 Well-Formed-Name matching (or an existing
+   implementation) and preserve the relation. Output `match_type: "cpe_match"`,
+   `identity_strength: "strong"`, `identity_evidence: { component_cpe, range_cpe,
+   relation }`. Ref: usnistgov/cpe-reference-implementation.
+
+8. **Separate range evidence from the final candidate decision.** A weak
+   name-only candidate may legitimately carry `range_assessment.verdict:
+   "affected"` while the CLI refuses to gate — safe inside the CLI but easy for a
+   downstream JSON consumer or VEX exporter to misuse. Add an explicit
+   `candidate_decision` object (`decision`, `range_verdict`, `identity`,
+   `gating_eligible`, `reason`). Treat `range_assessment` as version/range
+   evidence, not the final product-level disposition.
+
+### Tier 2 — persistence / interoperability
+
+9. **Internal adjudication store, separate from VEX (append-only / superseding).**
+   VEX is an interchange/export representation, not the canonical internal model.
+   Glasswing must preserve richer states VEX does not model (`PATCH_NOT_FOUND`,
+   `VERIFIER_CONFLICT`, `SOURCE_BINDING_UNVERIFIED`, `LIKELY_FALSE_POSITIVE`,
+   `INSUFFICIENT_EVIDENCE`, and machine vs AI vs human disposition). Record
+   `{ subject, finding, machine, source_verification, ai_review, human_review,
+   validity, vex_projection }`; a later range / advisory / build change
+   **supersedes** the prior review and preserves its audit history rather than
+   overwriting one key.
+
+10. **Stronger evidence hash + invalidation.** Bind the full decision context:
+    ANT + CVE/GHSA IDs; canonical PURL/CPE + version + qualifiers; SBOM / document
+    digest; fixmap source revision / manifest digest; affected-range record
+    digest; fix-impact dataset / record digest; source-verification report digest;
+    `source_binding` status; machine decision; adjudicator ruleset / Skill commit
+    SHA; and the AI review's upstream evidence references. Invalidate /
+    re-adjudicate when any material input changes. Suppression stays explicitly
+    human-approved and auditable.
+
+11. **Conservative VEX projection (OpenVEX first).** Suggested mapping: `AFFECTED`
+    + strong identity → affected; `VERIFIED_FIXED` + `source_binding == verified`
+    → fixed; `TARGET_ABSENT` + strong provenance → not_affected
+    (`vulnerable_code_not_present`); `PATCH_NOT_FOUND` / `UNKNOWN` /
+    AI `LIKELY_FALSE_POSITIVE` → under_investigation; AI `LIKELY_FALSE_POSITIVE` +
+    human approval + justification → not_affected. Do **not** export `fixed`
+    merely because `--source` found the patch — ordinary source input is
+    `user_asserted`, not `verified`. Distinguish identity mistakes (JDBC vs server
+    → fix via PURL/CPE) from exploitability dispositions. OpenVEX is the first
+    export target (grype / trivy consume VEX); do not claim OSV-Scanner interop
+    until verified. Ref: openvex-spec `OPENVEX-SPEC.md`.
+
+### Tier 3 — long-tail coverage
+
+12. **Conservative distro / vendor normalization — preserve backport
+    uncertainty.** Stripping a build flavor (`_p3`, `.el8`, `+deb12u1`,
+    `-1ubuntu2`, `-fips3.1`) to the base upstream version is useful *evidence*, but
+    for distro/vendor packages it is **not** the final security decision because a
+    downstream revision may carry a backported patch. Separate
+    `base_version_assessment: affected`, `downstream_patch_status: unknown`,
+    `final: UNKNOWN` until vendor/distro backport evidence or a native
+    Debian/RPM/Gentoo comparator/advisory confirms the package state.
+    `UPSTREAM_RANGE_AFFECTED` must not silently become final `AFFECTED` for a
+    downstream rebuild, and the adjudicator Skill must not assume a build flavor is
+    orthogonal for every vulnerability without vuln- or vendor-specific evidence.
+    (Corrects the earlier roadmap claim that `libyang 0.16_p3` resolves
+    deterministically to `AFFECTED`.)
+
+13. **Ecosystem comparators, `UNKNOWN` reason categorization, batch reporting.**
+    Maven / Debian / RPM / Packagist comparators (pending a well-maintained JS
+    implementation + conformance fixtures); emit the residual `UNKNOWN` cause
+    (missing-comparator / non-parseable-version / name-only-identity) to route
+    triage automatically; add a `--dir` / summary mode for many SBOMs.
+
+14. **Vanir container hardening + optional-install promotion.** Constrain the
+    Docker wrapper to preserve read-only inspection: source and signature mounts
+    `:ro`, report dir `:rw`, `--network=none`, `--read-only`, `--cap-drop=ALL`,
+    `--security-opt=no-new-privileges`; consider hash-locking transitive Python
+    dependencies if reproducible container builds become a release requirement.
+
+### P2 — docs / acceptance reconciliation (after the correctness work)
+
+Several docs now lag the implementation and should be reconciled so external users
+do not infer outdated decision semantics:
+- README / CLI help still say CycloneDX 1.5/1.6/1.7, but 1.4 is now supported.
+- README says name-only candidates are never evaluated for `AFFECTED`, while the
+  code now attaches a weak CVE product-name `range_assessment: affected` and only
+  prevents gating.
+- `docs/ACCEPTANCE.md` still reflects the older 16-SBOM / no-`AFFECTED` corpus,
+  while the latest sweep records deterministic affected / not_affected results.
 
 ## Definition of done
 
