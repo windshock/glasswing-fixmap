@@ -136,6 +136,27 @@ test("selects a PURL identity candidate with strong, high confidence", async () 
   assert.equal(report.package_component_count, 1);
 });
 
+test("Maven identity is case-sensitive; case-different coordinates do not match", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      { type: "library", name: "PostgreSQL", version: "42.7.3", purl: "pkg:maven/org.PostgreSQL/PostgreSQL@42.7.3" },
+    ]),
+  );
+  // The finding uses the canonical lowercase Maven coordinate; Maven groupId/
+  // artifactId are case-sensitive, so this must not match.
+  const mismatched = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-MVNCASE", "org/pg", "Maven", "org.postgresql:postgresql")],
+  });
+  assert.ok(!mismatched.candidates.some((candidate) => candidate.identity_strength === "strong"));
+  // The same coordinate with matching case is a strong identity match.
+  const matched = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-MVNCASE", "org/pg", "Maven", "org.PostgreSQL:PostgreSQL")],
+  });
+  assert.equal(matched.candidates[0]!.match_type, "ecosystem_package");
+});
+
 test("a Maven PostgreSQL JDBC component does not match the PostgreSQL server by name", async () => {
   const file = await writeSbom(
     cyclonedx([

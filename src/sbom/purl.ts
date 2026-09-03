@@ -34,10 +34,23 @@ export function canonicalizePurl(raw: string): ParsedPurl | undefined {
 /**
  * A case-insensitive identity key ignoring version and qualifiers, used for
  * `ecosystem + package` equivalence between components and findings.
+ *
+ * The PURL `type` is always case-insensitive (lowercased). The namespace/name are
+ * lowercased only for ecosystems that define case-insensitive identifiers;
+ * ecosystems with case-sensitive coordinates (notably Maven's groupId/artifactId)
+ * keep their case, so `org.PostgreSQL:PostgreSQL` never matches
+ * `org.postgresql:postgresql`.
  */
+const CASE_INSENSITIVE_IDENTIFIER_TYPES = new Set(["npm", "pypi", "github", "bitbucket", "composer"]);
+
 export function purlIdentityKey(type: string, namespace: string | undefined, name: string): string {
+  const normalizedType = type.trim().toLowerCase();
   const scope = namespace ? `${namespace}/` : "";
-  return `${type}:${scope}${name}`.toLowerCase();
+  const identifier = `${scope}${name}`;
+  const normalizedIdentifier = CASE_INSENSITIVE_IDENTIFIER_TYPES.has(normalizedType)
+    ? identifier.toLowerCase()
+    : identifier;
+  return `${normalizedType}:${normalizedIdentifier}`;
 }
 
 export function identityKeyForParsedPurl(parsed: ParsedPurl): string {
