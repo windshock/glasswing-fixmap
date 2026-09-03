@@ -3,3 +3,7 @@ dist/
 .cache/
 *.log
 .DS_Store
+
+# Private acceptance inputs — never commit or package (may contain SBOM inventory)
+sample/
+
