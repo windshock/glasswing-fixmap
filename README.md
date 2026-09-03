@@ -165,6 +165,21 @@ Add tests for new overrides and parser changes. See [CONTRIBUTING.md](CONTRIBUTI
 
 [.github/workflows/update-data.yml](.github/workflows/update-data.yml) synchronizes the latest Anthropic snapshot and advisory changes every day, then opens a pull request when the generated data changes. Output timestamps use Anthropic's `as_of` value rather than the local execution time, avoiding unnecessary diffs when the source snapshot is unchanged.
 
+## Adjudicating the residual (agents)
+
+The deterministic engine is the gate authority and prefers `UNKNOWN` over an unsupported
+claim. A second-opinion **adjudicator** investigates the residual `UNKNOWN` /
+`PATCH_NOT_FOUND` / `VERIFIER_CONFLICT` / package-identity cases and returns evidence-cited
+review metadata (`CONFIRMED` / `LIKELY_TRUE_POSITIVE` / `LIKELY_FALSE_POSITIVE` /
+`INSUFFICIENT_EVIDENCE`). It never overturns a deterministic decision and never
+auto-suppresses.
+
+The instructions are tool-neutral markdown and shared across agents:
+
+- **Claude Code:** the skill at [.claude/skills/glasswing-adjudicator/](.claude/skills/glasswing-adjudicator/) (invoke `/glasswing-adjudicator`).
+- **Codex / other `AGENTS.md`-aware agents:** [AGENTS.md](AGENTS.md) points at the same
+  rules; for a slash command, copy [codex/prompts/glasswing-adjudicator.md](codex/prompts/glasswing-adjudicator.md) into `~/.codex/prompts/`.
+
 ## Scope and limitations
 
 - Sealed Anthropic ledger entries whose `ant_id` and `project` have not been disclosed cannot yet be mapped.

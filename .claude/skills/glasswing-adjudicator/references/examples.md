@@ -56,3 +56,27 @@ These are the ambiguous patterns the Skill must handle; use them to check its be
 - Adjudication: `INSUFFICIENT_EVIDENCE`. A file absent in a partial tree is not "not
   applicable"; an unverified source binding does not confirm the SBOM version. Say what
   is missing (full checkout, verified revision, complete impact extraction).
+
+## 7. Flavored or truncated version string (FIPS / distro / missing patch)
+
+The `UNKNOWN` here is a comparator parse gap, not a genuine ambiguity — strip the build
+flavor and score the base version.
+
+- **Coverage-dominant, resolves to `high`.** `libyang 0.16_p3` vs a range `[0, 5.4.3)`.
+  `_p3` is a Gentoo revision on base `0.16`; the whole `0.16` line is below `5.4.3`, so
+  the suffix is irrelevant. Adjudication: `LIKELY_TRUE_POSITIVE`, `high`. Evidence: the
+  range's `introduced: 0`; the sibling `libyang 0.16.46` the engine already resolved
+  `AFFECTED` on the same base line. `recommended_action`: promote a distro-suffix
+  normalizer into the comparator so this stops needing adjudication.
+- **Orthogonal flavor + irreducible micro-gap, resolves to a sharp `medium` + evidence
+  ask.** `OpenSSL 3.4-fips3.1` vs a range `[3.4.0, 3.4.6)`. Split: base `3.4` line, FIPS
+  module `3.1` (orthogonal). The bug is in default-provider `PKCS7_verify`, present in
+  `libcrypto` regardless of FIPS, so the FIPS flavor does not clear it. The base `3.4`
+  line is affected across `3.4.0`–`3.4.5`; nothing in the string indicates `>= 3.4.6`.
+  Adjudication: `LIKELY_TRUE_POSITIVE`, `medium` — not `low`, because the only open
+  question is the exact base patch. `missing_evidence`/`recommended_action`: "`openssl
+  version -a` on the image; `>= 3.4.6` ⇒ not_affected, else affected." The residual is an
+  SBOM data-quality limit (the string never encoded the patch), not a Skill deficiency —
+  the deliverable is the precise ask, never a fabricated patch level.
+- Trap avoided: averaging an imprecise version to a vague `low`, or treating a strict-parse
+  failure as "cannot investigate".

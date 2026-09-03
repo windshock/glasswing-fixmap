@@ -60,7 +60,13 @@ Missing evidence lowers confidence or yields `INSUFFICIENT_EVIDENCE` — never a
    file/function?
 7. If native and Vanir (or ancestry) disagree, why?
 8. Is the finding configuration- or feature-dependent, and is that prerequisite present?
-9. Is there contradictory evidence that prevents a confident conclusion?
+9. Is the version string precise enough to place against the range, or is it truncated
+   (`3.4`), carrying an **orthogonal build flavor** (`-fips3.1`, `.el8`, `+deb12u1`,
+   `_p3`), or a downstream rebuild? Separate the base upstream version from the flavor,
+   apply the range to the base, and if the exact patch is unrecoverable from the string,
+   emit a concrete evidence request — never a guess. See
+   [references/adjudication-rules.md](references/adjudication-rules.md).
+10. Is there contradictory evidence that prevents a confident conclusion?
 
 ## Output contract
 
@@ -104,3 +110,17 @@ Verdicts (no generic `SAFE`): `CONFIRMED`, `LIKELY_TRUE_POSITIVE`,
 Detailed rules and worked regression examples:
 [references/adjudication-rules.md](references/adjudication-rules.md) and
 [references/examples.md](references/examples.md).
+
+## Portability (Codex / other agents)
+
+This Skill's content is tool-neutral markdown. The workflow, guardrails, output
+contract, rules, and examples are the single source of truth and are consumed by more
+than Claude Code:
+
+- **Codex (and any `AGENTS.md`-aware agent):** the repo-root `AGENTS.md` carries a
+  "Glasswing CVD adjudicator" section that points here. Codex auto-loads `AGENTS.md`.
+- **Codex slash command:** `codex/prompts/glasswing-adjudicator.md` is a portable prompt;
+  copy it to `~/.codex/prompts/` to invoke `/glasswing-adjudicator`.
+
+When editing the rules, edit the files under this directory — the `AGENTS.md` section and
+the Codex prompt reference them rather than duplicating them, so they cannot drift.
