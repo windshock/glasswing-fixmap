@@ -551,6 +551,19 @@ test("SemVer comparator evaluates an authoritative npm range", () => {
   assert.equal(comparator.evaluate("1.5.0", fromZero), "not_affected");
 });
 
+test("an OSV limit event is an exclusive upper bound", () => {
+  const comparator = new SemverComparator();
+  const range = {
+    ecosystem: "npm",
+    range_type: "ECOSYSTEM",
+    events: [{ introduced: "1.0.0" }, { limit: "2.0.0" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("1.5.0", range), "affected");
+  assert.equal(comparator.evaluate("2.0.0", range), "not_affected"); // at the limit is outside
+  assert.equal(comparator.evaluate("2.1.0", range), "not_affected");
+});
+
 test("SemVer security decisions reject versions that require coercion", () => {
   const comparator = new SemverComparator();
   const range = {

@@ -41,7 +41,9 @@
         "advisory": { "type": "string" },
         "ecosystem": { "type": "string" },
         "package": { "type": "string" },
+        "purl": { "type": "string" },
         "range_type": { "type": "string" },
+        "repo": { "type": "string" },
         "events": {
           "type": "array",
           "items": {

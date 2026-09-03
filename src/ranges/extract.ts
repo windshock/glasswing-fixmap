@@ -9,11 +9,12 @@ interface OsvEvent {
 
 interface OsvRange {
   type?: string;
+  repo?: string;
   events?: OsvEvent[];
 }
 
 interface OsvAffected {
-  package?: { ecosystem?: string; name?: string };
+  package?: { ecosystem?: string; name?: string; purl?: string };
   ranges?: OsvRange[];
   versions?: unknown;
 }
@@ -59,6 +60,7 @@ export function parseAuthoritativeRanges(
     const packageName = affected.package?.name;
     if (!ecosystem || !packageName) continue;
     const versions = stringArray(affected.versions);
+    const purl = typeof affected.package?.purl === "string" ? affected.package.purl : undefined;
 
     let emitted = 0;
     for (const range of affected.ranges ?? []) {
@@ -75,6 +77,8 @@ export function parseAuthoritativeRanges(
         events,
         provenance,
       };
+      if (purl) rangeRecord.purl = purl;
+      if (typeof range.repo === "string") rangeRecord.repo = range.repo;
       if (versions.length > 0) rangeRecord.versions = versions;
       results.push(rangeRecord);
       emitted += 1;
@@ -82,7 +86,7 @@ export function parseAuthoritativeRanges(
 
     // Exact affected versions with no usable range are still positive evidence.
     if (emitted === 0 && versions.length > 0) {
-      results.push({
+      const versionsRecord: AffectedRangeRecord = {
         ant_id: antId,
         advisory,
         ecosystem,
@@ -91,7 +95,9 @@ export function parseAuthoritativeRanges(
         events: [],
         versions,
         provenance,
-      });
+      };
+      if (purl) versionsRecord.purl = purl;
+      results.push(versionsRecord);
     }
   }
   return results;

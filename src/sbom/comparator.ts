@@ -6,6 +6,7 @@ export interface RangeEvent {
   introduced?: string;
   fixed?: string;
   last_affected?: string;
+  limit?: string;
 }
 
 /**
@@ -66,6 +67,13 @@ function evaluateInterval(version: string, range: AuthoritativeRange, ops: Versi
       const lastAffected = ops.valid(event.last_affected);
       if (lastAffected === null) return "unknown";
       if (ops.gt(target, lastAffected)) affected = false;
+    }
+    if (event.limit !== undefined) {
+      // A `limit` is an exclusive upper bound: a version at or past it is outside
+      // this range (OSV BeforeLimits semantics).
+      const limit = ops.valid(event.limit);
+      if (limit === null) return "unknown";
+      if (ops.gte(target, limit)) affected = false;
     }
   }
   return affected ? "affected" : "not_affected";

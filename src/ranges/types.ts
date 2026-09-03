@@ -18,7 +18,11 @@ export interface AffectedRangeRecord {
   advisory: string;
   ecosystem: string;
   package: string;
+  /** Canonical PURL from OSV `affected.package.purl`, when published. */
+  purl?: string;
   range_type: string;
+  /** OSV `ranges[].repo`, when published (notably for GIT ranges). */
+  repo?: string;
   events: AffectedRangeEvent[];
   /** Exact affected versions published in OSV `affected.versions[]`, if any. */
   versions?: string[];
