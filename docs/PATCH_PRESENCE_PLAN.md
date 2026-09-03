@@ -551,6 +551,65 @@ Fix:
   unresolvable (FIPS/distro variants, the JDBC-driver namesake), which is the
   correct, small surface for human/AI adjudication.
 
+## Improvement roadmap — next (2026-09-03)
+
+Prioritized from the full sample sweep (101 SBOMs; after the OpenSSL comparator:
+`affected 42 / not_affected 72 / unknown 3`) and the adjudication feedback loop.
+This section is a plan only — not yet implemented. Recommended order:
+Tier 1.1 → 1.2 → 1.3 → 1.4, then Tier 2/3.
+
+### Tier 1 — high value, unblocked, clearly scoped
+
+1. **Persist adjudication results (adjudication / VEX store).** The deterministic
+   engine is already idempotent — same SBOM + same committed datasets → same verdict,
+   offline, no Skill call. But Skill adjudications are not persisted anywhere, so the
+   same residual `UNKNOWN` is re-adjudicated on every run. Add a store:
+   - Key: `(ant_id, component identity [purl/cpe or name@version], evidence_hash)`,
+     where `evidence_hash` covers the component version, the authoritative range's
+     provenance / `source_as_of`, and the `machine_decision`.
+   - Reuse a stored review when the inputs are unchanged (no Skill call). **Invalidate**
+     when the version, the range, or the machine decision changes — this is the fail-safe
+     that stops a stale "false positive → suppressed" from surviving after the evidence
+     moved (no fail-open). Suppression stays explicit and human-approved (`approved_by`).
+   - Prefer emitting/consuming standard **VEX** so it interoperates with
+     grype / trivy / osv-scanner. This promotes "VEX output" from the deferred list below
+     for the adjudication-persistence use case specifically.
+
+2. **CPE-based matching in `check-sbom`.** SBOM adapters already capture
+   `component.cpes` (`cyclonedx.ts`, `syft.ts`) and range records carry `cpes`, but
+   `MatchType` has no CPE variant and `rangeAppliesTo` matches CVE ranges by product
+   *name* only — the CPE data is discarded. Add a `cpe_match` strong-identity type; match
+   CVE ranges by CPE first, fall back to name; let a CPE mismatch exclude. Effect: enables
+   real `--fail-on-affected` gating (the entire sample is currently weak/name-only → zero
+   gates) and root-fixes the `postgresql 42.4.0` JDBC-vs-server namesake deterministically
+   (distinct CPE), removing it from the Skill queue.
+
+3. **distro / vendor version-normalizer comparator.** Execute the Skill's feedback
+   loop: strip an orthogonal build flavor (`_p3`, `.el8`, `+deb12u1`, `-1ubuntu2`,
+   `-fips3.1`) to the base upstream version, apply the range, and use the coverage-dominant
+   shortcut (`introduced: 0` / whole base line in range). Resolves the `libyang 0.16_p3`
+   class deterministically to `AFFECTED`. Keep the guardrail: a distro revision may carry a
+   backport, and anything still unparseable (a truncated base patch like `3.4-fips3.1`)
+   stays `UNKNOWN` — never coerced.
+
+4. **Wire `sync-ranges` + `sync-impacts` into the daily workflow.** Now unblocked:
+   measured 27s over 93 findings, so the rate-limit concern that deferred this is resolved.
+   `.github/workflows/update-data.yml` runs only `sync` + `verify` today, so
+   `affected-ranges.json` / `fix-impacts.json` would silently go stale.
+
+### Tier 2 — medium
+
+5. **`UNKNOWN` reason categorization + batch reporting.** Emit the residual cause
+   (missing-comparator / non-parseable-version / name-only-identity) in the report so
+   triage routes to the adjudicator automatically, and add a `--dir` / summary mode for
+   scanning many SBOMs at once.
+6. **Maven / Debian / RPM / Packagist comparators.** Pending a well-maintained JS
+   implementation plus conformance fixtures (partially blocked).
+
+### Tier 3 — deferred
+
+7. **Vanir promotion** to a documented optional install.
+
 ## Definition of done
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.
