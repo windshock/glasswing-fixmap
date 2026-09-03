@@ -191,7 +191,9 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 },
           "uniqueItems": true
-        }
+        },
+        "relation": { "enum": ["all_of", "any_of"] },
+        "branch": { "type": "string" }
       },
       "allOf": [
         {

@@ -52,6 +52,13 @@ export interface FixImpact {
   files: ChangedFile[];
   evidence: Evidence[];
   warnings: string[];
+  /**
+   * Relationship of this commit to the finding's fix set. Absent means unknown,
+   * which fusion treats conservatively as `all_of` (every commit required).
+   */
+  relation?: "all_of" | "any_of";
+  /** Maintenance branch this commit fixes, when known. */
+  branch?: string;
 }
 
 export interface FixImpactMetadata {

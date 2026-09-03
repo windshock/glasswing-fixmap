@@ -481,6 +481,19 @@ P2 — done:
 - Scheduled `sync-impacts`/`sync-ranges` refresh, only after rate limits and generated-diff size are measured.
 - Done: reusable Docker-based Vanir runner wrapper (`tools/vanir-docker-runner` + `tools/Dockerfile.vanir`) so `verify-source --vanir-runner` drives the real Vanir detector in a `linux/amd64` container. Remaining (optional): promote Vanir to a documented optional install after broader real-Vanir coverage measurement.
 
+## Review fixes (external review, 2026-09-03)
+
+An external review found real defects to fix before "done", addressed in this order:
+
+1. P0 multi-commit fix — `fusion.ts` excluded impacts whose files are absent, so one matching commit could return `VERIFIED_FIXED` while another required commit was simply missing. With unknown relation, treat the fix set as `all_of`: every impact must be verified present and complete, otherwise `UNKNOWN`. Add optional `relation` (`all_of`/`any_of`) and `branch` to `FixImpact`.
+2. P0 OSV `limit` — the comparator ignored `limit` events, so a version at/after an exclusive `limit` read as `affected`. Evaluate `limit` as an exclusive upper bound. Also preserve `affected.package.purl` and `ranges[].repo` in the range artifact (previously dropped).
+3. P0 strict CLI options — unknown flags (e.g. a typo `--fail-on-affectd`) were silently accepted, which could disable a security gate. Reject unknown options per command.
+4. P1 malformed multi-document — the scanner accepted arbitrary text around JSON values, and an unsupported document among several was skipped with only a warning. Reject non-whitespace outside documents; treat an unsupported document in a multi-document file as an error.
+5. P1 PURL case rules — the identity key lowercased every ecosystem, so case-different Maven coordinates (case-sensitive) matched. Lowercase only case-insensitive types.
+6. P1 private sample protection — `sample/` was untracked but not ignored and was included by `npm pack`. Ignore it and restrict the package file list.
+7. P2 Vanir reproducibility — pin the base image digest and Vanir version, record the real Vanir version, and preserve the report's SHA-256 rather than a deleted temp path.
+8. CycloneDX 1.4 input support — the official JS library already supports 1.2–1.7, so accept 1.4 (thin projection unchanged); a dedicated BOM up-conversion remains an optional future feature via `cyclonedx-cli`.
+
 ## Definition of done
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.

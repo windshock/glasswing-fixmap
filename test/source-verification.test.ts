@@ -405,4 +405,11 @@ test("a multi-commit fix requires every applicable commit to be present", async 
   await writeFile(path.join(repository, "src/beta.c"), betaVulnerable);
   await commitAll(repository, "revert beta fix");
   await check(repository, dataset, "UNKNOWN");
+
+  // One required commit's file is absent (not merely unfixed): with unknown
+  // relation, absence must not let the other commit alone read as fixed.
+  await git(repository, "checkout", "-B", "beta-absent", commitB);
+  await rm(path.join(repository, "src/beta.c"));
+  await commitAll(repository, "remove beta.c");
+  await check(repository, dataset, "UNKNOWN");
 });

@@ -66,22 +66,14 @@ function candidateIsNativelyComplete(observations: VerificationObservation[]): b
     !observations.some((item) => VULNERABLE_TYPES.has(item.type));
 }
 
-const APPLICABLE_TYPES = new Set([
-  "FIX_POSTIMAGE_PRESENT",
-  "FIX_PREIMAGE_PRESENT",
-  "VULNERABLE_PATTERN_PRESENT",
-  "PATCH_SIGNATURE_ABSENT",
-  "TARGET_PATH_MOVED",
-]);
-
-/**
- * An impact is applicable to this source when its target files were found and
- * evaluated. An impact whose files are all absent belongs to a different branch
- * or version and does not block a fix conclusion; a co-required commit whose
- * files are present but unapplied does.
- */
-function impactIsApplicable(observations: VerificationObservation[]): boolean {
-  return observations.some((item) => APPLICABLE_TYPES.has(item.type));
+function impactIsStrongOrCorroborated(
+  native: VerificationObservation[],
+  candidateAncestry: VerificationObservation[],
+): boolean {
+  const strong = native.some(
+    (item) => item.type === "FIX_POSTIMAGE_PRESENT" && item.strength === "strong",
+  );
+  return strong || candidateAncestry.length > 0;
 }
 
 /**
@@ -129,29 +121,27 @@ export function fuseVerificationEvidence(
     ]);
   }
 
-  // Every impact applicable to this source must be complete and strong-or-
-  // corroborated. A single matching commit is not proof of a multi-commit fix,
-  // while a branch-specific commit whose files are absent does not block one.
-  const applicableImpacts = impacts.filter((impact) =>
-    impactIsApplicable(forImpact(fingerprintObservations, impact)),
-  );
-  const verifiedFixed = applicableImpacts.length > 0 &&
-    applicableImpacts.every((impact) => {
-      const native = forImpact(fingerprintObservations, impact);
-      if (!candidateIsNativelyComplete(native)) return false;
-      const strong = native.some(
-        (item) => item.type === "FIX_POSTIMAGE_PRESENT" && item.strength === "strong",
-      );
-      return strong || forImpact(ancestry, impact).length > 0;
-    });
+  // Multi-commit fix sets: a single matching commit is not proof. With unknown
+  // relation the set is treated conservatively as `all_of` — every impact must
+  // be complete and strong-or-corroborated (a missing co-required commit yields
+  // UNKNOWN, not a fix). Only an explicit `any_of` set is satisfied by one.
+  const qualifyingImpacts = impacts.filter((impact) => {
+    const native = forImpact(fingerprintObservations, impact);
+    return candidateIsNativelyComplete(native) &&
+      impactIsStrongOrCorroborated(native, forImpact(ancestry, impact));
+  });
+  const anyOf = impacts.length > 0 && impacts.every((impact) => impact.relation === "any_of");
+  const verifiedFixed = impacts.length > 0 &&
+    (anyOf ? qualifyingImpacts.length > 0 : qualifyingImpacts.length === impacts.length);
   if (verifiedFixed) {
-    const postimages = applicableImpacts.flatMap((impact) =>
+    const contributing = anyOf ? qualifyingImpacts : impacts;
+    const postimages = contributing.flatMap((impact) =>
       forImpact(fingerprintObservations, impact).filter(
         (item) => item.type === "FIX_POSTIMAGE_PRESENT",
       ),
     );
-    const candidateAncestry = applicableImpacts.flatMap((impact) => forImpact(ancestry, impact));
-    const everyStrong = applicableImpacts.every((impact) =>
+    const candidateAncestry = contributing.flatMap((impact) => forImpact(ancestry, impact));
+    const everyStrong = contributing.every((impact) =>
       forImpact(fingerprintObservations, impact).some(
         (item) => item.type === "FIX_POSTIMAGE_PRESENT" && item.strength === "strong",
       ),
