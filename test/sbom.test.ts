@@ -10,7 +10,7 @@ import { fingerprintPatch } from "../src/impact/fingerprint.js";
 import type { FixImpactDataset } from "../src/impact/types.js";
 import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
-import { Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
+import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
 import { parseAuthoritativeRanges, parseCveRanges } from "../src/ranges/extract.js";
@@ -809,6 +809,78 @@ test("PEP 440 comparator evaluates PyPI ranges with conformance vectors", () => 
   // Non-PyPI ecosystems are not handled by this comparator.
   assert.equal(comparator.supports("npm", "ECOSYSTEM"), false);
   assert.equal(comparator.supports("Maven", "ECOSYSTEM"), false);
+});
+
+test("CVE comparator evaluates OpenSSL letter-suffix versions deterministically", () => {
+  const comparator = new CveVersionComparator();
+  // OpenSSL 1.1.1 series: base release precedes 1.1.1a; fixed at 1.1.1zh.
+  const oneOneOne = {
+    ecosystem: "cve",
+    range_type: "SEMVER",
+    events: [{ introduced: "1.1.1" }, { fixed: "1.1.1zh" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("1.1.1", oneOneOne), "affected"); // base release is in range
+  assert.equal(comparator.evaluate("1.1.1d", oneOneOne), "affected");
+  assert.equal(comparator.evaluate("1.1.1g", oneOneOne), "affected");
+  assert.equal(comparator.evaluate("1.1.1zh", oneOneOne), "not_affected"); // fixed boundary is exclusive
+  assert.equal(comparator.evaluate("1.1.0", oneOneOne), "not_affected");
+  assert.equal(comparator.evaluate("1.0.2q", oneOneOne), "not_affected"); // different fix line
+
+  // OpenSSL 1.0.2 series: q is within [1.0.2, 1.0.2zq) — note zq sorts after q.
+  const oneZeroTwo = {
+    ecosystem: "cve",
+    range_type: "SEMVER",
+    events: [{ introduced: "1.0.2" }, { fixed: "1.0.2zq" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("1.0.2", oneZeroTwo), "affected");
+  assert.equal(comparator.evaluate("1.0.2k", oneZeroTwo), "affected");
+  assert.equal(comparator.evaluate("1.0.2q", oneZeroTwo), "affected");
+  assert.equal(comparator.evaluate("1.0.2zq", oneZeroTwo), "not_affected");
+  assert.equal(comparator.evaluate("1.0.1e", oneZeroTwo), "not_affected"); // predates the series
+  assert.equal(comparator.evaluate("0.9.8p", oneZeroTwo), "not_affected");
+
+  // OpenSSL 3.x is plain three-part numeric and sorts identically to SemVer.
+  const threeZero = {
+    ecosystem: "cve",
+    range_type: "SEMVER",
+    events: [{ introduced: "3.0.0" }, { fixed: "3.0.21" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("3.0.7", threeZero), "affected");
+  assert.equal(comparator.evaluate("3.0.21", threeZero), "not_affected");
+  assert.equal(comparator.evaluate("3.0.30", threeZero), "not_affected");
+});
+
+test("CVE comparator refuses to guess distro/FIPS variants and two-part boundaries", () => {
+  const comparator = new CveVersionComparator();
+  const threeFour = {
+    ecosystem: "cve",
+    range_type: "SEMVER",
+    events: [{ introduced: "3.4.0" }, { fixed: "3.4.6" }],
+    provenance: "x",
+  };
+  // A FIPS/distro variant is not OpenSSL classic versioning -> never coerced.
+  assert.equal(comparator.evaluate("3.4-fips3.1", threeFour), "unknown");
+  // A Gentoo-style patch suffix is a different scheme entirely.
+  assert.equal(comparator.evaluate("0.16_p3", threeFour), "unknown");
+
+  // A two-part product-line boundary (PostgreSQL server range) cannot be parsed
+  // as OpenSSL/three-part -> unresolved, routed to adjudication (e.g. the JDBC
+  // driver namesake), never silently resolved.
+  const twoPart = {
+    ecosystem: "cve",
+    range_type: "SEMVER",
+    events: [{ introduced: "15" }, { fixed: "15.18" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("42.4.0", twoPart), "unknown");
+
+  // Only the `cve` sentinel ecosystem is handled here.
+  assert.equal(comparator.supports("cve", "SEMVER"), true);
+  assert.equal(comparator.supports("npm", "SEMVER"), false);
+  assert.equal(comparator.supports("PyPI", "ECOSYSTEM"), false);
 });
 
 test("reaches AFFECTED for a PyPI component via a pypi PURL and authoritative range", async () => {

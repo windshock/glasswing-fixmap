@@ -92,6 +92,48 @@ const pep440Ops: VersionOps = {
 };
 
 /**
+ * OpenSSL classic versioning: `major.minor.fix` with an optional lowercase
+ * letter suffix, where the empty suffix (`1.1.1`, the base release) precedes
+ * `1.1.1a`, and the suffix advances `a … z, za, zb …` (bijective base-26). A
+ * plain three-part numeric version (OpenSSL 3.x, `3.0.7`) is the empty-suffix
+ * case and sorts identically to SemVer for these values. Anything else —
+ * two-part product lines (`15.18`), FIPS or distro variants (`3.4-fips3.1`,
+ * `0.16_p3`) — is not this scheme and must stay unresolved, never coerced.
+ */
+const OPENSSL_VERSION = /^(\d+)\.(\d+)\.(\d+)([a-z]*)$/;
+
+function bijectiveBase26(letters: string): number {
+  let value = 0;
+  for (const char of letters) value = value * 26 + (char.charCodeAt(0) - 96);
+  return value;
+}
+
+/**
+ * Encode an OpenSSL version into a fixed-width, lexicographically comparable
+ * key so ordinary string comparison yields the correct total order. Returns
+ * null for any value that is not OpenSSL classic / three-part numeric.
+ */
+function opensslKey(version: string): string | null {
+  const match = OPENSSL_VERSION.exec(version.trim());
+  if (!match) return null;
+  const [, major, minor, fix, letters] = match;
+  const pad = (value: string, width: number) => value.padStart(width, "0");
+  return [
+    pad(major!, 6),
+    pad(minor!, 6),
+    pad(fix!, 6),
+    pad(String(bijectiveBase26(letters!)), 5),
+  ].join(".");
+}
+
+const opensslOps: VersionOps = {
+  valid: (version) => opensslKey(version),
+  // Keys are fixed width, so lexicographic comparison is the numeric order.
+  gte: (a, b) => a >= b,
+  gt: (a, b) => a > b,
+};
+
+/**
  * SemVer comparator for ecosystems whose versions are genuine Semantic
  * Versioning (npm, Go, crates.io). Security decisions use strict parsing: a
  * version that would need coercion is never forced into SemVer and yields
@@ -102,9 +144,7 @@ const pep440Ops: VersionOps = {
 export class SemverComparator implements VersionComparator {
   readonly name = "semver";
 
-  // "cve" is a sentinel for CVE List V5 product ranges, whose versions are
-  // evaluated as SemVer; a value that is not strict SemVer yields `unknown`.
-  private static readonly SEMVER_ECOSYSTEMS = new Set(["npm", "go", "crates.io", "cve"]);
+  private static readonly SEMVER_ECOSYSTEMS = new Set(["npm", "go", "crates.io"]);
 
   supports(ecosystem: string, rangeType: string): boolean {
     const type = rangeType.trim().toUpperCase();
@@ -137,7 +177,34 @@ export class Pep440Comparator implements VersionComparator {
   }
 }
 
-const COMPARATORS: VersionComparator[] = [new SemverComparator(), new Pep440Comparator()];
+/**
+ * Comparator for the `cve` sentinel ecosystem used by CVE List V5 product
+ * ranges. CVE records carry no package ecosystem, so their versions follow the
+ * product's own scheme. This handles OpenSSL classic versioning (letter suffix)
+ * and plain three-part numeric versions; values outside that scheme (two-part
+ * product lines, FIPS/distro variants) stay `unknown` and are routed to
+ * adjudication rather than guessed.
+ */
+export class CveVersionComparator implements VersionComparator {
+  readonly name = "cve-openssl";
+
+  supports(ecosystem: string, rangeType: string): boolean {
+    const type = rangeType.trim().toUpperCase();
+    if (type !== "SEMVER" && type !== "ECOSYSTEM") return false;
+    return ecosystem.trim().toLowerCase() === "cve";
+  }
+
+  evaluate(version: string, range: AuthoritativeRange): RangeVerdict {
+    if (!this.supports(range.ecosystem, range.range_type)) return "unknown";
+    return evaluateInterval(version, range, opensslOps);
+  }
+}
+
+const COMPARATORS: VersionComparator[] = [
+  new SemverComparator(),
+  new Pep440Comparator(),
+  new CveVersionComparator(),
+];
 
 export function selectComparator(
   ecosystem: string,

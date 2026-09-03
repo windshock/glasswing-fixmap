@@ -519,6 +519,38 @@ math is deterministic and belongs in the engine, not the AI adjudicator.
   trivy / osv-scanner). It consumes the authoritative ranges of its own
   Anthropic findings and adds the fix→source verification those tools lack.
 
+## Improvement — OpenSSL version comparator vs. Skill routing (2026-09-03)
+
+Classifying the residual `UNKNOWN` verdicts from the full sample sweep (12
+unique component/version/finding pairs) showed they are two different problems,
+and most are *not* work for the AI adjudicator:
+
+- **11/12 are a deterministic comparator gap, not an investigation.** OpenSSL
+  ships its own version scheme — `major.minor.fix` plus a letter suffix
+  (`1.0.2q`, `1.1.1g`, `1.1.1zh`, `0.9.8p`) — which is not SemVer, so the SemVer
+  comparator returned `unknown`. But `1.0.2q ∈ [1.0.2, 1.0.2zq)` is pure version
+  math; handing it to an AI would be exactly the over-use the engine avoids.
+- **1/12 is a genuine identity case for the Skill.** `postgresql 42.4.0` matched
+  a PostgreSQL *server* range (`fixed 14.23 / 15.18 / 16.14`) by bare product
+  name, but 42.x is the **PostgreSQL JDBC driver** — a different product. No
+  comparator can fix a namesake mismatch; the Skill investigates identity and
+  flags `LIKELY_FALSE_POSITIVE`.
+
+Fix:
+
+- Add a dedicated CVE-ecosystem version comparator that understands OpenSSL
+  classic versioning (`X.Y.Z` + bijective base-26 letter suffix, where the empty
+  suffix `1.1.1` precedes `1.1.1a`) and plain three-part numeric versions. It
+  resolves the OpenSSL letter-suffixed and base-release cases deterministically
+  (several flip to `AFFECTED`, the pre-series ones to `not_affected`).
+- Deliberately do **not** guess distro/FIPS variants (`3.4-fips3.1`, Gentoo
+  `0.16_p3`) or two-part product-line boundaries (`postgresql 15.18`): these fail
+  strict parsing and stay `UNKNOWN`, routed to the Skill or left for a future
+  distro-version normalizer — never coerced.
+- Net effect on the sample: residual `UNKNOWN` drops to the genuinely
+  unresolvable (FIPS/distro variants, the JDBC-driver namesake), which is the
+  correct, small surface for human/AI adjudication.
+
 ## Definition of done
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.
