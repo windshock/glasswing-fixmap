@@ -337,6 +337,25 @@ test("rejects non-whitespace outside JSON documents", async () => {
   );
 });
 
+test("accepts comma-separated documents (array elements without brackets)", async () => {
+  const doc1 = JSON.stringify(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),
+  );
+  const doc2 = JSON.stringify(
+    cyclonedx([{ type: "library", name: "express", version: "4.19.2", purl: "pkg:npm/express@4.19.2" }]),
+  );
+  const file = await writeRaw(`${doc1},\n${doc2}`);
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [
+      packageFinding("ANT-2026-CS1", "stevemao/left-pad", "npm", "left-pad"),
+      packageFinding("ANT-2026-CS2", "expressjs/express", "npm", "express"),
+    ],
+  });
+  assert.equal(report.document_count, 2);
+  assert.equal(report.candidates.length, 2);
+});
+
 test("an unsupported document among several is a hard error, not a silent skip", async () => {
   const cdx = JSON.stringify(
     cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),

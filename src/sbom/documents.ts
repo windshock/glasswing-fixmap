@@ -10,7 +10,17 @@ export function parseJsonDocuments(text: string): unknown[] {
   try {
     return [JSON.parse(text)];
   } catch {
-    // Fall through to strict multi-document scanning.
+    // Fall through to multi-document handling.
+  }
+
+  // Some exporters emit documents separated by commas (JSON array elements
+  // without the enclosing brackets). Accept that only when wrapping the whole
+  // text in brackets parses as a JSON array — arbitrary garbage still fails.
+  try {
+    const wrapped = JSON.parse(`[${text}]`) as unknown;
+    if (Array.isArray(wrapped) && wrapped.length > 0) return wrapped;
+  } catch {
+    // Fall through to strict whitespace-separated scanning.
   }
 
   const documents: unknown[] = [];
