@@ -18,6 +18,8 @@ export interface AuthoritativeRange {
   range_type: string;
   events: RangeEvent[];
   provenance: string;
+  /** CVE List V5 product, used to route product-specific version schemes. */
+  product?: string;
 }
 
 export interface VersionComparator {
@@ -179,24 +181,43 @@ export class Pep440Comparator implements VersionComparator {
 
 /**
  * Comparator for the `cve` sentinel ecosystem used by CVE List V5 product
- * ranges. CVE records carry no package ecosystem, so their versions follow the
- * product's own scheme. This handles OpenSSL classic versioning (letter suffix)
- * and plain three-part numeric versions; values outside that scheme (two-part
- * product lines, FIPS/distro variants) stay `unknown` and are routed to
- * adjudication rather than guessed.
+ * ranges. `cve` is a provenance category, not a version scheme, so ordering is
+ * dispatched on the authoritative `versionType` (carried on `range_type`):
+ *
+ * - `SEMVER`            → strict SemVer (node-semver).
+ * - `CUSTOM` / unspecified → OpenSSL classic (letter suffix) or plain three-part
+ *   numeric; anything else that scheme cannot parse strictly stays `unknown`.
+ * - `RPM` / `DEBIAN` / `MAVEN` / `GIT` / `CHANGES_UNSUPPORTED` / any other named
+ *   scheme with no proven comparator → `unknown`, never coerced into another
+ *   scheme's ordering.
+ *
+ * There is deliberately no universal "CVE comparator": a scheme is compared only
+ * by an algorithm proven for it.
  */
 export class CveVersionComparator implements VersionComparator {
-  readonly name = "cve-openssl";
+  readonly name = "cve";
 
-  supports(ecosystem: string, rangeType: string): boolean {
-    const type = rangeType.trim().toUpperCase();
-    if (type !== "SEMVER" && type !== "ECOSYSTEM") return false;
+  supports(ecosystem: string): boolean {
     return ecosystem.trim().toLowerCase() === "cve";
   }
 
   evaluate(version: string, range: AuthoritativeRange): RangeVerdict {
-    if (!this.supports(range.ecosystem, range.range_type)) return "unknown";
-    return evaluateInterval(version, range, opensslOps);
+    if (!this.supports(range.ecosystem)) return "unknown";
+    // OpenSSL publishes one advisory across versionType `semver` (3.x) and
+    // `custom` (1.x letter releases). Its classic scheme (three-part numeric plus
+    // letter suffix) is a single proven comparator, so the whole product is
+    // evaluated with it rather than splitting on the per-entry label.
+    if ((range.product ?? "").trim().toLowerCase() === "openssl") {
+      return evaluateInterval(version, range, opensslOps);
+    }
+    const type = range.range_type.trim().toUpperCase();
+    if (type === "SEMVER") return evaluateInterval(version, range, semverOps);
+    if (type === "CUSTOM" || type === "UNSPECIFIED" || type === "") {
+      return evaluateInterval(version, range, opensslOps);
+    }
+    // RPM/DEBIAN/MAVEN/GIT/CHANGES_UNSUPPORTED and every other scheme without a
+    // proven comparator: refuse to order rather than guess.
+    return "unknown";
   }
 }
 

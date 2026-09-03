@@ -4,6 +4,7 @@ import type { FindingRecord } from "../types.js";
 import type { FixImpactDataset } from "../impact/types.js";
 import { verifySource } from "../verification/verify.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../ranges/types.js";
+import { SOURCE_VERIFICATION_SCHEMA_VERSION } from "../verification/types.js";
 import type { SourceVerificationReport } from "../verification/types.js";
 import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
 import { selectComparator } from "./comparator.js";
@@ -231,22 +232,40 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
           });
           verifiedAnts.set(candidate.ant_id, report);
         } catch (error) {
-          verifiedAnts.set(candidate.ant_id, undefined);
-          warnings.push(
-            `${candidate.ant_id}: source verification failed: ${error instanceof Error ? error.message : String(error)}`,
-          );
+          // --source is always an explicit request here, so a verification that
+          // cannot execute is an operational ERROR (non-zero exit), never a
+          // best-effort warning that lets the run pass. Fail closed.
+          const message = error instanceof Error ? error.message : String(error);
+          verifiedAnts.set(candidate.ant_id, {
+            schema_version: SOURCE_VERIFICATION_SCHEMA_VERSION,
+            ant_id: candidate.ant_id,
+            source: options.sourceRoot,
+            impact_schema_version: impactDataset.metadata.schema_version,
+            targets: [],
+            backend_results: [],
+            decision: "ERROR",
+            confidence: "low",
+            reasons: [
+              { code: "BACKEND_FAILURE", detail: `source verification failed: ${message}`, observation_ids: [] },
+            ],
+          });
+          warnings.push(`${candidate.ant_id}: source verification ERROR: ${message}`);
         }
       }
       const verification = verifiedAnts.get(candidate.ant_id);
       if (verification) {
         candidate.verification = verification;
-        candidate.source_binding = sourceBinding(verification);
-        // Source evidence is kept separate from range evidence and must not be
-        // read as confirming the SBOM component version.
-        if (candidate.source_binding !== "verified") {
-          warnings.push(
-            `${candidate.ant_id}: source binding is ${candidate.source_binding}; verify-source evidence does not confirm the checkout matches the SBOM component version and does not override authoritative range evidence`,
-          );
+        // A failed verification carries no observations to bind; leave
+        // source_binding unset so an ERROR is not read as user_asserted evidence.
+        if (verification.decision !== "ERROR") {
+          candidate.source_binding = sourceBinding(verification);
+          // Source evidence is kept separate from range evidence and must not be
+          // read as confirming the SBOM component version.
+          if (candidate.source_binding !== "verified") {
+            warnings.push(
+              `${candidate.ant_id}: source binding is ${candidate.source_binding}; verify-source evidence does not confirm the checkout matches the SBOM component version and does not override authoritative range evidence`,
+            );
+          }
         }
       }
     }

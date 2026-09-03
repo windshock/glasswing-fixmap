@@ -43,6 +43,7 @@
         "ecosystem": { "type": "string" },
         "package": { "type": "string" },
         "product": { "type": "string" },
+        "version_type": { "type": "string" },
         "cpes": { "type": "array", "items": { "type": "string" } },
         "purl": { "type": "string" },
         "range_type": { "type": "string" },

@@ -569,9 +569,14 @@ Design invariant:
 > second. VEX must not become a shortcut around weak identity, stale evidence, or
 > unresolved provenance.
 
-### Tier 0 — correctness / fail-closed (highest priority)
+### Tier 0 — correctness / fail-closed (highest priority) — implemented 2026-09-03
 
-1. **Preserve and honor CVE List V5 `versionType`.** `parseCveRanges()` flattens
+All four Tier 0 items are implemented and covered by tests; the full sample sweep
+holds at `affected 42 / not_affected 72 / unknown 3`, where the residual `unknown`
+is now the genuinely unresolvable long tail (FIPS variant `3.4-fips3.1`, Gentoo
+`0.16_p3`, and the `postgresql 42.4.0` rpm-typed JDBC namesake).
+
+1. **Preserve and honor CVE List V5 `versionType`.** *(done)* `parseCveRanges()` flattens
    every CVE record to `ecosystem: "cve"`, `range_type: "SEMVER"` and discards
    `versionType` (only `git` is skipped); `CveVersionComparator` then treats the
    `cve` sentinel as OpenSSL-classic / three-part ordering universally. But `cve`
@@ -584,7 +589,7 @@ Design invariant:
    `cve`-sentinel design of the OpenSSL-comparator section above.) Ref:
    CVEProject/cve-schema `schema/docs/versions.md`.
 
-2. **Preserve / evaluate CVE List V5 `changes[]`.** The range-projection path
+2. **Preserve / evaluate CVE List V5 `changes[]`.** *(done)* The range-projection path
    ignores within-line status transitions (e.g. affected → unaffected at 2.5.2 →
    affected at 2.6.0 → unaffected at 2.6.3), which can flatten a non-contiguous
    range into a broad false `AFFECTED`. Preferred: preserve `changes[]` in the
@@ -593,14 +598,14 @@ Design invariant:
    `changes[]` → mark the range unsupported / `UNKNOWN`; never emit a gating
    `AFFECTED` from the simplified interval.
 
-3. **Explicit `--source` must not fail open.** `checkSbom()` catches
+3. **Explicit `--source` must not fail open.** *(done)* `checkSbom()` catches
    `verifySource()` exceptions and converts them to warnings, so an explicitly
    requested source verification can exit 0 without ever completing. Required:
    `check-sbom --source …` + `verifySource()` throws / cannot execute →
    operational `ERROR` + non-zero exit. A best-effort warning is acceptable only
    when source verification was not explicitly part of the command contract.
 
-4. **Validate external `--ranges` input before use.** `readAffectedRangeDataset()`
+4. **Validate external `--ranges` input before use.** *(done)* `readAffectedRangeDataset()`
    does a raw `JSON.parse(… as AffectedRangeDataset)`, so a user-supplied or
    modified ranges file reaches the decision engine unvalidated. Change the path
    to read → structural / schema / semantic validation → snapshot-compatibility

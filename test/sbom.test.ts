@@ -14,7 +14,7 @@ import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
 import { parseAuthoritativeRanges, parseCveRanges } from "../src/ranges/extract.js";
-import { validateAffectedRangeDataset } from "../src/ranges/read.js";
+import { readAffectedRangeDataset, validateAffectedRangeDataset } from "../src/ranges/read.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../src/ranges/types.js";
 
 function rangeDataset(ranges: AffectedRangeRecord[]): AffectedRangeDataset {
@@ -523,7 +523,7 @@ test("parses CVE List V5 affected ranges keyed by product, skipping git version 
               product: "openssl",
               versions: [
                 { version: "3.0.0", status: "affected", versionType: "semver", lessThan: "3.0.21" },
-                { version: "3.4.0", status: "affected", versionType: "semver", lessThanOrEqual: "3.4.5" },
+                { version: "1.1.1", status: "affected", versionType: "custom", lessThan: "1.1.1zh" },
                 // A git range carries a commit boundary, not a comparable version.
                 { version: "abc123", status: "affected", versionType: "git", lessThan: "def456" },
                 // An unaffected entry is not an affected range.
@@ -541,9 +541,78 @@ test("parses CVE List V5 affected ranges keyed by product, skipping git version 
   assert.equal(records[0]!.source, "cve_list_v5");
   assert.equal(records[0]!.ecosystem, "cve");
   assert.equal(records[0]!.product, "openssl");
+  // versionType is preserved and carried onto range_type as the dispatch key.
+  assert.equal(records[0]!.version_type, "semver");
   assert.equal(records[0]!.range_type, "SEMVER");
   assert.deepEqual(records[0]!.events, [{ introduced: "3.0.0" }, { fixed: "3.0.21" }]);
-  assert.deepEqual(records[1]!.events, [{ introduced: "3.4.0" }, { last_affected: "3.4.5" }]);
+  assert.equal(records[1]!.version_type, "custom");
+  assert.equal(records[1]!.range_type, "CUSTOM");
+  assert.deepEqual(records[1]!.events, [{ introduced: "1.1.1" }, { fixed: "1.1.1zh" }]);
+});
+
+test("parseCveRanges marks a version line with changes[] unsupported (fail-safe UNKNOWN)", () => {
+  const records = parseCveRanges(
+    {
+      cveMetadata: { cveId: "CVE-2026-99999" },
+      containers: {
+        cna: {
+          affected: [
+            {
+              product: "widget",
+              versions: [
+                // Non-contiguous transitions within one line must not flatten to AFFECTED.
+                {
+                  version: "2.0.0",
+                  status: "affected",
+                  versionType: "semver",
+                  lessThan: "3.0.0",
+                  changes: [
+                    { at: "2.5.2", status: "unaffected" },
+                    { at: "2.6.0", status: "affected" },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+    "ANT-2026-CHG",
+    CVE_PROVENANCE,
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.range_type, "CHANGES_UNSUPPORTED");
+  assert.equal(records[0]!.version_type, "semver");
+  // The interval is not flattened; the version is preserved for audit only.
+  assert.deepEqual(records[0]!.events, [{ introduced: "2.0.0" }]);
+  assert.equal(records[0]!.versions, undefined);
+  // A component inside the naive interval must resolve to unknown, never affected.
+  assert.equal(new CveVersionComparator().evaluate("2.5.5", records[0]!), "unknown");
+  assert.deepEqual(validateAffectedRangeDataset(rangeDataset(records)), []);
+});
+
+test("parseCveRanges preserves rpm versionType so it is not compared as SemVer", () => {
+  const records = parseCveRanges(
+    {
+      cveMetadata: { cveId: "CVE-2026-6479" },
+      containers: {
+        cna: {
+          affected: [
+            {
+              product: "PostgreSQL",
+              versions: [{ version: "0", status: "affected", versionType: "rpm", lessThan: "14.23" }],
+            },
+          ],
+        },
+      },
+    },
+    "ANT-2026-PG",
+    CVE_PROVENANCE,
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.version_type, "rpm");
+  assert.equal(records[0]!.range_type, "RPM");
+  assert.equal(new CveVersionComparator().evaluate("14.10", records[0]!), "unknown");
 });
 
 test("parses authoritative ranges from an OSV record and skips identity-less entries", () => {
@@ -813,10 +882,11 @@ test("PEP 440 comparator evaluates PyPI ranges with conformance vectors", () => 
 
 test("CVE comparator evaluates OpenSSL letter-suffix versions deterministically", () => {
   const comparator = new CveVersionComparator();
-  // OpenSSL 1.1.1 series: base release precedes 1.1.1a; fixed at 1.1.1zh.
+  // OpenSSL 1.1.1 series: CVE List V5 labels the letter releases versionType
+  // "custom"; base release precedes 1.1.1a; fixed at 1.1.1zh.
   const oneOneOne = {
     ecosystem: "cve",
-    range_type: "SEMVER",
+    range_type: "CUSTOM",
     events: [{ introduced: "1.1.1" }, { fixed: "1.1.1zh" }],
     provenance: "x",
   };
@@ -830,7 +900,7 @@ test("CVE comparator evaluates OpenSSL letter-suffix versions deterministically"
   // OpenSSL 1.0.2 series: q is within [1.0.2, 1.0.2zq) — note zq sorts after q.
   const oneZeroTwo = {
     ecosystem: "cve",
-    range_type: "SEMVER",
+    range_type: "CUSTOM",
     events: [{ introduced: "1.0.2" }, { fixed: "1.0.2zq" }],
     provenance: "x",
   };
@@ -841,7 +911,7 @@ test("CVE comparator evaluates OpenSSL letter-suffix versions deterministically"
   assert.equal(comparator.evaluate("1.0.1e", oneZeroTwo), "not_affected"); // predates the series
   assert.equal(comparator.evaluate("0.9.8p", oneZeroTwo), "not_affected");
 
-  // OpenSSL 3.x is plain three-part numeric and sorts identically to SemVer.
+  // OpenSSL 3.x is labeled versionType "semver" and compared with node-semver.
   const threeZero = {
     ecosystem: "cve",
     range_type: "SEMVER",
@@ -851,36 +921,49 @@ test("CVE comparator evaluates OpenSSL letter-suffix versions deterministically"
   assert.equal(comparator.evaluate("3.0.7", threeZero), "affected");
   assert.equal(comparator.evaluate("3.0.21", threeZero), "not_affected");
   assert.equal(comparator.evaluate("3.0.30", threeZero), "not_affected");
+  // A letter version under a SEMVER-typed range is not valid SemVer -> unknown,
+  // never coerced into another scheme.
+  assert.equal(comparator.evaluate("3.0.7a", threeZero), "unknown");
 });
 
-test("CVE comparator refuses to guess distro/FIPS variants and two-part boundaries", () => {
+test("CVE comparator dispatches on versionType and refuses schemes it cannot order", () => {
   const comparator = new CveVersionComparator();
-  const threeFour = {
+  // rpm/debian/maven schemes have their own ordering (epoch, tilde, ~) and must
+  // never be compared as SemVer/three-part, even when the values look numeric.
+  // PostgreSQL server ranges are published as versionType "rpm".
+  const rpm = {
+    ecosystem: "cve",
+    range_type: "RPM",
+    events: [{ introduced: "0" }, { fixed: "14.23" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("14.10", rpm), "unknown");
+  assert.equal(comparator.evaluate("42.4.0", rpm), "unknown"); // JDBC-driver namesake
+
+  // A non-contiguous version line (changes[]) is marked unsupported at parse time
+  // and must never resolve to a gating AFFECTED from a flattened interval.
+  const changes = {
+    ecosystem: "cve",
+    range_type: "CHANGES_UNSUPPORTED",
+    events: [{ introduced: "2.6.0" }],
+    provenance: "x",
+  };
+  assert.equal(comparator.evaluate("2.6.1", changes), "unknown");
+
+  // FIPS/distro variants and two-part boundaries stay unknown under any typed range.
+  const semver34 = {
     ecosystem: "cve",
     range_type: "SEMVER",
     events: [{ introduced: "3.4.0" }, { fixed: "3.4.6" }],
     provenance: "x",
   };
-  // A FIPS/distro variant is not OpenSSL classic versioning -> never coerced.
-  assert.equal(comparator.evaluate("3.4-fips3.1", threeFour), "unknown");
-  // A Gentoo-style patch suffix is a different scheme entirely.
-  assert.equal(comparator.evaluate("0.16_p3", threeFour), "unknown");
-
-  // A two-part product-line boundary (PostgreSQL server range) cannot be parsed
-  // as OpenSSL/three-part -> unresolved, routed to adjudication (e.g. the JDBC
-  // driver namesake), never silently resolved.
-  const twoPart = {
-    ecosystem: "cve",
-    range_type: "SEMVER",
-    events: [{ introduced: "15" }, { fixed: "15.18" }],
-    provenance: "x",
-  };
-  assert.equal(comparator.evaluate("42.4.0", twoPart), "unknown");
+  assert.equal(comparator.evaluate("3.4-fips3.1", semver34), "unknown");
+  assert.equal(comparator.evaluate("0.16_p3", semver34), "unknown");
 
   // Only the `cve` sentinel ecosystem is handled here.
-  assert.equal(comparator.supports("cve", "SEMVER"), true);
-  assert.equal(comparator.supports("npm", "SEMVER"), false);
-  assert.equal(comparator.supports("PyPI", "ECOSYSTEM"), false);
+  assert.equal(comparator.supports("cve"), true);
+  assert.equal(comparator.supports("npm"), false);
+  assert.equal(comparator.supports("PyPI"), false);
 });
 
 test("reaches AFFECTED for a PyPI component via a pypi PURL and authoritative range", async () => {
@@ -1033,4 +1116,80 @@ test("bridges an exact-PURL candidate into verify-source", async (context) => {
   // The checkout's version is not machine-bound to the SBOM component version.
   assert.equal(bridged!.source_binding, "user_asserted");
   assert.ok(report.warnings.some((warning) => warning.includes("source binding is user_asserted")));
+});
+
+test("an explicit --source that cannot execute is an ERROR, not a passing warning", async () => {
+  const antId = "ANT-2026-SRCERR1";
+  const impactDataset: FixImpactDataset = {
+    metadata: {
+      schema_version: "1.0.0",
+      generated_from: {
+        fixmap_schema_version: "1.0.0",
+        source_as_of: "2026-09-02T00:00:00Z",
+        source_url: "https://red.anthropic.com/2026/cvd/data/payload.json",
+      },
+      finding_count: 1,
+      impact_count: 1,
+      complete_count: 1,
+      partial_count: 0,
+      error_count: 0,
+    },
+    impacts: [
+      {
+        repository: "example/widget",
+        commit: "a".repeat(40),
+        ant_ids: [antId],
+        extraction_status: "complete",
+        files: [{ path_before: "src/x.c", path_after: "src/x.c", status: "modified", patch_available: true, hunks: [] }],
+        evidence: [{ source: "github_repository", url: "https://github.com/example/widget/commit/" + "a".repeat(40) }],
+        warnings: [],
+      },
+    ],
+  };
+  const sbomFile = await writeSbom(
+    cyclonedx([{ type: "library", name: "widget", version: "1.0.0", purl: "pkg:npm/widget@1.0.0" }]),
+  );
+  const report = await checkSbom({
+    sbomFile,
+    findings: [packageFinding(antId, "example/widget", "npm", "widget")],
+    // A source path that does not exist: verifySource cannot execute.
+    sourceRoot: path.join(os.tmpdir(), `glasswing-missing-${antId}`),
+    impactDataset,
+  });
+  const candidate = report.candidates.find((item) => item.verification);
+  assert.ok(candidate, JSON.stringify(report, null, 2));
+  // Fail closed: an explicit --source that cannot run is ERROR (drives non-zero exit).
+  assert.equal(candidate!.verification!.decision, "ERROR");
+  // An ERROR must not be bound as user_asserted source evidence.
+  assert.equal(candidate!.source_binding, undefined);
+  assert.ok(report.warnings.some((warning) => warning.includes("source verification ERROR")));
+});
+
+test("readAffectedRangeDataset fails closed on malformed or invalid input", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "glasswing-ranges-"));
+
+  const malformed = path.join(dir, "malformed.json");
+  await writeFile(malformed, "{ not json");
+  await assert.rejects(readAffectedRangeDataset(malformed), /Malformed affected-range file/);
+
+  const invalid = path.join(dir, "invalid.json");
+  // Structurally wrong: a range missing required fields and a bad schema version.
+  await writeFile(
+    invalid,
+    JSON.stringify({
+      metadata: {
+        schema_version: "9.9.9",
+        generated_from: { fixmap_schema_version: "1.0.0", source_as_of: "x", source_url: "y" },
+        finding_count: 0,
+        record_count: 1,
+      },
+      ranges: [{ ant_id: "not-an-ant", advisory: "", ecosystem: "cve", package: "p", range_type: "SEMVER", events: [], provenance: "z" }],
+    }),
+  );
+  await assert.rejects(readAffectedRangeDataset(invalid), /Invalid affected-range dataset/);
+
+  const valid = path.join(dir, "valid.json");
+  await writeFile(valid, JSON.stringify(rangeDataset([cveRange("ANT-2026-OK", "openssl", "3.0.0", "3.0.21")])));
+  const dataset = await readAffectedRangeDataset(valid);
+  assert.equal(dataset.ranges.length, 1);
 });

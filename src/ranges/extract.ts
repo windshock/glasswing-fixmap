@@ -111,6 +111,7 @@ interface CveVersion {
   status?: string;
   lessThan?: string;
   lessThanOrEqual?: string;
+  changes?: unknown;
 }
 
 interface CveAffected {
@@ -150,17 +151,30 @@ export function parseCveRanges(
     const cpes = stringArray(affected.cpes);
     for (const entry of affected.versions ?? []) {
       if (entry.status !== "affected") continue;
-      if (entry.versionType?.toLowerCase() === "git") continue;
+      // `versionType` is authoritative for ordering and is preserved, not
+      // flattened to SEMVER. GIT ranges are commit boundaries, not comparable
+      // versions.
+      const versionType = (typeof entry.versionType === "string" ? entry.versionType : "custom").toLowerCase();
+      if (versionType === "git") continue;
       if (typeof entry.version !== "string") continue;
+      // Within-line status transitions make the affected set non-contiguous; a
+      // flattened interval could yield a false gating AFFECTED. Until they are
+      // fully evaluated per versionType, mark the range unsupported (fail-safe).
+      const hasChanges = Array.isArray(entry.changes) && entry.changes.length > 0;
       const events: AffectedRangeEvent[] = [];
       const versions: string[] = [];
-      if (typeof entry.lessThan === "string" && !entry.lessThan.includes("*")) {
+      if (hasChanges) {
+        // Preserve the version and provenance for audit; the sentinel range_type
+        // keeps it from ever resolving to AFFECTED.
+        events.push({ introduced: entry.version });
+      } else if (typeof entry.lessThan === "string" && !entry.lessThan.includes("*")) {
         events.push({ introduced: entry.version }, { fixed: entry.lessThan });
       } else if (typeof entry.lessThanOrEqual === "string" && !entry.lessThanOrEqual.includes("*")) {
         events.push({ introduced: entry.version }, { last_affected: entry.lessThanOrEqual });
       } else {
         versions.push(entry.version);
       }
+      const rangeType = hasChanges ? "CHANGES_UNSUPPORTED" : versionType.toUpperCase();
       const rangeRecord: AffectedRangeRecord = {
         ant_id: antId,
         advisory,
@@ -168,13 +182,14 @@ export function parseCveRanges(
         ecosystem: "cve",
         package: product,
         product,
-        range_type: "SEMVER",
+        version_type: versionType,
+        range_type: rangeType,
         events,
         provenance,
       };
       if (cpes.length > 0) rangeRecord.cpes = cpes;
       if (versions.length > 0) rangeRecord.versions = versions;
-      const key = `${product}|${JSON.stringify(events)}|${JSON.stringify(versions)}`;
+      const key = `${product}|${rangeType}|${JSON.stringify(events)}|${JSON.stringify(versions)}`;
       if (seen.has(key)) continue;
       seen.add(key);
       results.push(rangeRecord);

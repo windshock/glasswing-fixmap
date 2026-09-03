@@ -22,6 +22,12 @@ export interface AffectedRangeRecord {
   package: string;
   /** CVE List V5 product/vendor name, used to match name-only components. */
   product?: string;
+  /**
+   * Authoritative CVE List V5 `versionType` (semver/custom/rpm/…), preserved for
+   * comparator dispatch and audit. `range_type` carries the dispatch key derived
+   * from it (or `CHANGES_UNSUPPORTED` when a version line has `changes[]`).
+   */
+  version_type?: string;
   /** CPE strings published alongside the range, used to match by CPE. */
   cpes?: string[];
   /** Canonical PURL from OSV `affected.package.purl`, when published. */

@@ -5,8 +5,26 @@ import {
   type AffectedRangeRecord,
 } from "./types.js";
 
+/**
+ * Read an affected-range dataset for consumption by the decision engine. A
+ * user-supplied or hand-edited `--ranges` file is validated before use so that
+ * malformed security-decision input fails closed rather than being trusted.
+ */
 export async function readAffectedRangeDataset(file: string): Promise<AffectedRangeDataset> {
-  return JSON.parse(await readFile(file, "utf8")) as AffectedRangeDataset;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(await readFile(file, "utf8"));
+  } catch (error) {
+    throw new Error(
+      `Malformed affected-range file ${file}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  const dataset = parsed as AffectedRangeDataset;
+  const errors = validateAffectedRangeDataset(dataset);
+  if (errors.length > 0) {
+    throw new Error(`Invalid affected-range dataset ${file}:\n${errors.join("\n")}`);
+  }
+  return dataset;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
