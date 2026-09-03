@@ -126,8 +126,11 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   for (let index = 0; index < documents.length; index += 1) {
     const adapter = adapters.find((item) => item.supports(documents[index]));
     if (!adapter) {
-      warnings.push(`Document ${index + 1} of ${documents.length} is not a supported SBOM format; skipped`);
-      continue;
+      // Do not silently skip part of the input; an unsupported document fails.
+      const where = documents.length > 1 ? ` (document ${index + 1} of ${documents.length})` : "";
+      throw new Error(
+        `Unsupported SBOM${where}: expected CycloneDX JSON (1.4/1.5/1.6/1.7) or Syft native JSON (schema 16.1.2)`,
+      );
     }
     const parsed = await adapter.parse(documents[index]);
     parsedResults.push(parsed);

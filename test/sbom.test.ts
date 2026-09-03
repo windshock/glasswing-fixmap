@@ -294,6 +294,25 @@ test("aggregates concatenated pretty-printed documents and dedupes components", 
   assert.equal(report.candidates.length, 1);
 });
 
+test("rejects non-whitespace outside JSON documents", async () => {
+  const file = await writeRaw(
+    'garbage {"bomFormat":"CycloneDX","specVersion":"1.6","version":1,"components":[]} tail',
+  );
+  await assert.rejects(
+    () => checkSbom({ sbomFile: file, findings: [] }),
+    /Unexpected non-whitespace|Unsupported SBOM/,
+  );
+});
+
+test("an unsupported document among several is a hard error, not a silent skip", async () => {
+  const cdx = JSON.stringify(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.0.0", purl: "pkg:npm/left-pad@1.0.0" }]),
+  );
+  const spdx = JSON.stringify({ spdxVersion: "SPDX-2.3", packages: [] });
+  const file = await writeRaw(`${cdx}\n${spdx}\n`);
+  await assert.rejects(() => checkSbom({ sbomFile: file, findings: [] }), /Unsupported SBOM/);
+});
+
 test("reaches AFFECTED for strong identity and an authoritative range covering the version", async () => {
   const file = await writeSbom(
     cyclonedx([{ type: "library", name: "left-pad", version: "1.5.0", purl: "pkg:npm/left-pad@1.5.0" }]),
