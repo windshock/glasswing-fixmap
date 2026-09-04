@@ -53,11 +53,31 @@ is irrelevant and the verdict is confident even if the string will not parse:
   `LIKELY_FALSE_POSITIVE`.
 - The only caveat is a downstream backport (guardrail on the distro revision); note it as
   missing evidence when the version distance makes it implausible but not impossible.
+- **Coverage-dominant "in range" is version-ordering evidence only — it is not
+  vulnerability.** For an *old* base, it must still pass the introduction-timing check
+  before leaning `LIKELY_TRUE_POSITIVE`: an over-broad `< fixed` range routinely sweeps in
+  releases that predate the vulnerable subsystem. If the vulnerable function/structure was
+  introduced *after* the base, the base being "below the fix" means nothing →
+  `LIKELY_FALSE_POSITIVE`. (Regression: `libyang 0.16.46` sits in `[0, 5.4.3)` yet predates
+  the `lyd_meta` architecture the CVE fixes by years — see examples.)
+
+## Resolving "which version is this" — a missing tag is not a missing version
+
+Do not conclude a version is downstream/unverifiable just because no git **tag** matches it.
+Projects often tag only some releases while bumping the version in the source between tags.
+Search the **commit history** (a `VERSION`/`CMakeLists.txt` bump to that exact micro
+version) before deciding. Only when neither a tag nor a version-bump commit exists is the
+version genuinely downstream. (Regression: `libyang 0.16.46` has no tag but is upstream
+commit `6ed7a85`, "VERSION bump to version 0.16.46", 2018-10-11.) With the exact commit in
+hand, check out that tree and adjudicate the actual source — for open source this is always
+reachable.
 
 ## Confidence calibration
 
-- `high`: multiple independent, concrete evidence items agree and none contradicts; or a
-  coverage-dominant range places the base line unambiguously.
+- `high`: multiple independent, concrete evidence items agree and none contradicts. A
+  coverage-dominant range alone is *not* `high` — pair it with an introduction-timing or
+  code-presence check, because version ordering does not establish the vulnerable code
+  exists in that release.
 - `medium`: one strong evidence item, or several weak ones agreeing, no contradiction; or
   a flavored version whose base leans clearly one way with a single unresolved micro-level
   question captured as a concrete evidence request.

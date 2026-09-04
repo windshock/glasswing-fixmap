@@ -104,3 +104,24 @@ components the source is public, so *fetch it* rather than asserting from memory
   as the proof gap — not `CONFIRMED`.
 - Trap avoided: reading version-in-range as proof the vulnerable code runs here; asserting
   a function is present/absent from memory instead of fetching the public source.
+
+## 9. Over-broad range sweeps in a release predating the vulnerable subsystem
+
+`libyang 0.16.46` matched CVE-2026-41401 by the range `[0, 5.4.3)`, and a coverage-dominant
+base check called the `0.16` line "affected" (below the fix). Both are pure version
+ordering — neither shows the vulnerable code exists in `0.16.46`. The archaeology:
+
+- **A missing tag is not a missing version.** `git ls-remote --tags` has no `0.16.46`, but
+  the commit history does: `6ed7a85` = "VERSION bump to version 0.16.46" (2018-10-11);
+  `v0.16-r1` = 0.16.41, `v0.16-r2` = 0.16.52. So `0.16.46` is an untagged upstream release,
+  not a downstream string — fetch that commit's tree.
+- **Introduction timing overturns "in range".** At `6ed7a85`, `src/tree_data.h` and
+  `src/parser.c` use the old `lyd_attr` model; `struct lyd_meta` and
+  `lyd_parser_set_data_flags` (the CVE's use-after-free site) have **zero** occurrences, and
+  `lyd_meta` is still absent at `v1.0.167` (2020) — the metadata architecture arrives only
+  in the 2.x rewrite. The vulnerable subsystem postdates `0.16.46` by years.
+- Adjudication: `LIKELY_FALSE_POSITIVE`, `high` — the `< 5.4.3` range is historically
+  over-broad. Evidence: the version-bump commit; the symbol counts at that tree.
+- Trap avoided (a real regression): concluding "downstream version" from a missing tag;
+  and treating a coverage-dominant "base below the fix" as `LIKELY_TRUE_POSITIVE` without
+  the introduction-timing check — old-version-in-range is not vulnerability.

@@ -46,6 +46,29 @@
         "confidence": "medium",
         "summary": "FIPS is orthogonal to the default-provider PKCS7_verify bug; base 3.4 is affected below 3.4.6 and the string does not indicate >=3.4.6; confirm exact patch with 'openssl version -a'"
       }
+    },
+    {
+      "evidence_hash": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
+      "recorded_at": "2026-09-04T12:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-TZQ1KH7E",
+        "component": {
+          "name": "libyang",
+          "version": "0.16_p3"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-41401"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "supersedes": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
+      "ai_review": {
+        "verdict": "LIKELY_FALSE_POSITIVE",
+        "confidence": "high",
+        "summary": "CORRECTED: the vulnerable subsystem was introduced long after 0.16. 0.16.46 is an upstream commit (6ed7a85, 2018-10-11) whose tree_data.h/parser.c use the old lyd_attr architecture; struct lyd_meta and lyd_parser_set_data_flags (the CVE's UAF site) do not exist and appear only in the 2.x rewrite. The CVE range <5.4.3 is historically over-broad. Supersedes the earlier LIKELY_TRUE_POSITIVE which wrongly leaned on version-in-range without introduction-timing."
+      }
     }
   ]
 }
