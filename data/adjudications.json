@@ -69,6 +69,50 @@
         "confidence": "high",
         "summary": "CORRECTED: the vulnerable subsystem was introduced long after 0.16. 0.16.46 is an upstream commit (6ed7a85, 2018-10-11) whose tree_data.h/parser.c use the old lyd_attr architecture; struct lyd_meta and lyd_parser_set_data_flags (the CVE's UAF site) do not exist and appear only in the 2.x rewrite. The CVE range <5.4.3 is historically over-broad. Supersedes the earlier LIKELY_TRUE_POSITIVE which wrongly leaned on version-in-range without introduction-timing."
       }
+    },
+    {
+      "evidence_hash": "1e93e1eb172f3795b9074172ec03c6d2b24bd051893abd35b358d287d76889cf",
+      "recorded_at": "2026-09-04T12:30:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-TZQ1KH7E",
+        "component": {
+          "name": "libyang",
+          "version": "0.16.46"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-41401"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_FALSE_POSITIVE",
+        "confidence": "high",
+        "summary": "CORRECTED: libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
+      }
+    },
+    {
+      "evidence_hash": "d123147c8f5125b0ebd377343c5e7ab8a2619403ea12fb94930a3625a64a86d6",
+      "recorded_at": "2026-09-04T12:30:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-TZQ1KH7E",
+        "component": {
+          "name": "libyang",
+          "version": "0.16.46"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-41401"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_FALSE_POSITIVE",
+        "confidence": "high",
+        "summary": "CORRECTED: libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
+      }
     }
   ]
 }
