@@ -93,6 +93,17 @@
             "reason": { "type": "string" }
           }
         },
+        "base_assessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["base_version", "flavor", "base_version_verdict", "downstream_patch_status"],
+          "properties": {
+            "base_version": { "type": "string" },
+            "flavor": { "type": "string" },
+            "base_version_verdict": { "enum": ["affected", "not_affected", "unknown"] },
+            "downstream_patch_status": { "enum": ["unknown"] }
+          }
+        },
         "verification": { "type": "object" },
         "source_binding": { "enum": ["verified", "user_asserted", "unverified"] },
         "evidence_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
@@ -117,7 +128,7 @@
             "identity": { "enum": ["strong", "weak"] },
             "gating_eligible": { "type": "boolean" },
             "unknown_reason": {
-              "enum": ["name_only_identity", "range_unresolved", "no_applicable_range", "source_inconclusive"]
+              "enum": ["name_only_identity", "range_unresolved", "no_applicable_range", "source_inconclusive", "distro_variant"]
             },
             "reason": { "type": "string" }
           }

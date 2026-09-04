@@ -14,6 +14,7 @@ import { SOURCE_VERIFICATION_SCHEMA_VERSION } from "../verification/types.js";
 import type { SourceVerificationReport } from "../verification/types.js";
 import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
 import { cpeRelation } from "./cpe.js";
+import { baseLowerBound, baseUpperBound, stripBuildFlavor } from "./distro.js";
 import { selectComparator } from "./comparator.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
 import { SyftAdapter } from "./syft.js";
@@ -207,6 +208,20 @@ function decideCandidate(candidate: ComponentCandidate): CandidateDecision {
     };
   }
   if (rangeVerdict === "unknown") {
+    // A recognized downstream flavor with a coverage-dominant base is a distinct
+    // triage category: the base is affected/not_affected but the downstream patch
+    // status is unknown, so the final decision stays UNKNOWN (no backport guess).
+    if (candidate.base_assessment && candidate.base_assessment.base_version_verdict !== "unknown") {
+      const base = candidate.base_assessment;
+      return {
+        decision: "UNKNOWN",
+        range_verdict: "unknown",
+        identity,
+        gating_eligible: false,
+        unknown_reason: "distro_variant",
+        reason: `base ${base.base_version} is ${base.base_version_verdict} upstream, but ${base.flavor} may carry a backport; downstream patch status unknown`,
+      };
+    }
     return {
       decision: "UNKNOWN",
       range_verdict: "unknown",
@@ -370,6 +385,23 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
       if (applicable.length > 0) {
         candidate.range_assessment = assessRanges(candidate.component.version, applicable);
         appliedRangeDigests.set(candidate, rangeDigest(applicable));
+        // A downstream-flavored version that did not resolve: compute the base
+        // upstream version's assessment as evidence, but only when it is
+        // coverage-dominant (the whole base line resolves the same way), so a
+        // rebuild's exact patch level is never assumed.
+        if (candidate.range_assessment.verdict === "unknown") {
+          const stripped = stripBuildFlavor(candidate.component.version);
+          if (stripped) {
+            const low = assessRanges(baseLowerBound(stripped.base), applicable).verdict;
+            const high = assessRanges(baseUpperBound(stripped.base), applicable).verdict;
+            candidate.base_assessment = {
+              base_version: stripped.base,
+              flavor: stripped.flavor,
+              base_version_verdict: low === high ? low : "unknown",
+              downstream_patch_status: "unknown",
+            };
+          }
+        }
       }
     }
   }

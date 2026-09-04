@@ -697,7 +697,7 @@ The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (recor
 ### Tier 3 — long-tail coverage
 
 12. **Conservative distro / vendor normalization — preserve backport
-    uncertainty.** Stripping a build flavor (`_p3`, `.el8`, `+deb12u1`,
+    uncertainty.** *(done)* Stripping a build flavor (`_p3`, `.el8`, `+deb12u1`,
     `-1ubuntu2`, `-fips3.1`) to the base upstream version is useful *evidence*, but
     for distro/vendor packages it is **not** the final security decision because a
     downstream revision may carry a backported patch. Separate

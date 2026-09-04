@@ -73,7 +73,8 @@ export type UnknownReason =
   | "name_only_identity"
   | "range_unresolved"
   | "no_applicable_range"
-  | "source_inconclusive";
+  | "source_inconclusive"
+  | "distro_variant";
 
 /**
  * The explicit, final candidate decision, kept separate from `range_assessment`
@@ -121,6 +122,18 @@ export interface ComponentCandidate {
   };
   /** Present only when an authoritative range and a supporting comparator exist. */
   range_assessment?: RangeAssessment;
+  /**
+   * For a downstream-flavored version (distro/FIPS suffix) whose raw form does not
+   * resolve, the coverage-dominant assessment of its base upstream version. This
+   * is evidence only: `downstream_patch_status` stays `unknown` and the final
+   * decision remains UNKNOWN because a rebuild may carry a backported fix.
+   */
+  base_assessment?: {
+    base_version: string;
+    flavor: string;
+    base_version_verdict: RangeVerdict;
+    downstream_patch_status: "unknown";
+  };
   /** Present only when `--source` resolves an unambiguous candidate. */
   verification?: SourceVerificationReport;
   /** Provenance of the `--source` binding; present whenever `verification` is. */

@@ -11,6 +11,7 @@ import type { FixImpactDataset } from "../src/impact/types.js";
 import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
 import { checkSbomDir } from "../src/sbom/batch.js";
+import { stripBuildFlavor } from "../src/sbom/distro.js";
 import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import { cpeRelation } from "../src/sbom/cpe.js";
@@ -629,6 +630,65 @@ test("a disjoint CPE excludes a namesake CVE range (JDBC driver vs server)", asy
   assert.equal(candidate.match_type, "name_heuristic");
   assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
   assert.equal(candidate.candidate_decision?.gating_eligible, false);
+});
+
+test("stripBuildFlavor recognizes distro/FIPS suffixes and refuses the rest", () => {
+  assert.deepEqual(stripBuildFlavor("0.16_p3"), { base: "0.16", flavor: "_p3" });
+  assert.deepEqual(stripBuildFlavor("3.4-fips3.1"), { base: "3.4", flavor: "-fips3.1" });
+  assert.deepEqual(stripBuildFlavor("1.2.3+deb12u1"), { base: "1.2.3", flavor: "+deb12u1" });
+  assert.deepEqual(stripBuildFlavor("1.2.3-1ubuntu2"), { base: "1.2.3", flavor: "-1ubuntu2" });
+  // Plain versions and OpenSSL letter versions are not distro flavors.
+  assert.equal(stripBuildFlavor("3.0.7"), null);
+  assert.equal(stripBuildFlavor("1.1.1g"), null);
+  assert.equal(stripBuildFlavor(undefined), null);
+});
+
+test("a coverage-dominant distro base is surfaced as evidence but stays UNKNOWN (backport uncertainty)", async () => {
+  // libyang 0.16_p3 (Gentoo) against a [0, 5.4.3) range: the whole 0.16 line is
+  // below the fix, so the base is affected — but a _p3 rebuild may backport, so
+  // the final decision stays UNKNOWN and never gates.
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "libyang", version: "0.16_p3" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-LY", "cesnet/libyang", "npm", "libyang")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-LY",
+        advisory: "CVE-2026-41401",
+        source: "cve_list_v5",
+        ecosystem: "cve",
+        package: "libyang",
+        product: "libyang",
+        version_type: "custom",
+        range_type: "CUSTOM",
+        events: [{ introduced: "0" }, { fixed: "5.4.3" }],
+        provenance: CVE_PROVENANCE,
+      },
+    ]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.range_assessment?.verdict, "unknown");
+  assert.equal(candidate.base_assessment?.base_version, "0.16");
+  assert.equal(candidate.base_assessment?.base_version_verdict, "affected");
+  assert.equal(candidate.base_assessment?.downstream_patch_status, "unknown");
+  assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
+  assert.equal(candidate.candidate_decision?.gating_eligible, false);
+  assert.equal(candidate.candidate_decision?.unknown_reason, "distro_variant");
+});
+
+test("a distro base that straddles the fix stays plainly unresolved, not distro_variant", async () => {
+  // openssl 3.4-fips3.1: base 3.4 straddles the fix (3.4.0–3.4.5 affected, 3.4.6
+  // fixed), so the base is not coverage-dominant and no base verdict is asserted.
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "openssl", version: "3.4-fips3.1" }]));
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.4.0", "3.4.6")]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.range_assessment?.verdict, "unknown");
+  assert.equal(candidate.base_assessment?.base_version_verdict, "unknown");
+  assert.equal(candidate.candidate_decision?.unknown_reason, "range_unresolved");
 });
 
 test("check-sbom --dir aggregates a directory, categorizes UNKNOWN, and counts unsupported", async () => {
