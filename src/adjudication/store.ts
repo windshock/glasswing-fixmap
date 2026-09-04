@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { atomicWrite } from "../output.js";
 import type { ComponentCandidate } from "../sbom/types.js";
 import { computeEvidenceHash, type EvidenceKey } from "./evidence-hash.js";
@@ -30,6 +30,22 @@ export function validateAdjudicationStore(store: AdjudicationStore): string[] {
     if (!record.subject?.ant_id) errors.push(`records[${index}]: missing subject.ant_id`);
   });
   return errors;
+}
+
+export function validateAdjudicationRecord(record: AdjudicationRecord): string[] {
+  return validateAdjudicationStore({ metadata: { schema_version: ADJUDICATION_SCHEMA_VERSION }, records: [record] })
+    .filter((error) => !error.startsWith("metadata."))
+    .map((error) => error.replace(/^records\[0\]: /, ""));
+}
+
+/** Read a store, or return an empty one when the file does not exist yet. */
+export async function readOrEmptyAdjudicationStore(file: string): Promise<AdjudicationStore> {
+  try {
+    await access(file);
+  } catch {
+    return emptyStore();
+  }
+  return readAdjudicationStore(file);
 }
 
 export async function readAdjudicationStore(file: string): Promise<AdjudicationStore> {

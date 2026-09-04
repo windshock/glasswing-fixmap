@@ -10,6 +10,8 @@ import {
   evidenceHashForCandidate,
   lookupAdjudication,
   readAdjudicationStore,
+  readOrEmptyAdjudicationStore,
+  validateAdjudicationRecord,
   writeAdjudicationStore,
 } from "../src/adjudication/store.js";
 import type { AdjudicationRecord } from "../src/adjudication/types.js";
@@ -321,4 +323,25 @@ test("adjudication store round-trips through disk and fails closed on malformed 
   const bad = path.join(dir, "bad.json");
   await writeFile(bad, JSON.stringify({ metadata: { schema_version: "1.0.0" }, records: [{ evidence_hash: "nope", machine_decision: "UNKNOWN", subject: { ant_id: "ANT-2026-X" } }] }));
   await assert.rejects(readAdjudicationStore(bad), /evidence_hash must be a sha256/);
+});
+
+test("validateAdjudicationRecord accepts a good record and reports a bad hash (unprefixed)", () => {
+  const good: AdjudicationRecord = {
+    evidence_hash: "a".repeat(64),
+    recorded_at: "2026-09-04T00:00:00Z",
+    subject: { ant_id: "ANT-2026-OSSL", component: { name: "openssl", version: "3.0.7" } },
+    machine_decision: "UNKNOWN",
+  };
+  assert.deepEqual(validateAdjudicationRecord(good), []);
+  const errors = validateAdjudicationRecord({ ...good, evidence_hash: "nope" });
+  assert.equal(errors.length, 1);
+  assert.match(errors[0]!, /^evidence_hash must be a sha256/); // no "records[0]:" prefix
+});
+
+test("readOrEmptyAdjudicationStore returns an empty store when the file is absent", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "glasswing-adjempty-"));
+  const missing = path.join(dir, "does-not-exist.json");
+  const store = await readOrEmptyAdjudicationStore(missing);
+  assert.deepEqual(store.records, []);
+  assert.equal(store.metadata.schema_version, "1.0.0");
 });

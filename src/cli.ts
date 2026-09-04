@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { HttpClient } from "./http.js";
@@ -17,7 +18,15 @@ import { checkSbom } from "./sbom/check.js";
 import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
 import { syncAffectedRanges } from "./ranges/sync.js";
 import { readAffectedRangeDataset } from "./ranges/read.js";
-import { readAdjudicationStore } from "./adjudication/store.js";
+import {
+  appendAdjudication,
+  lookupAdjudication,
+  readAdjudicationStore,
+  readOrEmptyAdjudicationStore,
+  validateAdjudicationRecord,
+  writeAdjudicationStore,
+} from "./adjudication/store.js";
+import type { AdjudicationRecord } from "./adjudication/types.js";
 
 const HELP = `glasswing-fixmap
 
@@ -29,6 +38,8 @@ Usage:
   glasswing-fixmap verify-source --ant <ANT-ID> --source <dir> [options]
   glasswing-fixmap check-sbom --sbom <file> [options]
   glasswing-fixmap sync-ranges [options]
+  glasswing-fixmap adjudicate record --store <file> [--input <review.json>]
+  glasswing-fixmap adjudicate query --store <file> --evidence-hash <hash>
 
 Sync options:
   --output <dir>          Output directory (default: data)
@@ -103,6 +114,7 @@ const COMMAND_OPTIONS: Record<string, readonly string[]> = {
   "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
   "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
   "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
+  adjudicate: ["--store", "--input", "--evidence-hash", ...COMMON_OPTIONS],
   report: [...COMMON_OPTIONS],
   validate: [...COMMON_OPTIONS],
   help: [...COMMON_OPTIONS],
@@ -128,6 +140,9 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--component",
     "--ranges",
     "--adjudications",
+    "--store",
+    "--input",
+    "--evidence-hash",
     "--vanir-runner",
     "--vanir-signatures",
     "--vanir-vuln",
@@ -155,6 +170,12 @@ function parseArguments(argv: string[]): ParsedArguments {
     }
   }
   return { command, positional, values, flags };
+}
+
+async function readStdin(): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) chunks.push(chunk as Buffer);
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 function printReport(dataset: Awaited<ReturnType<typeof readDataset>>): void {
@@ -350,6 +371,43 @@ async function main(): Promise<void> {
       process.exitCode = 3;
     }
     return;
+  }
+  if (args.command === "adjudicate") {
+    const subcommand = args.positional[0];
+    const storeFile = args.values.get("--store");
+    if (!storeFile) throw new Error("adjudicate requires --store <file>");
+    const storePath = path.resolve(storeFile);
+    if (subcommand === "record") {
+      // A review is produced by the adjudicator (e.g. the Skill) as a JSON record
+      // and appended; the store is validated on read and write (fail closed).
+      const inputFile = args.values.get("--input");
+      const raw = inputFile ? await readFile(path.resolve(inputFile), "utf8") : await readStdin();
+      let record: AdjudicationRecord;
+      try {
+        record = JSON.parse(raw) as AdjudicationRecord;
+      } catch (error) {
+        throw new Error(`Malformed adjudication record: ${error instanceof Error ? error.message : String(error)}`);
+      }
+      const recordErrors = validateAdjudicationRecord(record);
+      if (recordErrors.length > 0) throw new Error(`Invalid adjudication record:\n${recordErrors.join("\n")}`);
+      const store = await readOrEmptyAdjudicationStore(storePath);
+      const updated = appendAdjudication(store, record);
+      await writeAdjudicationStore(updated, storePath);
+      process.stdout.write(
+        `Recorded adjudication for ${record.subject.ant_id} (evidence ${record.evidence_hash.slice(0, 12)}); ${updated.records.length} record(s)\n`,
+      );
+      return;
+    }
+    if (subcommand === "query") {
+      const evidenceHash = args.values.get("--evidence-hash");
+      if (!evidenceHash) throw new Error("adjudicate query requires --evidence-hash <hash>");
+      const store = await readAdjudicationStore(storePath);
+      const record = lookupAdjudication(store, evidenceHash);
+      process.stdout.write(record ? `${JSON.stringify(record, null, 2)}\n` : "No current adjudication for that evidence hash\n");
+      if (!record) process.exitCode = 1;
+      return;
+    }
+    throw new Error("adjudicate requires a subcommand: 'record' or 'query'");
   }
   if (args.command === "sync-ranges") {
     const concurrency = Number(args.values.get("--concurrency") ?? "4");
