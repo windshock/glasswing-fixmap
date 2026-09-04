@@ -814,6 +814,54 @@ test("candidate_decision separates the gating decision from weak range evidence"
   assert.equal(safe.candidates[0]!.candidate_decision?.gating_eligible, false);
 });
 
+test("a CVE product range tolerates distribution qualifiers but not product differentiators", async () => {
+  // "NGINX Open Source" range should match a component named "nginx".
+  const nginxFile = await writeSbom(cyclonedx([{ type: "library", name: "nginx", version: "1.10.0" }]));
+  const nginx = await checkSbom({
+    sbomFile: nginxFile,
+    findings: [packageFinding("ANT-2026-NGX", "nginx/nginx", "npm", "nginx")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-NGX",
+        advisory: "CVE-2026-27654",
+        source: "cve_list_v5",
+        ecosystem: "cve",
+        package: "NGINX Open Source",
+        product: "NGINX Open Source",
+        version_type: "semver",
+        range_type: "SEMVER",
+        events: [{ introduced: "1.0.0" }, { fixed: "1.28.3" }],
+        provenance: CVE_PROVENANCE,
+      },
+    ]),
+  });
+  assert.equal(nginx.candidates[0]!.range_assessment?.verdict, "affected");
+
+  // "PostgreSQL JDBC Driver" is a different product from a "postgresql" component
+  // matched to the server range — the differentiator must NOT be stripped.
+  const pgFile = await writeSbom(cyclonedx([{ type: "library", name: "postgresql", version: "15.2" }]));
+  const pg = await checkSbom({
+    sbomFile: pgFile,
+    findings: [packageFinding("ANT-2026-PG2", "postgres/postgres", "npm", "postgresql")],
+    rangeDataset: rangeDataset([
+      {
+        ant_id: "ANT-2026-PG2",
+        advisory: "CVE-2026-9",
+        source: "cve_list_v5",
+        ecosystem: "cve",
+        package: "PostgreSQL JDBC Driver",
+        product: "PostgreSQL JDBC Driver",
+        version_type: "semver",
+        range_type: "SEMVER",
+        events: [{ introduced: "42.0.0" }, { fixed: "42.7.0" }],
+        provenance: CVE_PROVENANCE,
+      },
+    ]),
+  });
+  // Range does not apply (different product); no range_assessment attached.
+  assert.equal(pg.candidates[0]!.range_assessment, undefined);
+});
+
 test("a CVE List V5 product range matches case-insensitively by product name", async () => {
   const file = await writeSbom(cyclonedx([{ type: "library", name: "OpenSSL", version: "3.0.7" }]));
   const report = await checkSbom({

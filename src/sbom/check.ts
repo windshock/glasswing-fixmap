@@ -275,6 +275,26 @@ interface RangeApplicability {
 }
 
 /**
+ * Normalize a product/component name for a weak CVE-product-name match. Only a
+ * small allowlist of *distribution* qualifiers that do not change product
+ * identity is stripped (e.g. "NGINX Open Source" → "nginx", "OpenSSH portable" →
+ * "openssh"). Product-*differentiating* words (e.g. "JDBC Driver") are never
+ * stripped, so a namesake such as "PostgreSQL JDBC Driver" still does not match
+ * the "PostgreSQL" server.
+ */
+function normalizeProductName(name: string): string {
+  return name
+    .trim()
+    .toLowerCase()
+    .replace(/\s+(open\s?source|portable|community(\s+edition)?|oss)$/i, "")
+    .trim();
+}
+
+function productNameMatches(product: string | undefined, componentName: string): boolean {
+  return Boolean(product) && normalizeProductName(product!) === normalizeProductName(componentName);
+}
+
+/**
  * Whether an authoritative range applies to a candidate, and by what identity.
  * A CVE List V5 product range prefers a CPE 2.3 match (strong identity); a CPE
  * that is present on both sides but disjoint excludes the range (a namesake such
@@ -294,11 +314,9 @@ function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidat
     }
     // Both sides declare CPEs but none are compatible: a different product.
     if (relation.relation === "disjoint") return { applies: false };
-    // No usable CPE on one side: fall back to a weak product-name match.
-    return {
-      applies:
-        Boolean(range.product) && range.product!.toLowerCase() === candidate.component.name.toLowerCase(),
-    };
+    // No usable CPE on one side: fall back to a weak product-name match, tolerant
+    // of distribution qualifiers ("NGINX Open Source" vs "nginx").
+    return { applies: productNameMatches(range.product, candidate.component.name) };
   }
   if (candidate.identity_strength !== "strong") return { applies: false };
   const parsed = candidate.component.purl ? canonicalizePurl(candidate.component.purl) : undefined;
