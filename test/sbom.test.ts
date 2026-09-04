@@ -911,6 +911,40 @@ test("parses CVE List V5 affected ranges keyed by product, skipping git version 
   assert.deepEqual(records[1]!.events, [{ introduced: "1.1.1" }, { fixed: "1.1.1zh" }]);
 });
 
+test("parseCveRanges inverts defaultStatus:affected with an open-ended unaffected cutoff", () => {
+  const records = parseCveRanges(
+    {
+      cveMetadata: { cveId: "CVE-2026-13595" },
+      containers: {
+        cna: {
+          affected: [
+            {
+              product: "widget",
+              defaultStatus: "affected",
+              versions: [
+                // everything below 2.42.2 is affected; 2.42.2 and later unaffected
+                { version: "2.42.2", lessThan: "*", versionType: "rpm", status: "unaffected" },
+              ],
+            },
+            {
+              // a bounded unaffected window is ambiguous to invert -> no range
+              product: "widget2",
+              defaultStatus: "affected",
+              versions: [{ version: "1.0", lessThan: "1.5", status: "unaffected" }],
+            },
+          ],
+        },
+      },
+    },
+    "ANT-2026-DS",
+    CVE_PROVENANCE,
+  );
+  assert.equal(records.length, 1);
+  assert.equal(records[0]!.product, "widget");
+  assert.equal(records[0]!.range_type, "RPM");
+  assert.deepEqual(records[0]!.events, [{ introduced: "0" }, { fixed: "2.42.2" }]);
+});
+
 test("parseCveRanges marks a version line with changes[] unsupported (fail-safe UNKNOWN)", () => {
   const records = parseCveRanges(
     {

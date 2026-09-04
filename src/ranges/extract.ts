@@ -119,6 +119,7 @@ interface CveAffected {
   product?: string;
   packageName?: string;
   cpes?: unknown;
+  defaultStatus?: string;
   versions?: CveVersion[];
 }
 
@@ -149,8 +150,11 @@ export function parseCveRanges(
     const product = affected.packageName ?? affected.product;
     if (!product) continue;
     const cpes = stringArray(affected.cpes);
+    // `defaultStatus: "affected"` expresses "everything is affected except the
+    // listed unaffected cutoffs" — a real CVE List V5 pattern.
+    const defaultAffected =
+      (typeof affected.defaultStatus === "string" ? affected.defaultStatus : "").toLowerCase() === "affected";
     for (const entry of affected.versions ?? []) {
-      if (entry.status !== "affected") continue;
       // `versionType` is authoritative for ordering and is preserved, not
       // flattened to SEMVER. GIT ranges are commit boundaries, not comparable
       // versions.
@@ -163,16 +167,30 @@ export function parseCveRanges(
       const hasChanges = Array.isArray(entry.changes) && entry.changes.length > 0;
       const events: AffectedRangeEvent[] = [];
       const versions: string[] = [];
-      if (hasChanges) {
-        // Preserve the version and provenance for audit; the sentinel range_type
-        // keeps it from ever resolving to AFFECTED.
-        events.push({ introduced: entry.version });
-      } else if (typeof entry.lessThan === "string" && !entry.lessThan.includes("*")) {
-        events.push({ introduced: entry.version }, { fixed: entry.lessThan });
-      } else if (typeof entry.lessThanOrEqual === "string" && !entry.lessThanOrEqual.includes("*")) {
-        events.push({ introduced: entry.version }, { last_affected: entry.lessThanOrEqual });
+      if (entry.status === "affected") {
+        if (hasChanges) {
+          // Preserve the version and provenance for audit; the sentinel range_type
+          // keeps it from ever resolving to AFFECTED.
+          events.push({ introduced: entry.version });
+        } else if (typeof entry.lessThan === "string" && !entry.lessThan.includes("*")) {
+          events.push({ introduced: entry.version }, { fixed: entry.lessThan });
+        } else if (typeof entry.lessThanOrEqual === "string" && !entry.lessThanOrEqual.includes("*")) {
+          events.push({ introduced: entry.version }, { last_affected: entry.lessThanOrEqual });
+        } else {
+          versions.push(entry.version);
+        }
+      } else if (entry.status === "unaffected" && defaultAffected && !hasChanges) {
+        // With defaultStatus affected, an open-ended unaffected cutoff
+        // (`{version}` or `{version, lessThan:"*"}`) means everything below
+        // `version` is affected → invert to `[0, version)`. A bounded unaffected
+        // window is ambiguous to invert and is skipped.
+        if (entry.lessThan === undefined || entry.lessThan === "*") {
+          events.push({ introduced: "0" }, { fixed: entry.version });
+        } else {
+          continue;
+        }
       } else {
-        versions.push(entry.version);
+        continue;
       }
       const rangeType = hasChanges ? "CHANGES_UNSUPPORTED" : versionType.toUpperCase();
       const rangeRecord: AffectedRangeRecord = {
