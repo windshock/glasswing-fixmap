@@ -2,7 +2,7 @@
 
 Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Debian/RPM/Packagist comparators — not blocked on an algorithm (well-maintained implementations exist), but pending evaluation of an optional `univers` backend gated behind per-scheme differential conformance (Tier 3.13).
 
-Last updated: 2026-09-04 — issue #4 hardening: Tier 0 and Tier 1 complete; Tier 3.15 (Vanir hardening), Tier 2.10 (evidence hash), and the Tier 2.9 store (prototype validated) done; Tier 2 CLI/OpenVEX and Tier 3.12–3.14 pending (see roadmap below). Tier 3.13 reframed: Maven/Debian/RPM/Composer comparators are not blocked on an algorithm — evaluate an optional `univers` backend under differential conformance.
+Last updated: 2026-09-04 — issue #4 hardening: Tier 0, Tier 1, and Tier 2 complete (adjudication store + evidence hash + check-sbom reuse + `adjudicate` record/query/export-vex CLI + OpenVEX projection), plus Tier 3.15 (Vanir hardening). Pending: Tier 3.12 (distro normalization with backport uncertainty), 3.13 (optional `univers` comparator backend under differential conformance — not blocked on an algorithm), and 3.14 (UNKNOWN categorization + batch reporting). See roadmap below.
 
 ## Objective
 
@@ -645,10 +645,12 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
    `gating_eligible`, `reason`). Treat `range_assessment` as version/range
    evidence, not the final product-level disposition.
 
-### Tier 2 — persistence / interoperability
+### Tier 2 — persistence / interoperability — implemented 2026-09-04
+
+The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (record / query / export-vex), and OpenVEX projection are implemented and tested.
 
 9. **Internal adjudication store, separate from VEX (append-only / superseding).**
-   *(prototype validated 2026-09-04; CLI + check-sbom integration pending)* VEX is
+   *(done — store + check-sbom reuse + record/query CLI)* VEX is
    an interchange/export representation, not the canonical internal model.
    Glasswing must preserve richer states VEX does not model (`PATCH_NOT_FOUND`,
    `VERIFIER_CONFLICT`, `SOURCE_BINDING_UNVERIFIED`, `LIKELY_FALSE_POSITIVE`,
@@ -671,7 +673,7 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
    `check-sbom` candidates and surface a hash-miss as "re-adjudication needed"; a
    `record` / `query` CLI; and the OpenVEX projection (item 11).
 
-10. **Stronger evidence hash + invalidation.** *(hash done; invalidation wiring pending)* Bind the full decision context:
+10. **Stronger evidence hash + invalidation.** *(done — hash + check-sbom auto-invalidation on evidence change)* Bind the full decision context:
     ANT + CVE/GHSA IDs; canonical PURL/CPE + version + qualifiers; SBOM / document
     digest; fixmap source revision / manifest digest; affected-range record
     digest; fix-impact dataset / record digest; source-verification report digest;
@@ -680,7 +682,7 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
     re-adjudicate when any material input changes. Suppression stays explicitly
     human-approved and auditable.
 
-11. **Conservative VEX projection (OpenVEX first).** Suggested mapping: `AFFECTED`
+11. **Conservative VEX projection (OpenVEX first).** *(done — projectToOpenVex + `adjudicate export-vex`)* Suggested mapping: `AFFECTED`
     + strong identity → affected; `VERIFIED_FIXED` + `source_binding == verified`
     → fixed; `TARGET_ABSENT` + strong provenance → not_affected
     (`vulnerable_code_not_present`); `PATCH_NOT_FOUND` / `UNKNOWN` /
