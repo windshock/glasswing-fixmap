@@ -24,6 +24,15 @@ export function formatSbomCheck(report: SbomCheckReport): string {
           `    decision: ${decision.decision}${decision.gating_eligible ? " (gating)" : ""} — ${decision.reason}`,
         );
       }
+      if (candidate.prior_adjudication) {
+        const prior = candidate.prior_adjudication;
+        const review = prior.human_review
+          ? `human: ${prior.human_review.disposition} (${prior.human_review.approved_by})`
+          : prior.ai_review
+            ? `ai: ${prior.ai_review.verdict} (${prior.ai_review.confidence})`
+            : "recorded";
+        lines.push(`    adjudication: ${review} [reused ${prior.evidence_hash.slice(0, 12)}]`);
+      }
       if (candidate.range_assessment) {
         lines.push(
           `    range: ${candidate.range_assessment.verdict.toUpperCase()} — ${candidate.range_assessment.reason}`,

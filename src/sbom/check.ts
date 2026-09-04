@@ -1,7 +1,13 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { FindingRecord } from "../types.js";
 import type { FixImpactDataset } from "../impact/types.js";
+import type { AffectedRangeRecord as RangeRecord } from "../ranges/types.js";
+import type { AdjudicationStore } from "../adjudication/types.js";
+import { evidenceKeyForCandidate } from "../adjudication/store.js";
+import { computeEvidenceHash } from "../adjudication/evidence-hash.js";
+import { lookupAdjudication } from "../adjudication/store.js";
 import { verifySource } from "../verification/verify.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../ranges/types.js";
 import { SOURCE_VERIFICATION_SCHEMA_VERSION } from "../verification/types.js";
@@ -53,7 +59,21 @@ export interface CheckSbomOptions {
    * snapshot; a mismatch is surfaced as a warning rather than silently combined.
    */
   snapshot?: SnapshotIdentity;
+  /**
+   * Prior adjudications. When present, a stored review whose evidence hash matches
+   * a candidate is attached (reuse without re-running the Skill); a gating-relevant
+   * `UNKNOWN` with no current review is surfaced as needing adjudication.
+   */
+  adjudicationStore?: AdjudicationStore;
   adapters?: SbomAdapter[];
+}
+
+/** Stable digest of the applicable authoritative ranges for a candidate. */
+function rangeDigest(ranges: RangeRecord[]): string {
+  const projection = ranges
+    .map((range) => ({ provenance: range.provenance, range_type: range.range_type, events: range.events, versions: range.versions ?? [] }))
+    .sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1));
+  return createHash("sha256").update(JSON.stringify(projection)).digest("hex");
 }
 
 interface SnapshotIdentity {
@@ -267,7 +287,9 @@ function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidat
  * SBOM with no candidate Anthropic finding is a valid clean result, not an error.
  */
 export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckReport> {
-  const documents = await readSbomDocuments(options.sbomFile);
+  const rawSbom = await readFile(options.sbomFile, "utf8");
+  const documents = parseJsonDocuments(rawSbom);
+  const sbomDigest = createHash("sha256").update(rawSbom).digest("hex");
   const adapters = options.adapters ?? [new CycloneDxAdapter(), new SyftAdapter()];
   const warnings: string[] = [];
   const parsedResults: SbomParseResult[] = [];
@@ -320,6 +342,7 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   }
   const candidates = selectCandidates(components, options.findings);
 
+  const appliedRangeDigests = new Map<ComponentCandidate, string>();
   if (options.rangeDataset) {
     const ranges = options.rangeDataset.ranges;
     for (const candidate of candidates) {
@@ -340,6 +363,7 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
       }
       if (applicable.length > 0) {
         candidate.range_assessment = assessRanges(candidate.component.version, applicable);
+        appliedRangeDigests.set(candidate, rangeDigest(applicable));
       }
     }
   }
@@ -429,9 +453,31 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   }
 
   // Reduce every candidate's evidence to one explicit final decision so a
-  // downstream consumer never mistakes range evidence for a gating disposition.
+  // downstream consumer never mistakes range evidence for a gating disposition,
+  // then bind an evidence hash and reuse any stored adjudication for it.
   for (const candidate of candidates) {
     candidate.candidate_decision = decideCandidate(candidate);
+    const key = evidenceKeyForCandidate(candidate, {
+      sbom_digest: sbomDigest,
+      fixmap_source_revision: options.snapshot?.source_revision ?? null,
+      fixmap_source_manifest_sha3: options.snapshot?.source_manifest_sha3 ?? null,
+      affected_range_digest: appliedRangeDigests.get(candidate) ?? null,
+      source_verification_digest: candidate.verification
+        ? createHash("sha256").update(JSON.stringify(candidate.verification)).digest("hex")
+        : null,
+      source_binding: candidate.source_binding ?? null,
+    });
+    candidate.evidence_hash = computeEvidenceHash(key);
+    if (options.adjudicationStore) {
+      const prior = lookupAdjudication(options.adjudicationStore, candidate.evidence_hash);
+      if (prior) {
+        candidate.prior_adjudication = prior;
+      } else if (candidate.candidate_decision.decision === "UNKNOWN") {
+        warnings.push(
+          `${candidate.ant_id}: ${candidate.component.name}@${candidate.component.version ?? "?"} is UNKNOWN with no current adjudication (evidence ${candidate.evidence_hash.slice(0, 12)}); needs review`,
+        );
+      }
+    }
   }
 
   const packageComponentCount = components.filter(

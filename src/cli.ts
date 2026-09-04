@@ -17,6 +17,7 @@ import { checkSbom } from "./sbom/check.js";
 import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
 import { syncAffectedRanges } from "./ranges/sync.js";
 import { readAffectedRangeDataset } from "./ranges/read.js";
+import { readAdjudicationStore } from "./adjudication/store.js";
 
 const HELP = `glasswing-fixmap
 
@@ -66,6 +67,7 @@ Check SBOM options:
   --impacts <file>        Fix-impact input for --source (default: data/fix-impacts.json)
   --component <purl>      Restrict source verification to one canonical PURL
   --ranges <file>         Authoritative ranges for AFFECTED (data/affected-ranges.json)
+  --adjudications <file>  Prior adjudications to reuse (data/adjudications.json)
   --fail-on-affected      Exit non-zero when an authoritative AFFECTED is found
   --json                  Print the complete machine-readable report
   --output <file>         Also write the JSON report atomically
@@ -100,7 +102,7 @@ const COMMAND_OPTIONS: Record<string, readonly string[]> = {
   "sync-impacts": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", "--strict", ...COMMON_OPTIONS],
   "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
   "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
-  "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
+  "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
   report: [...COMMON_OPTIONS],
   validate: [...COMMON_OPTIONS],
   help: [...COMMON_OPTIONS],
@@ -125,6 +127,7 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--sbom",
     "--component",
     "--ranges",
+    "--adjudications",
     "--vanir-runner",
     "--vanir-signatures",
     "--vanir-vuln",
@@ -306,6 +309,10 @@ async function main(): Promise<void> {
     const rangeDataset = rangesFile
       ? await readAffectedRangeDataset(path.resolve(rangesFile))
       : undefined;
+    const adjudicationsFile = args.values.get("--adjudications");
+    const adjudicationStore = adjudicationsFile
+      ? await readAdjudicationStore(path.resolve(adjudicationsFile))
+      : undefined;
     const report = await checkSbom({
       sbomFile: path.resolve(sbom),
       findings: fixmap.findings,
@@ -318,6 +325,7 @@ async function main(): Promise<void> {
       ...(impactDataset ? { impactDataset } : {}),
       ...(component ? { component } : {}),
       ...(rangeDataset ? { rangeDataset } : {}),
+      ...(adjudicationStore ? { adjudicationStore } : {}),
     });
     const output = args.values.get("--output");
     if (output) await writeSbomCheck(report, path.resolve(output));

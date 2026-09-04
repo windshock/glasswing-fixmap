@@ -1,3 +1,4 @@
+import type { AdjudicationRecord } from "../adjudication/types.js";
 import type { SourceVerificationReport } from "../verification/types.js";
 
 export const SBOM_CHECK_SCHEMA_VERSION = "1.0.0" as const;
@@ -120,6 +121,13 @@ export interface ComponentCandidate {
    * Always populated by `checkSbom` for every candidate it returns.
    */
   candidate_decision?: CandidateDecision;
+  /**
+   * Deterministic hash binding this candidate's decision to its full evidence
+   * context; the key an adjudication is recorded and looked up under.
+   */
+  evidence_hash?: string;
+  /** A stored adjudication whose evidence hash matches this candidate, if any. */
+  prior_adjudication?: AdjudicationRecord;
 }
 
 export interface SbomCheckReport {

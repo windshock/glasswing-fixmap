@@ -253,6 +253,57 @@ test("adjudication store: latest-wins for a same-evidence correction and explici
   assert.equal(lookupAdjudication(store, hash), undefined);
 });
 
+test("check-sbom reuses a stored adjudication and re-flags it after the evidence moves", async () => {
+  const findings = [finding("ANT-2026-OSSL")];
+  const ranges = rangeDataset([cveRange("ANT-2026-OSSL", "3.0.0", "3.0.21")]);
+  const snapshot = { source_as_of: "2026-08-26T00:00:00Z", source_revision: 32, source_manifest_sha3: "f89b" };
+
+  // First scan: the weak UNKNOWN candidate exposes its evidence_hash and, with an
+  // empty store, is flagged as needing review.
+  const first = await checkSbom({
+    sbomFile: await sbomWithOpenssl("3.0.7"),
+    findings,
+    rangeDataset: ranges,
+    snapshot,
+    adjudicationStore: emptyStore(),
+  });
+  const candidate = first.candidates[0]!;
+  assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
+  assert.match(candidate.evidence_hash ?? "", /^[0-9a-f]{64}$/);
+  assert.ok(first.warnings.some((w) => w.includes("needs review")));
+
+  // Record a review against that exact evidence hash.
+  const store = appendAdjudication(emptyStore(), {
+    evidence_hash: candidate.evidence_hash!,
+    recorded_at: "2026-09-04T00:00:00Z",
+    subject: { ant_id: "ANT-2026-OSSL", component: { name: "openssl", version: "3.0.7" } },
+    machine_decision: "UNKNOWN",
+    ai_review: { verdict: "LIKELY_TRUE_POSITIVE", confidence: "medium", summary: "in the 3.0 line" },
+  });
+
+  // Second scan (same evidence): the review is reused, no re-review warning.
+  const reused = await checkSbom({
+    sbomFile: await sbomWithOpenssl("3.0.7"),
+    findings,
+    rangeDataset: ranges,
+    snapshot,
+    adjudicationStore: store,
+  });
+  assert.equal(reused.candidates[0]!.prior_adjudication?.ai_review?.verdict, "LIKELY_TRUE_POSITIVE");
+  assert.ok(!reused.warnings.some((w) => w.includes("needs review")));
+
+  // Evidence moves (version bump): the stored review no longer applies.
+  const moved = await checkSbom({
+    sbomFile: await sbomWithOpenssl("3.0.8"),
+    findings,
+    rangeDataset: ranges,
+    snapshot,
+    adjudicationStore: store,
+  });
+  assert.equal(moved.candidates[0]!.prior_adjudication, undefined);
+  assert.ok(moved.warnings.some((w) => w.includes("needs review")));
+});
+
 test("adjudication store round-trips through disk and fails closed on malformed input", async () => {
   const dir = await mkdtemp(path.join(os.tmpdir(), "glasswing-adjstore-"));
   const file = path.join(dir, "adjudications.json");

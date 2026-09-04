@@ -95,6 +95,8 @@
         },
         "verification": { "type": "object" },
         "source_binding": { "enum": ["verified", "user_asserted", "unverified"] },
+        "evidence_hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "prior_adjudication": { "type": "object" },
         "candidate_decision": {
           "type": "object",
           "additionalProperties": false,
