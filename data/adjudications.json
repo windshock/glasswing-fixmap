@@ -113,6 +113,29 @@
         "confidence": "high",
         "summary": "CORRECTED: libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
       }
+    },
+    {
+      "evidence_hash": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
+      "recorded_at": "2026-09-04T13:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "OpenSSL",
+          "version": "3.4-fips3.1"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "supersedes": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "medium",
+        "summary": "VERIFIED bounds from public source: openssl-3.4.0 has the vulnerable PKCS7_verify BIO_free_all(p7bio) cleanup; openssl-3.4.6 has the fix (while p7bio != indata). FIPS is orthogonal (PKCS7 is default-provider libcrypto). But '3.4-fips3.1' is NOT an upstream version (no fips release tag, 0 matching commits) - it is a Palo Alto vendor build string, so the exact base patch (3.4.0-3.4.5 vulnerable vs 3.4.6+ fixed) is NOT publicly resolvable. Irreducible residual: needs the actual PA build ('openssl version -a' / PA source), unlike libyang 0.16.46 which was an upstream commit."
+      }
     }
   ]
 }
