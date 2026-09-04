@@ -19,7 +19,17 @@ so existing behaviour was checked for byte-for-byte compatibility:
 
 ## SBOM corpus (16 real SBOMs)
 
-Formats exercised: CycloneDX 1.5, 1.6, and 1.7, and Syft native JSON 16.1.2.
+> Update (2026-09-04): after `sync-ranges` began consuming CVE List V5 ranges and
+> the OpenSSL/`versionType` comparator work, a larger private sweep (101 SBOMs)
+> now reaches deterministic range verdicts — `affected 42 / not_affected 72 /
+> unknown 3` — while still gating nothing, because every affected component in the
+> corpus is name-only (weak) identity. The residual `unknown` is the genuinely
+> unresolvable tail (a FIPS build variant, a Gentoo distro suffix, and the
+> `postgresql 42.4.0` rpm-typed JDBC namesake). The no-incorrect-decision and
+> non-gating properties below still hold; a CPE-bearing SBOM would let the engine
+> gate and would exclude the JDBC namesake outright.
+
+Formats exercised: CycloneDX 1.4, 1.5, 1.6, and 1.7, and Syft native JSON 16.1.2.
 Shapes exercised: single-document, newline-delimited multi-document, and
 concatenated pretty-printed multi-document (up to 83 BOMs in one file).
 Component counts ranged from a handful to 10,435 (a file-only inventory that

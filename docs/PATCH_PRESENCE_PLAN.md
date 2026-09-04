@@ -611,22 +611,24 @@ is now the genuinely unresolvable long tail (FIPS variant `3.4-fips3.1`, Gentoo
    to read → structural / schema / semantic validation → snapshot-compatibility
    validation → evaluate. Malformed security-decision input must fail closed.
 
-### Tier 1 — evidence integrity
+### Tier 1 — evidence integrity — implemented 2026-09-04
 
-5. **Bind fixmap / ranges / impacts to one snapshot.** Companion datasets carry
+All four Tier 1 items are implemented and covered by tests (78 passing).
+
+5. **Bind fixmap / ranges / impacts to one snapshot.** *(done)* Companion datasets carry
    only partial `generated_from` (schema version, `source_as_of`, source URL).
    Propagate and validate at least `fixmap_schema_version`, `source_as_of`,
    `source_revision`, and a `source_manifest` digest. At scan time, reject or
    explicitly mark incompatible / stale companions rather than silently combining
    a newer fixmap with older ranges/impacts.
 
-6. **Atomic scheduled refresh of all companion datasets.**
+6. **Atomic scheduled refresh of all companion datasets.** *(done)*
    `.github/workflows/update-data.yml` refreshes `fixmap` only. Run `sync` +
    `sync-ranges` + `sync-impacts` + snapshot-compatibility validation + verify /
    test → one data PR. (Now unblocked: `sync-ranges` measured 27s over 93
    findings.) Prevents stale range / impact data pairing with a newer fixmap.
 
-7. **Real CPE 2.3 matching (not string equality).** Adapters already preserve
+7. **Real CPE 2.3 matching (not string equality).** *(done)* Adapters already preserve
    CPEs and range records can carry CPEs; adding CPE as a strong identity source
    eliminates name-collision cases (JDBC driver vs database server). CPE 2.3 has
    wildcard / ANY / NA semantics, so do **not** implement `componentCpe ===
@@ -635,7 +637,7 @@ is now the genuinely unresolvable long tail (FIPS variant `3.4-fips3.1`, Gentoo
    `identity_strength: "strong"`, `identity_evidence: { component_cpe, range_cpe,
    relation }`. Ref: usnistgov/cpe-reference-implementation.
 
-8. **Separate range evidence from the final candidate decision.** A weak
+8. **Separate range evidence from the final candidate decision.** *(done)* A weak
    name-only candidate may legitimately carry `range_assessment.verdict:
    "affected"` while the CLI refuses to gate — safe inside the CLI but easy for a
    downstream JSON consumer or VEX exporter to misuse. Add an explicit
