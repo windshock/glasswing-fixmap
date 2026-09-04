@@ -502,6 +502,32 @@ test("a CVE List V5 product range is not_affected for an already-patched name-on
   assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
 });
 
+test("a --ranges dataset from a different fixmap snapshot is flagged, not silently combined", async () => {
+  const file = await writeSbom(cyclonedx([{ type: "library", name: "openssl", version: "3.0.7" }]));
+  const findings = [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")];
+  const ranges = rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]);
+  // ranges were generated at source_as_of 2026-09-02T00:00:00Z (see rangeDataset()).
+
+  const stale = await checkSbom({
+    sbomFile: file,
+    findings,
+    rangeDataset: ranges,
+    snapshot: { source_as_of: "2026-09-03T00:00:00Z", source_revision: 33, source_manifest_sha3: null },
+  });
+  assert.ok(
+    stale.warnings.some((warning) => warning.includes("--ranges dataset is from a different fixmap snapshot")),
+    JSON.stringify(stale.warnings),
+  );
+
+  const fresh = await checkSbom({
+    sbomFile: file,
+    findings,
+    rangeDataset: ranges,
+    snapshot: { source_as_of: "2026-09-02T00:00:00Z", source_revision: 32, source_manifest_sha3: null },
+  });
+  assert.ok(!fresh.warnings.some((warning) => warning.includes("different fixmap snapshot")));
+});
+
 test("cpeRelation matches on part/vendor/product, excludes namesakes, defers without CPEs", () => {
   const server = "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*";
   assert.equal(cpeRelation(["cpe:2.3:a:openssl:openssl:3.0.7:*:*:*:*:*:*:*"], [server]).relation, "match");

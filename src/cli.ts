@@ -309,6 +309,11 @@ async function main(): Promise<void> {
     const report = await checkSbom({
       sbomFile: path.resolve(sbom),
       findings: fixmap.findings,
+      snapshot: {
+        source_as_of: fixmap.metadata.source_as_of,
+        source_revision: fixmap.metadata.source_revision,
+        source_manifest_sha3: fixmap.metadata.source_manifest_sha3,
+      },
       ...(source ? { sourceRoot: path.resolve(source) } : {}),
       ...(impactDataset ? { impactDataset } : {}),
       ...(component ? { component } : {}),

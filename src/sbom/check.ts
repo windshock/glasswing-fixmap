@@ -47,7 +47,44 @@ export interface CheckSbomOptions {
   component?: string;
   /** Authoritative affected ranges used to reach an AFFECTED verdict. */
   rangeDataset?: AffectedRangeDataset;
+  /**
+   * Snapshot identity of the fixmap driving this scan. When present, companion
+   * datasets (`--ranges`, `--impacts`) are checked to belong to the same source
+   * snapshot; a mismatch is surfaced as a warning rather than silently combined.
+   */
+  snapshot?: SnapshotIdentity;
   adapters?: SbomAdapter[];
+}
+
+interface SnapshotIdentity {
+  source_as_of?: string;
+  source_revision?: number | string | null;
+  source_manifest_sha3?: string | null;
+}
+
+/**
+ * Whether a companion dataset was generated from a different source snapshot than
+ * the fixmap. A manifest digest is authoritative when both carry one; otherwise
+ * `source_as_of` and `source_revision` are compared.
+ */
+function companionStale(generated: SnapshotIdentity, snapshot: SnapshotIdentity): boolean {
+  if (generated.source_manifest_sha3 && snapshot.source_manifest_sha3) {
+    return generated.source_manifest_sha3 !== snapshot.source_manifest_sha3;
+  }
+  if (
+    generated.source_as_of &&
+    snapshot.source_as_of &&
+    generated.source_as_of !== snapshot.source_as_of
+  ) {
+    return true;
+  }
+  const generatedRevision = generated.source_revision;
+  const snapshotRevision = snapshot.source_revision;
+  return (
+    generatedRevision != null &&
+    snapshotRevision != null &&
+    String(generatedRevision) !== String(snapshotRevision)
+  );
 }
 
 /**
@@ -251,6 +288,22 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
     throw new Error(
       "Unsupported SBOM: expected CycloneDX JSON (1.5/1.6/1.7) or Syft native JSON (schema 16.1.2)",
     );
+  }
+
+  // Companion datasets must belong to the same source snapshot as the fixmap;
+  // a stale range/impact artifact paired with a newer fixmap is surfaced, not
+  // silently combined.
+  if (options.snapshot) {
+    if (options.rangeDataset && companionStale(options.rangeDataset.metadata.generated_from, options.snapshot)) {
+      warnings.push(
+        `--ranges dataset is from a different fixmap snapshot (ranges source_as_of ${options.rangeDataset.metadata.generated_from.source_as_of} vs fixmap ${options.snapshot.source_as_of ?? "unknown"}); re-run sync-ranges so all evidence shares one snapshot`,
+      );
+    }
+    if (options.impactDataset && companionStale(options.impactDataset.metadata.generated_from, options.snapshot)) {
+      warnings.push(
+        `--impacts dataset is from a different fixmap snapshot (impacts source_as_of ${options.impactDataset.metadata.generated_from.source_as_of} vs fixmap ${options.snapshot.source_as_of ?? "unknown"}); re-run sync-impacts so all evidence shares one snapshot`,
+      );
+    }
   }
 
   const format = parsedResults[0]!.format;

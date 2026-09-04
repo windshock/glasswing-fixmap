@@ -4,6 +4,8 @@
     "generated_from": {
       "fixmap_schema_version": "1.0.0",
       "source_as_of": "2026-08-26T18:55:53.809770Z",
+      "source_revision": 32,
+      "source_manifest_sha3": "f89b26dc49393d86613a9687a7b6e152d60e1b8de4066640707ded608fd51f5bd354b29ac790490fc0fc6ee3b01dcf7ae11617318a95129c9cbc0ae353b6d281",
       "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json"
     },
     "finding_count": 69,

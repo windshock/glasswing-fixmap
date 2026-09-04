@@ -66,6 +66,10 @@ export interface FixImpactMetadata {
   generated_from: {
     fixmap_schema_version: string;
     source_as_of: string;
+    /** Snapshot revision and manifest digest, bound so a scan can prove the
+     * companion belongs to the same fixmap snapshot. */
+    source_revision?: number | string | null;
+    source_manifest_sha3?: string | null;
     source_url: string;
   };
   finding_count: number;

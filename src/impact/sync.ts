@@ -151,6 +151,8 @@ export async function syncImpactDataset(options: SyncImpactOptions): Promise<Fix
       generated_from: {
         fixmap_schema_version: options.fixmap.metadata.schema_version,
         source_as_of: options.fixmap.metadata.source_as_of,
+        source_revision: options.fixmap.metadata.source_revision,
+        source_manifest_sha3: options.fixmap.metadata.source_manifest_sha3,
         source_url: options.fixmap.metadata.source_url,
       },
       finding_count: new Set(impacts.flatMap((impact) => impact.ant_ids)).size,

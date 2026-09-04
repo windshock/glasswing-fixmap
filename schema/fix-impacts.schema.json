@@ -250,6 +250,8 @@
           "properties": {
             "fixmap_schema_version": { "type": "string", "minLength": 1 },
             "source_as_of": { "type": "string", "minLength": 1 },
+            "source_revision": { "anyOf": [{ "type": "number" }, { "type": "string" }, { "type": "null" }] },
+            "source_manifest_sha3": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
             "source_url": { "type": "string", "pattern": "^https?://" }
           }
         },
