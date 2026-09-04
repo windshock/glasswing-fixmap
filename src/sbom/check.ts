@@ -7,6 +7,7 @@ import type { AffectedRangeDataset, AffectedRangeRecord } from "../ranges/types.
 import { SOURCE_VERIFICATION_SCHEMA_VERSION } from "../verification/types.js";
 import type { SourceVerificationReport } from "../verification/types.js";
 import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
+import { cpeRelation } from "./cpe.js";
 import { selectComparator } from "./comparator.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
 import { SyftAdapter } from "./syft.js";
@@ -183,23 +184,43 @@ function componentKey(component: NormalizedComponent): string {
   ].join("|");
 }
 
+interface RangeApplicability {
+  applies: boolean;
+  /** Present when a CPE 2.3 match established strong identity for this range. */
+  cpe?: NonNullable<ComponentCandidate["identity_evidence"]>;
+}
+
 /**
- * Whether an authoritative range applies to a candidate. A CVE List V5 product
- * range matches by component name (CVE records carry no package ecosystem), so
- * it can be evaluated even for a name-only, weak-identity candidate. An OSV
- * package-ecosystem range still requires strong PURL identity.
+ * Whether an authoritative range applies to a candidate, and by what identity.
+ * A CVE List V5 product range prefers a CPE 2.3 match (strong identity); a CPE
+ * that is present on both sides but disjoint excludes the range (a namesake such
+ * as a JDBC driver vs the database server). Absent CPEs fall back to a product-
+ * name match (weak, non-gating). An OSV package-ecosystem range still requires
+ * strong PURL identity.
  */
-function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidate): boolean {
-  if (range.ant_id !== candidate.ant_id) return false;
+function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidate): RangeApplicability {
+  if (range.ant_id !== candidate.ant_id) return { applies: false };
   if (range.source === "cve_list_v5") {
-    return Boolean(range.product) &&
-      range.product!.toLowerCase() === candidate.component.name.toLowerCase();
+    const relation = cpeRelation(candidate.component.cpes ?? [], range.cpes ?? []);
+    if (relation.relation === "match") {
+      return {
+        applies: true,
+        cpe: { component_cpe: relation.component_cpe!, range_cpe: relation.range_cpe!, relation: "match" },
+      };
+    }
+    // Both sides declare CPEs but none are compatible: a different product.
+    if (relation.relation === "disjoint") return { applies: false };
+    // No usable CPE on one side: fall back to a weak product-name match.
+    return {
+      applies:
+        Boolean(range.product) && range.product!.toLowerCase() === candidate.component.name.toLowerCase(),
+    };
   }
-  if (candidate.identity_strength !== "strong") return false;
+  if (candidate.identity_strength !== "strong") return { applies: false };
   const parsed = candidate.component.purl ? canonicalizePurl(candidate.component.purl) : undefined;
   const componentKey = parsed ? identityKeyForParsedPurl(parsed) : undefined;
-  if (!componentKey) return false;
-  return findingIdentityKey(range.ecosystem, range.package) === componentKey;
+  if (!componentKey) return { applies: false };
+  return { applies: findingIdentityKey(range.ecosystem, range.package) === componentKey };
 }
 
 /**
@@ -250,7 +271,20 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
     const ranges = options.rangeDataset.ranges;
     for (const candidate of candidates) {
       if (!candidate.component.version) continue;
-      const applicable = ranges.filter((range) => rangeAppliesTo(range, candidate));
+      const applicable: AffectedRangeRecord[] = [];
+      for (const range of ranges) {
+        const applicability = rangeAppliesTo(range, candidate);
+        if (!applicability.applies) continue;
+        applicable.push(range);
+        // A CPE 2.3 match is strong identity: elevate the candidate so its
+        // decision becomes gating-eligible, and record the CPE evidence.
+        if (applicability.cpe && candidate.identity_strength !== "strong") {
+          candidate.match_type = "cpe_match";
+          candidate.identity_strength = "strong";
+          candidate.confidence = "high";
+          candidate.identity_evidence = applicability.cpe;
+        }
+      }
       if (applicable.length > 0) {
         candidate.range_assessment = assessRanges(candidate.component.version, applicable);
       }

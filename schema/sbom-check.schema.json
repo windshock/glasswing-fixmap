@@ -48,7 +48,7 @@
         "ant_id": { "type": "string", "pattern": "^ANT-\\d{4}-[A-Z0-9]+$" },
         "project": { "type": "string" },
         "match_type": {
-          "enum": ["exact_purl", "ecosystem_package", "repository", "name_heuristic"]
+          "enum": ["exact_purl", "cpe_match", "ecosystem_package", "repository", "name_heuristic"]
         },
         "identity_strength": { "enum": ["strong", "weak"] },
         "confidence": { "enum": ["high", "medium", "low"] },
@@ -61,6 +61,7 @@
             "name": { "type": "string" },
             "version": { "type": "string" },
             "purl": { "type": "string" },
+            "cpes": { "type": "array", "items": { "type": "string" } },
             "repository": { "type": "string" },
             "locations": { "type": "array", "items": { "type": "string" } }
           }
@@ -71,6 +72,16 @@
           "properties": {
             "ecosystem": { "type": "string" },
             "package": { "type": "string" }
+          }
+        },
+        "identity_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["component_cpe", "range_cpe", "relation"],
+          "properties": {
+            "component_cpe": { "type": "string" },
+            "range_cpe": { "type": "string" },
+            "relation": { "enum": ["match"] }
           }
         },
         "range_assessment": {

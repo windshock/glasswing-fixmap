@@ -12,6 +12,7 @@ import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
 import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
+import { cpeRelation } from "../src/sbom/cpe.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
 import { parseAuthoritativeRanges, parseCveRanges } from "../src/ranges/extract.js";
 import { readAffectedRangeDataset, validateAffectedRangeDataset } from "../src/ranges/read.js";
@@ -499,6 +500,108 @@ test("a CVE List V5 product range is not_affected for an already-patched name-on
     rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]),
   });
   assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
+});
+
+test("cpeRelation matches on part/vendor/product, excludes namesakes, defers without CPEs", () => {
+  const server = "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*";
+  assert.equal(cpeRelation(["cpe:2.3:a:openssl:openssl:3.0.7:*:*:*:*:*:*:*"], [server]).relation, "match");
+  // JDBC driver vs the OpenSSL... use the postgresql namesake: different product token.
+  assert.equal(
+    cpeRelation(
+      ["cpe:2.3:a:postgresql:postgresql_jdbc_driver:42.4.0:*:*:*:*:*:*:*"],
+      ["cpe:2.3:a:postgresql:postgresql:*:*:*:*:*:*:*:*"],
+    ).relation,
+    "disjoint",
+  );
+  // A different vendor is also disjoint even when the product token matches.
+  assert.equal(cpeRelation(["cpe:2.3:a:acme:openssl:*:*:*:*:*:*:*:*"], [server]).relation, "disjoint");
+  // No parseable CPE on one side -> defer to a weaker signal.
+  assert.equal(cpeRelation([], [server]).relation, "unknown");
+  assert.equal(cpeRelation(["not-a-cpe"], [server]).relation, "unknown");
+  // The legacy 2.2 URI binding is accepted.
+  assert.equal(cpeRelation(["cpe:/a:openssl:openssl:1.1.1"], [server]).relation, "match");
+});
+
+function cveRangeWithCpe(
+  antId: string,
+  product: string,
+  cpe: string,
+  events: unknown[],
+  rangeType = "SEMVER",
+  versionType = "semver",
+): AffectedRangeRecord {
+  return {
+    ant_id: antId,
+    advisory: "CVE-2026-00000",
+    source: "cve_list_v5",
+    ecosystem: "cve",
+    package: product,
+    product,
+    version_type: versionType,
+    range_type: rangeType,
+    cpes: [cpe],
+    events: events as AffectedRangeRecord["events"],
+    provenance: CVE_PROVENANCE,
+  };
+}
+
+test("a CPE 2.3 match elevates a CVE range to strong identity and gates", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      { type: "library", name: "openssl", version: "3.0.7", cpe: "cpe:2.3:a:openssl:openssl:3.0.7:*:*:*:*:*:*:*" },
+    ]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([
+      cveRangeWithCpe(
+        "ANT-2026-OSSL",
+        "openssl",
+        "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+        [{ introduced: "3.0.0" }, { fixed: "3.0.21" }],
+      ),
+    ]),
+  });
+  const candidate = report.candidates[0]!;
+  assert.equal(candidate.match_type, "cpe_match");
+  assert.equal(candidate.identity_strength, "strong");
+  assert.equal(candidate.identity_evidence?.relation, "match");
+  assert.equal(candidate.candidate_decision?.decision, "AFFECTED");
+  assert.equal(candidate.candidate_decision?.gating_eligible, true);
+});
+
+test("a disjoint CPE excludes a namesake CVE range (JDBC driver vs server)", async () => {
+  const file = await writeSbom(
+    cyclonedx([
+      {
+        type: "library",
+        name: "postgresql",
+        version: "42.4.0",
+        cpe: "cpe:2.3:a:postgresql:postgresql_jdbc_driver:42.4.0:*:*:*:*:*:*:*",
+      },
+    ]),
+  );
+  const report = await checkSbom({
+    sbomFile: file,
+    findings: [packageFinding("ANT-2026-PG", "postgres/postgres", "npm", "postgresql")],
+    rangeDataset: rangeDataset([
+      cveRangeWithCpe(
+        "ANT-2026-PG",
+        "PostgreSQL",
+        "cpe:2.3:a:postgresql:postgresql:*:*:*:*:*:*:*:*",
+        [{ introduced: "0" }, { fixed: "14.23" }],
+        "RPM",
+        "rpm",
+      ),
+    ]),
+  });
+  const candidate = report.candidates[0]!;
+  // The range does not apply: the component CPE is a different product.
+  assert.equal(candidate.range_assessment, undefined);
+  assert.equal(candidate.match_type, "name_heuristic");
+  assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
+  assert.equal(candidate.candidate_decision?.gating_eligible, false);
 });
 
 test("candidate_decision separates the gating decision from weak range evidence", async () => {

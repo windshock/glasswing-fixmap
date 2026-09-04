@@ -77,6 +77,7 @@ function confidenceFor(matchType: MatchType): {
 } {
   switch (matchType) {
     case "exact_purl":
+    case "cpe_match":
     case "ecosystem_package":
       return { strength: "strong", confidence: "high" };
     case "repository":
@@ -100,6 +101,7 @@ function candidate(
   };
   if (component.version) componentView.version = component.version;
   if (component.purl) componentView.purl = component.purl;
+  if (component.cpes.length > 0) componentView.cpes = component.cpes;
   if (component.repository) componentView.repository = component.repository;
   const findingIdentity: ComponentCandidate["finding_identity"] = {};
   if (identity.ecosystem) findingIdentity.ecosystem = identity.ecosystem;

@@ -34,7 +34,7 @@ export interface SbomAdapter {
   parse(document: unknown): Promise<SbomParseResult>;
 }
 
-export type MatchType = "exact_purl" | "ecosystem_package" | "repository" | "name_heuristic";
+export type MatchType = "exact_purl" | "cpe_match" | "ecosystem_package" | "repository" | "name_heuristic";
 
 export type IdentityStrength = "strong" | "weak";
 
@@ -95,12 +95,19 @@ export interface ComponentCandidate {
     name: string;
     version?: string;
     purl?: string;
+    cpes?: string[];
     repository?: string;
     locations: string[];
   };
   finding_identity: {
     ecosystem?: string;
     package?: string;
+  };
+  /** Present when identity was established or refuted by a CPE 2.3 match. */
+  identity_evidence?: {
+    component_cpe: string;
+    range_cpe: string;
+    relation: "match";
   };
   /** Present only when an authoritative range and a supporting comparator exist. */
   range_assessment?: RangeAssessment;
