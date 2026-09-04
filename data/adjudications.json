@@ -68,6 +68,182 @@
         "confidence": "medium",
         "summary": "VERIFIED bounds from public source: openssl-3.4.0 has the vulnerable PKCS7_verify cleanup, openssl-3.4.6 has the fix, FIPS is orthogonal (default-provider libcrypto). But '3.4-fips3.1' is a Palo Alto vendor build string, not an upstream version, so the exact base patch (3.4.0-3.4.5 vulnerable vs 3.4.6+ fixed) is not publicly resolvable — needs the actual PA build ('openssl version -a')."
       }
+    },
+    {
+      "evidence_hash": "f2a63e26394bc4785e9fcd2502e1a06f29dc95f854d68eab7950101f967855ba",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-X3EB6DN3",
+        "component": {
+          "name": "libexpat",
+          "version": "2.1.0"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-56132"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified: the vulnerable doProlog pre-image in expat/lib/xmlparse.c is present at R_2_1_0 and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). SBOM->build binding user_asserted -> LIKELY_TRUE_POSITIVE (high)."
+      }
+    },
+    {
+      "evidence_hash": "691c9cc327e5a31cdf78fd94a9500dd41885b17224c08a7fcba2e56baf0067df",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-TZQ1KH7E",
+        "component": {
+          "name": "libyang",
+          "version": "2.1.128"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-41401"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "medium",
+        "summary": "Source-verified: fix absent at v2.1.128; unlike the 0.16 line, the vulnerable lyd_meta metadata-list subsystem exists in the 2.x line. Main-file fingerprint match was weaker (version drift), so confidence medium; SBOM->build binding user_asserted -> LIKELY_TRUE_POSITIVE."
+      }
+    },
+    {
+      "evidence_hash": "0c8b6ce0781bec9e20752db0734ca1a67b724cc5417f7352b55376732868a5b7",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "openssl",
+          "version": "1.1.1g"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
+    },
+    {
+      "evidence_hash": "1eae9ef3138fdf4b1f673e3cfd4c056f88c2585e4cef9cccfae0c3e72da01eaa",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "openssl",
+          "version": "3.0.7"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
+    },
+    {
+      "evidence_hash": "643ecdcf290454dd6c4e08a36fefbaa437f2c2abaf121e0fdda3007eb379d848",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "openssl",
+          "version": "1.0.2k"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
+    },
+    {
+      "evidence_hash": "c2684145736a6ff70487e3ab796dc8692d45a1e21ac8336198720caea73284e1",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "openssl",
+          "version": "1.0.2"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
+    },
+    {
+      "evidence_hash": "42f465c1f4d5db6f77d68a9223329943b3db3971f446f0211101a670c1751924",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "OpenSSL",
+          "version": "1.1.1d"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
+    },
+    {
+      "evidence_hash": "5311ed9feb6c06406131be8380da103cddbfa3cb5a5334a49209f65d7c7cb946",
+      "recorded_at": "2026-09-04T15:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "OpenSSL",
+          "version": "1.0.2q"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
+      }
     }
   ]
 }
