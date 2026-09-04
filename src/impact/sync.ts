@@ -32,6 +32,32 @@ function isGitHubCommitUrl(url: string): boolean {
   }
 }
 
+// github.com paths whose first segment is a reserved namespace, not a repo owner.
+// A URL like github.com/advisories/GHSA-.../... or github.com/user-attachments/...
+// is not a commit in `owner/repo` and must not be fetched as one (it 404s).
+const GITHUB_RESERVED_OWNERS = new Set([
+  "advisories",
+  "user-attachments",
+  "sponsors",
+  "orgs",
+  "users",
+  "settings",
+  "apps",
+  "marketplace",
+  "topics",
+  "collections",
+  "notifications",
+  "login",
+  "join",
+  "about",
+]);
+
+function isPlausibleRepository(repository: string): boolean {
+  const [owner, repo] = repository.split("/");
+  if (!owner || !repo) return false;
+  return !GITHUB_RESERVED_OWNERS.has(owner.toLowerCase());
+}
+
 function mergePrefixCandidates(candidates: ImpactCandidate[]): ImpactCandidate[] {
   const merged: ImpactCandidate[] = [];
   for (const candidate of [...candidates].sort((a, b) =>
@@ -70,7 +96,7 @@ function candidatesFromFixmap(
   for (const finding of fixmap.findings) {
     if (only && !only.has(finding.ant_id)) continue;
     for (const commit of finding.fix_commits) {
-      if (!commit.repository || !isGitHubCommitUrl(commit.url)) continue;
+      if (!commit.repository || !isPlausibleRepository(commit.repository) || !isGitHubCommitUrl(commit.url)) continue;
       candidates.push({
         repository: commit.repository,
         commit: commit.sha,

@@ -8,120 +8,13 @@
       "source_manifest_sha3": "f89b26dc49393d86613a9687a7b6e152d60e1b8de4066640707ded608fd51f5bd354b29ac790490fc0fc6ee3b01dcf7ae11617318a95129c9cbc0ae353b6d281",
       "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json"
     },
-    "finding_count": 104,
-    "impact_count": 117,
+    "finding_count": 100,
+    "impact_count": 112,
     "complete_count": 112,
     "partial_count": 0,
-    "error_count": 5
+    "error_count": 0
   },
   "impacts": [
-    {
-      "repository": "advisories/GHSA-hg75-4cmp-f367",
-      "commit": "e5ab7fa74",
-      "ant_ids": [
-        "ANT-2026-K8YY7WWS"
-      ],
-      "extraction_status": "error",
-      "files": [],
-      "evidence": [
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-K8YY7WWS",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "github_repository",
-          "url": "https://github.com/advisories/GHSA-hg75-4cmp-f367/commit/e5ab7fa74",
-          "locator": "commit impact extraction failed"
-        }
-      ],
-      "warnings": [
-        "Unable to extract GitHub commit impact: Error: HTTP 404 Not Found: https://api.github.com/repos/advisories/GHSA-hg75-4cmp-f367/commits/e5ab7fa74?per_page=100&page=1"
-      ]
-    },
-    {
-      "repository": "advisories/GHSA-m62j-63mf-xr95",
-      "commit": "b95d5a25777cc8910d2c2a921c68c778a3b30498",
-      "ant_ids": [
-        "ANT-2026-PCBAKVPB"
-      ],
-      "extraction_status": "error",
-      "files": [],
-      "evidence": [
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-PCBAKVPB",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "github_repository",
-          "url": "https://github.com/advisories/GHSA-m62j-63mf-xr95/commit/b95d5a25777cc8910d2c2a921c68c778a3b30498",
-          "locator": "commit impact extraction failed"
-        }
-      ],
-      "warnings": [
-        "Unable to extract GitHub commit impact: Error: HTTP 404 Not Found: https://api.github.com/repos/advisories/GHSA-m62j-63mf-xr95/commits/b95d5a25777cc8910d2c2a921c68c778a3b30498?per_page=100&page=1"
-      ]
-    },
-    {
-      "repository": "advisories/GHSA-mpxh-8fq3-x8mh",
-      "commit": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
-      "ant_ids": [
-        "ANT-2026-H97FY6C8",
-        "ANT-2026-RXYVE4DZ"
-      ],
-      "extraction_status": "error",
-      "files": [],
-      "evidence": [
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-H97FY6C8",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-RXYVE4DZ",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "github_repository",
-          "url": "https://github.com/advisories/GHSA-mpxh-8fq3-x8mh/commit/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
-          "locator": "commit impact extraction failed"
-        }
-      ],
-      "warnings": [
-        "Unable to extract GitHub commit impact: Error: HTTP 404 Not Found: https://api.github.com/repos/advisories/GHSA-mpxh-8fq3-x8mh/commits/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7?per_page=100&page=1"
-      ]
-    },
-    {
-      "repository": "advisories/GHSA-v782-6fq4-q827",
-      "commit": "70da513",
-      "ant_ids": [
-        "ANT-2026-2FETJP49"
-      ],
-      "extraction_status": "error",
-      "files": [],
-      "evidence": [
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-2FETJP49",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "github_repository",
-          "url": "https://github.com/advisories/GHSA-v782-6fq4-q827/commit/70da513",
-          "locator": "commit impact extraction failed"
-        }
-      ],
-      "warnings": [
-        "Unable to extract GitHub commit impact: Error: HTTP 404 Not Found: https://api.github.com/repos/advisories/GHSA-v782-6fq4-q827/commits/70da513?per_page=100&page=1"
-      ]
-    },
     {
       "repository": "alanxz/rabbitmq-c",
       "commit": "4777d0b5c58cb02966a04a85832436bd66ed5d1f",
@@ -78743,31 +78636,6 @@
         }
       ],
       "warnings": []
-    },
-    {
-      "repository": "user-attachments/files",
-      "commit": "36babe770e83d2104f752c0c10d61eb945321f65",
-      "ant_ids": [
-        "ANT-2026-7ZJGE8XJ"
-      ],
-      "extraction_status": "error",
-      "files": [],
-      "evidence": [
-        {
-          "source": "anthropic_finding",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-7ZJGE8XJ",
-          "locator": "REPORT fix statement",
-          "note": "Commit identifier reported in the public finding body"
-        },
-        {
-          "source": "github_repository",
-          "url": "https://github.com/user-attachments/files/commit/36babe770e83d2104f752c0c10d61eb945321f65",
-          "locator": "commit impact extraction failed"
-        }
-      ],
-      "warnings": [
-        "Unable to extract GitHub commit impact: Error: HTTP 404 Not Found: https://api.github.com/repos/user-attachments/files/commits/36babe770e83d2104f752c0c10d61eb945321f65?per_page=100&page=1"
-      ]
     },
     {
       "repository": "util-linux/util-linux",
