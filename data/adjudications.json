@@ -4,8 +4,8 @@
   },
   "records": [
     {
-      "evidence_hash": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
-      "recorded_at": "2026-09-04T00:00:00Z",
+      "evidence_hash": "7beaaf87405376d0e346a835eb86d697cc9d1ee648a028abfae944cf8c83c1be",
+      "recorded_at": "2026-09-04T14:00:00Z",
       "subject": {
         "ant_id": "ANT-2026-TZQ1KH7E",
         "component": {
@@ -19,60 +19,15 @@
         ]
       },
       "machine_decision": "UNKNOWN",
-      "ai_review": {
-        "verdict": "LIKELY_TRUE_POSITIVE",
-        "confidence": "high",
-        "summary": "base 0.16 line is entirely below fix 5.4.3 (coverage-dominant affected); a Gentoo _p3 backport of a 5.4.3-era fix is implausible given the version gap"
-      }
-    },
-    {
-      "evidence_hash": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
-      "recorded_at": "2026-09-04T00:00:00Z",
-      "subject": {
-        "ant_id": "ANT-2026-AYWQW7P2",
-        "component": {
-          "name": "OpenSSL",
-          "version": "3.4-fips3.1"
-        }
-      },
-      "finding": {
-        "vulnerability_ids": [
-          "CVE-2026-45447"
-        ]
-      },
-      "machine_decision": "UNKNOWN",
-      "ai_review": {
-        "verdict": "LIKELY_TRUE_POSITIVE",
-        "confidence": "medium",
-        "summary": "FIPS is orthogonal to the default-provider PKCS7_verify bug; base 3.4 is affected below 3.4.6 and the string does not indicate >=3.4.6; confirm exact patch with 'openssl version -a'"
-      }
-    },
-    {
-      "evidence_hash": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
-      "recorded_at": "2026-09-04T12:00:00Z",
-      "subject": {
-        "ant_id": "ANT-2026-TZQ1KH7E",
-        "component": {
-          "name": "libyang",
-          "version": "0.16_p3"
-        }
-      },
-      "finding": {
-        "vulnerability_ids": [
-          "CVE-2026-41401"
-        ]
-      },
-      "machine_decision": "UNKNOWN",
-      "supersedes": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
       "ai_review": {
         "verdict": "LIKELY_FALSE_POSITIVE",
         "confidence": "high",
-        "summary": "CORRECTED: the vulnerable subsystem was introduced long after 0.16. 0.16.46 is an upstream commit (6ed7a85, 2018-10-11) whose tree_data.h/parser.c use the old lyd_attr architecture; struct lyd_meta and lyd_parser_set_data_flags (the CVE's UAF site) do not exist and appear only in the 2.x rewrite. The CVE range <5.4.3 is historically over-broad. Supersedes the earlier LIKELY_TRUE_POSITIVE which wrongly leaned on version-in-range without introduction-timing."
+        "summary": "libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
       }
     },
     {
-      "evidence_hash": "1e93e1eb172f3795b9074172ec03c6d2b24bd051893abd35b358d287d76889cf",
-      "recorded_at": "2026-09-04T12:30:00Z",
+      "evidence_hash": "24082ded5eadb7443fb4ea9250aa6c475217ab93619da70534745ffa8cae2837",
+      "recorded_at": "2026-09-04T14:00:00Z",
       "subject": {
         "ant_id": "ANT-2026-TZQ1KH7E",
         "component": {
@@ -89,34 +44,12 @@
       "ai_review": {
         "verdict": "LIKELY_FALSE_POSITIVE",
         "confidence": "high",
-        "summary": "CORRECTED: libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
+        "summary": "libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
       }
     },
     {
-      "evidence_hash": "d123147c8f5125b0ebd377343c5e7ab8a2619403ea12fb94930a3625a64a86d6",
-      "recorded_at": "2026-09-04T12:30:00Z",
-      "subject": {
-        "ant_id": "ANT-2026-TZQ1KH7E",
-        "component": {
-          "name": "libyang",
-          "version": "0.16.46"
-        }
-      },
-      "finding": {
-        "vulnerability_ids": [
-          "CVE-2026-41401"
-        ]
-      },
-      "machine_decision": "UNKNOWN",
-      "ai_review": {
-        "verdict": "LIKELY_FALSE_POSITIVE",
-        "confidence": "high",
-        "summary": "CORRECTED: libyang 0.16 line predates the vulnerable lyd_meta/lyd_parser_set_data_flags subsystem (introduced in the 2.x rewrite; absent at upstream commit 6ed7a85 = 0.16.46, 2018-10). CVE range <5.4.3 is historically over-broad; the vulnerable behavior does not exist in this version."
-      }
-    },
-    {
-      "evidence_hash": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
-      "recorded_at": "2026-09-04T13:00:00Z",
+      "evidence_hash": "79913bc453aeb9ea0ff6784312e59b48c7db44375c70ff46966c76b866e00505",
+      "recorded_at": "2026-09-04T14:00:00Z",
       "subject": {
         "ant_id": "ANT-2026-AYWQW7P2",
         "component": {
@@ -130,11 +63,10 @@
         ]
       },
       "machine_decision": "UNKNOWN",
-      "supersedes": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
       "ai_review": {
         "verdict": "LIKELY_TRUE_POSITIVE",
         "confidence": "medium",
-        "summary": "VERIFIED bounds from public source: openssl-3.4.0 has the vulnerable PKCS7_verify BIO_free_all(p7bio) cleanup; openssl-3.4.6 has the fix (while p7bio != indata). FIPS is orthogonal (PKCS7 is default-provider libcrypto). But '3.4-fips3.1' is NOT an upstream version (no fips release tag, 0 matching commits) - it is a Palo Alto vendor build string, so the exact base patch (3.4.0-3.4.5 vulnerable vs 3.4.6+ fixed) is NOT publicly resolvable. Irreducible residual: needs the actual PA build ('openssl version -a' / PA source), unlike libyang 0.16.46 which was an upstream commit."
+        "summary": "VERIFIED bounds from public source: openssl-3.4.0 has the vulnerable PKCS7_verify cleanup, openssl-3.4.6 has the fix, FIPS is orthogonal (default-provider libcrypto). But '3.4-fips3.1' is a Palo Alto vendor build string, not an upstream version, so the exact base patch (3.4.0-3.4.5 vulnerable vs 3.4.6+ fixed) is not publicly resolvable — needs the actual PA build ('openssl version -a')."
       }
     }
   ]

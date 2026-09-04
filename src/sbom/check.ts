@@ -334,7 +334,6 @@ function rangeAppliesTo(range: AffectedRangeRecord, candidate: ComponentCandidat
 export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckReport> {
   const rawSbom = await readFile(options.sbomFile, "utf8");
   const documents = parseJsonDocuments(rawSbom);
-  const sbomDigest = createHash("sha256").update(rawSbom).digest("hex");
   const adapters = options.adapters ?? [new CycloneDxAdapter(), new SyftAdapter()];
   const warnings: string[] = [];
   const parsedResults: SbomParseResult[] = [];
@@ -522,8 +521,13 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   // then bind an evidence hash and reuse any stored adjudication for it.
   for (const candidate of candidates) {
     candidate.candidate_decision = decideCandidate(candidate);
+    // The evidence key deliberately excludes the SBOM document digest: an
+    // adjudication is a judgment about a component version against a range and a
+    // decision, which is document-independent. Binding it to the component
+    // identity + version + applied range + snapshot + machine decision lets the
+    // same review be reused across every SBOM that carries the same component,
+    // while any change to those inputs still moves the hash and re-flags it.
     const key = evidenceKeyForCandidate(candidate, {
-      sbom_digest: sbomDigest,
       fixmap_source_revision: options.snapshot?.source_revision ?? null,
       fixmap_source_manifest_sha3: options.snapshot?.source_manifest_sha3 ?? null,
       affected_range_digest: appliedRangeDigests.get(candidate) ?? null,
