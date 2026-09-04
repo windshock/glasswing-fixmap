@@ -2,7 +2,7 @@
 
 Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Packagist comparators (blocked on a well-maintained library).
 
-Last updated: 2026-09-02
+Last updated: 2026-09-04 — issue #4 hardening: Tier 0 and Tier 1 complete; Tier 3.14 (Vanir hardening) and Tier 2.10 (evidence-hash foundation) done; Tier 2 store/OpenVEX and Tier 3.12–3.13 pending (see roadmap below).
 
 ## Objective
 
@@ -657,7 +657,7 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
    **supersedes** the prior review and preserves its audit history rather than
    overwriting one key.
 
-10. **Stronger evidence hash + invalidation.** Bind the full decision context:
+10. **Stronger evidence hash + invalidation.** *(hash done; invalidation wiring pending)* Bind the full decision context:
     ANT + CVE/GHSA IDs; canonical PURL/CPE + version + qualifiers; SBOM / document
     digest; fixmap source revision / manifest digest; affected-range record
     digest; fix-impact dataset / record digest; source-verification report digest;
