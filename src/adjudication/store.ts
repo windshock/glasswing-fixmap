@@ -90,6 +90,14 @@ export function lookupAdjudication(store: AdjudicationStore, evidenceHash: strin
   return latest;
 }
 
+/** The current (latest, non-invalidated) record for each distinct evidence hash. */
+export function currentRecords(store: AdjudicationStore): AdjudicationRecord[] {
+  const hashes = [...new Set(store.records.map((record) => record.evidence_hash))];
+  return hashes
+    .map((hash) => lookupAdjudication(store, hash))
+    .filter((record): record is AdjudicationRecord => record !== undefined);
+}
+
 /**
  * Build the evidence key for a candidate. Binds component identity and the
  * machine decision; the caller supplies the surrounding snapshot/digests so the

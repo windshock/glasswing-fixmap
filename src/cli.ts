@@ -5,7 +5,7 @@ import process from "node:process";
 import { HttpClient } from "./http.js";
 import { syncImpactDataset } from "./impact/sync.js";
 import type { FixImpactDataset } from "./impact/types.js";
-import { readDataset } from "./output.js";
+import { atomicWrite, readDataset } from "./output.js";
 import { syncFixmap } from "./sync.js";
 import { validateDataset } from "./validate.js";
 import { formatSourceVerification, writeSourceVerification } from "./verification/output.js";
@@ -20,12 +20,14 @@ import { syncAffectedRanges } from "./ranges/sync.js";
 import { readAffectedRangeDataset } from "./ranges/read.js";
 import {
   appendAdjudication,
+  currentRecords,
   lookupAdjudication,
   readAdjudicationStore,
   readOrEmptyAdjudicationStore,
   validateAdjudicationRecord,
   writeAdjudicationStore,
 } from "./adjudication/store.js";
+import { projectToOpenVex } from "./adjudication/vex.js";
 import type { AdjudicationRecord } from "./adjudication/types.js";
 
 const HELP = `glasswing-fixmap
@@ -40,6 +42,7 @@ Usage:
   glasswing-fixmap sync-ranges [options]
   glasswing-fixmap adjudicate record --store <file> [--input <review.json>]
   glasswing-fixmap adjudicate query --store <file> --evidence-hash <hash>
+  glasswing-fixmap adjudicate export-vex --store <file> [--author <a>] [--output <f>]
 
 Sync options:
   --output <dir>          Output directory (default: data)
@@ -114,7 +117,7 @@ const COMMAND_OPTIONS: Record<string, readonly string[]> = {
   "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
   "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
   "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
-  adjudicate: ["--store", "--input", "--evidence-hash", ...COMMON_OPTIONS],
+  adjudicate: ["--store", "--input", "--evidence-hash", "--author", "--output", ...COMMON_OPTIONS],
   report: [...COMMON_OPTIONS],
   validate: [...COMMON_OPTIONS],
   help: [...COMMON_OPTIONS],
@@ -143,6 +146,7 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--store",
     "--input",
     "--evidence-hash",
+    "--author",
     "--vanir-runner",
     "--vanir-signatures",
     "--vanir-vuln",
@@ -407,7 +411,22 @@ async function main(): Promise<void> {
       if (!record) process.exitCode = 1;
       return;
     }
-    throw new Error("adjudicate requires a subcommand: 'record' or 'query'");
+    if (subcommand === "export-vex") {
+      // VEX is an export view of the current dispositions, not the source of truth.
+      const store = await readAdjudicationStore(storePath);
+      const timestamp = new Date().toISOString();
+      const document = projectToOpenVex(currentRecords(store), {
+        author: args.values.get("--author") ?? "glasswing-fixmap",
+        timestamp,
+        id: `glasswing-vex-${timestamp}`,
+      });
+      const serialized = `${JSON.stringify(document, null, 2)}\n`;
+      const output = args.values.get("--output");
+      if (output) await atomicWrite(path.resolve(output), serialized);
+      else process.stdout.write(serialized);
+      return;
+    }
+    throw new Error("adjudicate requires a subcommand: 'record', 'query', or 'export-vex'");
   }
   if (args.command === "sync-ranges") {
     const concurrency = Number(args.values.get("--concurrency") ?? "4");

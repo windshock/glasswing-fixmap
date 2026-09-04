@@ -10,6 +10,8 @@ export interface AdjudicationRecord {
     ant_id: string;
     component: { name: string; version?: string; purl?: string; cpes?: string[] };
   };
+  /** The advisory identifiers, so a VEX export can name the vulnerability. */
+  finding?: { vulnerability_ids?: string[] };
   /** The deterministic engine decision this adjudication is attached to. */
   machine_decision: string;
   /** AI second opinion (verdict is review metadata, never a gate). */

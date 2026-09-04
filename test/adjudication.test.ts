@@ -15,6 +15,7 @@ import {
   writeAdjudicationStore,
 } from "../src/adjudication/store.js";
 import type { AdjudicationRecord } from "../src/adjudication/types.js";
+import { projectRecordToOpenVex, projectToOpenVex } from "../src/adjudication/vex.js";
 import { checkSbom } from "../src/sbom/check.js";
 import type { AffectedRangeDataset, AffectedRangeRecord } from "../src/ranges/types.js";
 import type { FindingRecord } from "../src/types.js";
@@ -344,4 +345,60 @@ test("readOrEmptyAdjudicationStore returns an empty store when the file is absen
   const store = await readOrEmptyAdjudicationStore(missing);
   assert.deepEqual(store.records, []);
   assert.equal(store.metadata.schema_version, "1.0.0");
+});
+
+function record(partial: Partial<AdjudicationRecord> & Pick<AdjudicationRecord, "machine_decision">): AdjudicationRecord {
+  return {
+    evidence_hash: "a".repeat(64),
+    recorded_at: "2026-09-04T00:00:00Z",
+    subject: { ant_id: "ANT-2026-OSSL", component: { name: "openssl", version: "3.0.7" } },
+    finding: { vulnerability_ids: ["CVE-2026-45447"] },
+    ...partial,
+  };
+}
+
+test("OpenVEX projection collapses machine decisions conservatively", () => {
+  const status = (r: AdjudicationRecord) => projectRecordToOpenVex(r)[0]!;
+  assert.equal(status(record({ machine_decision: "AFFECTED" })).status, "affected");
+  assert.equal(status(record({ machine_decision: "UNKNOWN" })).status, "under_investigation");
+  assert.equal(status(record({ machine_decision: "PATCH_NOT_FOUND" })).status, "under_investigation");
+  // VERIFIED_FIXED is NOT exported as fixed (source is user_asserted, not verified).
+  assert.equal(status(record({ machine_decision: "VERIFIED_FIXED" })).status, "under_investigation");
+
+  const targetAbsent = status(record({ machine_decision: "TARGET_ABSENT" }));
+  assert.equal(targetAbsent.status, "not_affected");
+  assert.equal(targetAbsent.justification, "vulnerable_code_not_present");
+
+  const notAffected = status(record({ machine_decision: "NOT_AFFECTED" }));
+  assert.equal(notAffected.status, "not_affected");
+  assert.ok(notAffected.impact_statement);
+});
+
+test("OpenVEX: a human disposition is authoritative and names the CVE and product", () => {
+  const withPurl = record({
+    machine_decision: "UNKNOWN",
+    subject: { ant_id: "ANT-2026-OSSL", component: { name: "openssl", version: "3.0.7", purl: "pkg:generic/openssl@3.0.7" } },
+    human_review: { disposition: "not_affected", approved_by: "windshock", justification: "feature not built in this configuration" },
+  });
+  const statement = projectRecordToOpenVex(withPurl)[0]!;
+  assert.equal(statement.status, "not_affected"); // human overrides machine UNKNOWN
+  assert.equal(statement.impact_statement, "feature not built in this configuration");
+  assert.equal(statement.vulnerability.name, "CVE-2026-45447");
+  assert.equal(statement.products[0]!["@id"], "pkg:generic/openssl@3.0.7");
+
+  // Falls back to ant_id and name@version when CVE/PURL are absent.
+  const bare = projectRecordToOpenVex(record({ machine_decision: "UNKNOWN", finding: undefined }))[0]!;
+  assert.equal(bare.vulnerability.name, "ANT-2026-OSSL");
+  assert.equal(bare.products[0]!["@id"], "openssl@3.0.7");
+});
+
+test("projectToOpenVex builds a well-formed OpenVEX document", () => {
+  const doc = projectToOpenVex([record({ machine_decision: "AFFECTED" })], {
+    author: "glasswing",
+    timestamp: "2026-09-04T00:00:00Z",
+    id: "glasswing-vex-1",
+  });
+  assert.equal(doc["@context"], "https://openvex.dev/ns/v0.2.0");
+  assert.equal(doc.statements.length, 1);
+  assert.equal(doc.statements[0]!.status, "affected");
 });
