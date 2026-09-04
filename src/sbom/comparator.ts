@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import semver from "semver";
 import * as pep440 from "@renovatebot/pep440";
 import type { RangeVerdict } from "./types.js";
@@ -221,11 +222,71 @@ export class CveVersionComparator implements VersionComparator {
   }
 }
 
+/**
+ * Optional cross-ecosystem comparator backed by the external `univers` runner
+ * (see `tools/univers-runner`). Mirrors the Vanir opt-in pattern: it is used only
+ * when a runner path is configured, and an absent or failing runner degrades to
+ * `unknown` rather than an error, so the default behavior is unchanged. It covers
+ * the CVE `versionType` schemes with no native Node comparator (RPM epoch/tilde,
+ * Debian epoch/revision, Maven qualifiers, Composer) — never hand-rolled here.
+ */
+export class UniversComparator implements VersionComparator {
+  readonly name = "univers";
+  private static readonly SCHEMES: Record<string, string> = {
+    RPM: "rpm",
+    DEBIAN: "debian",
+    MAVEN: "maven",
+    COMPOSER: "composer",
+    PACKAGIST: "composer",
+  };
+
+  constructor(private readonly runnerPath: string) {}
+
+  private scheme(rangeType: string): string | undefined {
+    return UniversComparator.SCHEMES[rangeType.trim().toUpperCase()];
+  }
+
+  supports(ecosystem: string, rangeType: string): boolean {
+    return ecosystem.trim().toLowerCase() === "cve" && this.scheme(rangeType) !== undefined;
+  }
+
+  evaluate(version: string, range: AuthoritativeRange): RangeVerdict {
+    const scheme = this.scheme(range.range_type);
+    if (!scheme) return "unknown";
+    const request = JSON.stringify({ scheme, version: version.trim(), events: range.events });
+    try {
+      const output = execFileSync(this.runnerPath, [request], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 15_000,
+      });
+      const verdict = (JSON.parse(output) as { verdict?: string }).verdict;
+      return verdict === "affected" || verdict === "not_affected" ? verdict : "unknown";
+    } catch {
+      // Runner absent (ENOENT / exit 2) or any failure: treat as unsupported.
+      return "unknown";
+    }
+  }
+}
+
 const COMPARATORS: VersionComparator[] = [
   new SemverComparator(),
   new Pep440Comparator(),
   new CveVersionComparator(),
 ];
+
+/**
+ * Resolve a comparator, optionally consulting extra (e.g. opt-in univers)
+ * comparators first so a configured backend takes precedence over the native
+ * `unknown` for its schemes.
+ */
+export function selectComparatorWith(
+  extra: VersionComparator[],
+  ecosystem: string,
+  rangeType: string,
+): VersionComparator | undefined {
+  return [...extra, ...COMPARATORS].find((comparator) => comparator.supports(ecosystem, rangeType));
+}
 
 export function selectComparator(
   ecosystem: string,

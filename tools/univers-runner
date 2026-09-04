@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Optional cross-ecosystem version-range evaluator for glasswing-fixmap.
+
+Mirrors the Vanir pattern: a small, opt-in external backend. The Node comparator
+shells out with one JSON request and gets back a single verdict. Ordering is
+delegated to `univers` (Apache/BSD/MIT-family, purpose-built for package /
+vulnerability version ranges), which implements the ecosystem-correct schemes
+(RPM epoch/tilde, Debian epoch/revision, Maven qualifiers, Composer) that must
+not be hand-rolled in Node.
+
+Request (argv[1] or stdin):
+  {"scheme": "rpm", "version": "1.2-3.el8",
+   "events": [{"introduced": "0"}, {"fixed": "1.2-5.el8"}]}
+
+Response (stdout):
+  {"verdict": "affected" | "not_affected" | "unknown"}
+
+Any parse failure or unsupported scheme yields "unknown" — never a guess.
+Exit code is 0 on a produced verdict; 2 if univers is unavailable (so the caller
+can treat the backend as absent, exactly like an uninstalled Vanir).
+"""
+import json
+import sys
+
+try:
+    from univers.versions import (
+        ComposerVersion,
+        DebianVersion,
+        MavenVersion,
+        RpmVersion,
+    )
+except Exception:  # univers not installed -> backend absent
+    sys.stderr.write("univers is not installed\n")
+    sys.exit(2)
+
+SCHEMES = {
+    "rpm": RpmVersion,
+    "debian": DebianVersion,
+    "maven": MavenVersion,
+    "composer": ComposerVersion,
+    "packagist": ComposerVersion,
+}
+
+
+def evaluate(request):
+    scheme = str(request.get("scheme", "")).lower()
+    version_class = SCHEMES.get(scheme)
+    if version_class is None:
+        return "unknown"
+    raw_version = request.get("version")
+    if not isinstance(raw_version, str):
+        return "unknown"
+    try:
+        target = version_class(raw_version)
+    except Exception:
+        return "unknown"
+
+    affected = False
+    for event in request.get("events", []):
+        try:
+            if "introduced" in event:
+                if event["introduced"] == "0":
+                    affected = True
+                else:
+                    affected = affected or target >= version_class(event["introduced"])
+            if "fixed" in event:
+                if target >= version_class(event["fixed"]):
+                    affected = False
+            if "last_affected" in event:
+                if target > version_class(event["last_affected"]):
+                    affected = False
+            if "limit" in event:
+                if target >= version_class(event["limit"]):
+                    affected = False
+        except Exception:
+            return "unknown"
+    return "affected" if affected else "not_affected"
+
+
+def main():
+    raw = sys.argv[1] if len(sys.argv) > 1 else sys.stdin.read()
+    try:
+        request = json.loads(raw)
+    except Exception:
+        print(json.dumps({"verdict": "unknown"}))
+        return
+    print(json.dumps({"verdict": evaluate(request)}))
+
+
+if __name__ == "__main__":
+    main()

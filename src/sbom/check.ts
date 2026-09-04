@@ -15,7 +15,7 @@ import type { SourceVerificationReport } from "../verification/types.js";
 import { canonicalizePurl, findingIdentityKey, identityKeyForParsedPurl } from "./purl.js";
 import { cpeRelation } from "./cpe.js";
 import { baseLowerBound, baseUpperBound, stripBuildFlavor } from "./distro.js";
-import { selectComparator } from "./comparator.js";
+import { selectComparatorWith, UniversComparator, type VersionComparator } from "./comparator.js";
 import { CycloneDxAdapter } from "./cyclonedx.js";
 import { SyftAdapter } from "./syft.js";
 import { parseJsonDocuments } from "./documents.js";
@@ -66,6 +66,8 @@ export interface CheckSbomOptions {
    * `UNKNOWN` with no current review is surfaced as needing adjudication.
    */
   adjudicationStore?: AdjudicationStore;
+  /** Opt-in path to the `univers` runner for RPM/Debian/Maven/Composer ranges. */
+  universRunner?: string;
   adapters?: SbomAdapter[];
 }
 
@@ -113,7 +115,11 @@ function companionStale(generated: SnapshotIdentity, snapshot: SnapshotIdentity)
  * ranges. AFFECTED requires a comparator that explicitly supports the range's
  * ecosystem and type; anything unresolved stays `unknown`, never guessed.
  */
-function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAssessment {
+function assessRanges(
+  version: string,
+  ranges: AffectedRangeRecord[],
+  extraComparators: VersionComparator[] = [],
+): RangeAssessment {
   let notAffected = false;
   let unresolved = false;
   for (const range of ranges) {
@@ -125,7 +131,7 @@ function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAsse
         reason: `version ${version} is explicitly listed as affected (${range.advisory}, ${range.provenance})`,
       };
     }
-    const comparator = selectComparator(range.ecosystem, range.range_type);
+    const comparator = selectComparatorWith(extraComparators, range.ecosystem, range.range_type);
     if (!comparator) {
       // An applicable range with no supporting comparator is unresolved, not absent.
       unresolved = true;
@@ -363,6 +369,9 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
   }
   const candidates = selectCandidates(components, options.findings);
 
+  const extraComparators: VersionComparator[] = options.universRunner
+    ? [new UniversComparator(options.universRunner)]
+    : [];
   const appliedRangeDigests = new Map<ComponentCandidate, string>();
   if (options.rangeDataset) {
     const ranges = options.rangeDataset.ranges;
@@ -383,7 +392,7 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
         }
       }
       if (applicable.length > 0) {
-        candidate.range_assessment = assessRanges(candidate.component.version, applicable);
+        candidate.range_assessment = assessRanges(candidate.component.version, applicable, extraComparators);
         appliedRangeDigests.set(candidate, rangeDigest(applicable));
         // A downstream-flavored version that did not resolve: compute the base
         // upstream version's assessment as evidence, but only when it is
@@ -392,8 +401,8 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
         if (candidate.range_assessment.verdict === "unknown") {
           const stripped = stripBuildFlavor(candidate.component.version);
           if (stripped) {
-            const low = assessRanges(baseLowerBound(stripped.base), applicable).verdict;
-            const high = assessRanges(baseUpperBound(stripped.base), applicable).verdict;
+            const low = assessRanges(baseLowerBound(stripped.base), applicable, extraComparators).verdict;
+            const high = assessRanges(baseUpperBound(stripped.base), applicable, extraComparators).verdict;
             candidate.base_assessment = {
               base_version: stripped.base,
               flavor: stripped.flavor,

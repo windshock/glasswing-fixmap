@@ -83,6 +83,7 @@ Check SBOM options:
   --impacts <file>        Fix-impact input for --source (default: data/fix-impacts.json)
   --component <purl>      Restrict source verification to one canonical PURL
   --ranges <file>         Authoritative ranges for AFFECTED (data/affected-ranges.json)
+  --univers-runner <path> Opt-in RPM/Debian/Maven/Composer comparator (tools/univers-runner)
   --adjudications <file>  Prior adjudications to reuse (data/adjudications.json)
   --fail-on-affected      Exit non-zero when an authoritative AFFECTED is found
   --json                  Print the complete machine-readable report
@@ -118,7 +119,7 @@ const COMMAND_OPTIONS: Record<string, readonly string[]> = {
   "sync-impacts": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", "--strict", ...COMMON_OPTIONS],
   "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
   "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
-  "check-sbom": ["--sbom", "--dir", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
+  "check-sbom": ["--sbom", "--dir", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--univers-runner", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
   adjudicate: ["--store", "--input", "--evidence-hash", "--author", "--output", ...COMMON_OPTIONS],
   report: [...COMMON_OPTIONS],
   validate: [...COMMON_OPTIONS],
@@ -145,6 +146,7 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--component",
     "--ranges",
     "--adjudications",
+    "--univers-runner",
     "--dir",
     "--store",
     "--input",
@@ -334,6 +336,7 @@ async function main(): Promise<void> {
     const adjudicationStore = adjudicationsFile
       ? await readAdjudicationStore(path.resolve(adjudicationsFile))
       : undefined;
+    const universRunner = args.values.get("--univers-runner");
     const shared = {
       findings: fixmap.findings,
       snapshot: {
@@ -343,6 +346,7 @@ async function main(): Promise<void> {
       },
       ...(rangeDataset ? { rangeDataset } : {}),
       ...(adjudicationStore ? { adjudicationStore } : {}),
+      ...(universRunner ? { universRunner: path.resolve(universRunner) } : {}),
     };
     const output = args.values.get("--output");
 

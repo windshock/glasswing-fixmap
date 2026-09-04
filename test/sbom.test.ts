@@ -12,7 +12,12 @@ import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
 import { checkSbomDir } from "../src/sbom/batch.js";
 import { stripBuildFlavor } from "../src/sbom/distro.js";
-import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
+import {
+  CveVersionComparator,
+  Pep440Comparator,
+  SemverComparator,
+  UniversComparator,
+} from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import { cpeRelation } from "../src/sbom/cpe.js";
 import type { SbomCheckReport } from "../src/sbom/types.js";
@@ -630,6 +635,47 @@ test("a disjoint CPE excludes a namesake CVE range (JDBC driver vs server)", asy
   assert.equal(candidate.match_type, "name_heuristic");
   assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
   assert.equal(candidate.candidate_decision?.gating_eligible, false);
+});
+
+test("UniversComparator supports only cve rpm/debian/maven/composer ranges", () => {
+  const comparator = new UniversComparator("/nonexistent-runner");
+  assert.equal(comparator.supports("cve", "RPM"), true);
+  assert.equal(comparator.supports("cve", "DEBIAN"), true);
+  assert.equal(comparator.supports("cve", "MAVEN"), true);
+  assert.equal(comparator.supports("cve", "COMPOSER"), true);
+  // Schemes with a native comparator or no scheme are not claimed here.
+  assert.equal(comparator.supports("cve", "SEMVER"), false);
+  assert.equal(comparator.supports("cve", "CUSTOM"), false);
+  assert.equal(comparator.supports("npm", "RPM"), false);
+});
+
+test("UniversComparator degrades to unknown when the runner is absent or fails", () => {
+  const range = {
+    ecosystem: "cve",
+    range_type: "RPM",
+    events: [{ introduced: "0" }, { fixed: "1.2-5.el8" }],
+    provenance: "x",
+  };
+  // Absent runner (ENOENT) -> unknown, never an error (opt-in backend, like Vanir).
+  assert.equal(new UniversComparator("/nonexistent-runner").evaluate("1.2-3.el8", range), "unknown");
+});
+
+test("UniversComparator parses a runner's verdict (exec + JSON contract)", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "glasswing-univers-"));
+  const runner = path.join(dir, "runner");
+  // A stand-in runner exercises the exec/parse contract without requiring univers.
+  await writeFile(runner, `#!/bin/sh\necho '{"verdict":"affected"}'\n`, { mode: 0o755 });
+  const range = {
+    ecosystem: "cve",
+    range_type: "MAVEN",
+    events: [{ introduced: "1.0" }, { fixed: "2.0" }],
+    provenance: "x",
+  };
+  assert.equal(new UniversComparator(runner).evaluate("1.2.3.Final", range), "affected");
+
+  const junk = path.join(dir, "junk");
+  await writeFile(junk, `#!/bin/sh\necho 'not json'\n`, { mode: 0o755 });
+  assert.equal(new UniversComparator(junk).evaluate("1.2.3.Final", range), "unknown");
 });
 
 test("stripBuildFlavor recognizes distro/FIPS suffixes and refuses the rest", () => {

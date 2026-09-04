@@ -2,7 +2,7 @@
 
 Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Debian/RPM/Packagist comparators — not blocked on an algorithm (well-maintained implementations exist), but pending evaluation of an optional `univers` backend gated behind per-scheme differential conformance (Tier 3.13).
 
-Last updated: 2026-09-04 — issue #4 hardening: Tier 0, Tier 1, and Tier 2 complete (adjudication store + evidence hash + check-sbom reuse + `adjudicate` record/query/export-vex CLI + OpenVEX projection), plus Tier 3.15 (Vanir hardening). Pending: Tier 3.12 (distro normalization with backport uncertainty), 3.13 (optional `univers` comparator backend under differential conformance — not blocked on an algorithm), and 3.14 (UNKNOWN categorization + batch reporting). See roadmap below.
+Last updated: 2026-09-04 — issue #4 hardening: Tier 0, Tier 1, and Tier 2 complete (adjudication store + evidence hash + check-sbom reuse + `adjudicate` record/query/export-vex CLI + OpenVEX projection), plus Tier 3.15 (Vanir hardening). Pending: none of the numbered roadmap items — Tier 3.12/3.13/3.14 are done. Remaining is operational (Vanir/univers optional-install promotion and scheduled-refresh tuning). See roadmap below.
 
 ## Objective
 
@@ -710,7 +710,7 @@ The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (recor
     (Corrects the earlier roadmap claim that `libyang 0.16_p3` resolves
     deterministically to `AFFECTED`.)
 
-13. **Ecosystem comparators via an optional `univers` backend.** *Not blocked on a
+13. **Ecosystem comparators via an optional `univers` backend.** *(done — runner + opt-in comparator + differential conformance, all 4 schemes PASS)* *Not blocked on a
     missing algorithm* — that framing was too strong. Well-maintained
     implementations exist for every target: Renovate ships TypeScript versioning
     for Maven, Debian, RPM, and Composer, and each has an official reference
