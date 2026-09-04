@@ -22,28 +22,54 @@
 set -euo pipefail
 
 image="${GLASSWING_VANIR_IMAGE:-glasswing-vanir:latest}"
-mounts=()
+# Bash 3.2 (the macOS default) has no associative arrays, so directory modes are
+# tracked with `:`-delimited strings and an ordered list.
+order=()
 seen=":"
+writable=":"
 
 add_mount() {
   # Mount the containing directory even when the target itself does not exist
-  # yet (the report prefix is a path Vanir writes to).
-  local target="$1" dir
+  # yet (the report prefix is a path Vanir writes to). `mode` is `ro` for the
+  # source tree and signature files and `rw` only for the report directory, so
+  # the inspection stays read-only except where Vanir must emit its report.
+  local target="$1" mode="$2" dir
   if [ -d "$target" ]; then dir="$target"; else dir="$(dirname "$target")"; fi
   [ -d "$dir" ] || return 0
   dir="$(cd "$dir" && pwd)"
+  # A directory needed for both input and the report must be writable.
+  if [ "$mode" = "rw" ]; then
+    case "$writable" in *":$dir:"*) : ;; *) writable="$writable$dir:" ;; esac
+  fi
   case "$seen" in *":$dir:"*) return 0 ;; esac
   seen="$seen$dir:"
-  mounts+=(-v "$dir:$dir")
+  order+=("$dir")
 }
 
 for arg in "$@"; do
   case "$arg" in
-    --vulnerability_file_name=*) add_mount "${arg#*=}" ;;
-    --report_file_name_prefix=*) add_mount "${arg#*=}" ;;
-    /*) add_mount "$arg" ;;
+    --vulnerability_file_name=*) add_mount "${arg#*=}" ro ;;
+    --report_file_name_prefix=*) add_mount "${arg#*=}" rw ;;
+    /*) add_mount "$arg" ro ;;
   esac
 done
 
-exec docker run --rm --platform linux/amd64 "${mounts[@]}" "$image" \
+mounts=()
+for dir in "${order[@]}"; do
+  case "$writable" in
+    *":$dir:"*) mounts+=(-v "$dir:$dir:rw") ;;
+    *) mounts+=(-v "$dir:$dir:ro") ;;
+  esac
+done
+
+# Preserve Glasswing's read-only inspection principle: no network, a read-only
+# container root (with a writable tmpfs for Vanir's scratch space), all
+# capabilities dropped, and no privilege escalation. Source and signature mounts
+# are :ro; only the report directory is :rw.
+exec docker run --rm --platform linux/amd64 \
+  --network=none \
+  --read-only --tmpfs /tmp:rw,exec \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges \
+  "${mounts[@]}" "$image" \
   python -m vanir.detector_runner "$@"

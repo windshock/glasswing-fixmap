@@ -700,7 +700,7 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
     (missing-comparator / non-parseable-version / name-only-identity) to route
     triage automatically; add a `--dir` / summary mode for many SBOMs.
 
-14. **Vanir container hardening + optional-install promotion.** Constrain the
+14. **Vanir container hardening + optional-install promotion.** *(hardening done; optional-install promotion still pending)* Constrain the
     Docker wrapper to preserve read-only inspection: source and signature mounts
     `:ro`, report dir `:rw`, `--network=none`, `--read-only`, `--cap-drop=ALL`,
     `--security-opt=no-new-privileges`; consider hash-locking transitive Python
