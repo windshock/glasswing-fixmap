@@ -83,7 +83,29 @@
           }
         },
         "verification": { "type": "object" },
-        "source_binding": { "enum": ["verified", "user_asserted", "unverified"] }
+        "source_binding": { "enum": ["verified", "user_asserted", "unverified"] },
+        "candidate_decision": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["decision", "identity", "gating_eligible", "reason"],
+          "properties": {
+            "decision": {
+              "enum": [
+                "AFFECTED",
+                "NOT_AFFECTED",
+                "VERIFIED_FIXED",
+                "TARGET_ABSENT",
+                "PATCH_NOT_FOUND",
+                "UNKNOWN",
+                "ERROR"
+              ]
+            },
+            "range_verdict": { "enum": ["affected", "not_affected", "unknown"] },
+            "identity": { "enum": ["strong", "weak"] },
+            "gating_eligible": { "type": "boolean" },
+            "reason": { "type": "string" }
+          }
+        }
       }
     }
   }

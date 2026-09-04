@@ -57,6 +57,33 @@ export interface RangeAssessment {
   reason: string;
 }
 
+/** Final, product-level disposition of a candidate. */
+export type CandidateDecisionValue =
+  | "AFFECTED"
+  | "NOT_AFFECTED"
+  | "VERIFIED_FIXED"
+  | "TARGET_ABSENT"
+  | "PATCH_NOT_FOUND"
+  | "UNKNOWN"
+  | "ERROR";
+
+/**
+ * The explicit, final candidate decision, kept separate from `range_assessment`
+ * (which is only version/range evidence). A weak, name-only candidate can carry
+ * `range_assessment.verdict = "affected"` yet a `decision = "UNKNOWN"` with
+ * `gating_eligible = false`, so a downstream consumer or VEX exporter cannot
+ * mistake range evidence for a gating vulnerability disposition.
+ */
+export interface CandidateDecision {
+  decision: CandidateDecisionValue;
+  /** The underlying authoritative-range verdict, when one was evaluated. */
+  range_verdict?: RangeVerdict;
+  identity: IdentityStrength;
+  /** Whether this decision may fail a security gate (`--fail-on-affected`). */
+  gating_eligible: boolean;
+  reason: string;
+}
+
 export interface ComponentCandidate {
   ant_id: string;
   project: string;
@@ -81,6 +108,11 @@ export interface ComponentCandidate {
   verification?: SourceVerificationReport;
   /** Provenance of the `--source` binding; present whenever `verification` is. */
   source_binding?: SourceBinding;
+  /**
+   * Final product-level disposition, distinct from `range_assessment` evidence.
+   * Always populated by `checkSbom` for every candidate it returns.
+   */
+  candidate_decision?: CandidateDecision;
 }
 
 export interface SbomCheckReport {

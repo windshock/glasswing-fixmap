@@ -14,6 +14,7 @@ import { parseJsonDocuments } from "./documents.js";
 import { selectCandidates } from "./matching.js";
 import {
   SBOM_CHECK_SCHEMA_VERSION,
+  type CandidateDecision,
   type ComponentCandidate,
   type NormalizedComponent,
   type RangeAssessment,
@@ -92,6 +93,75 @@ function assessRanges(version: string, ranges: AffectedRangeRecord[]): RangeAsse
     return { verdict: "not_affected", reason: `version ${version} is outside every authoritative affected range` };
   }
   return { verdict: "unknown", reason: "authoritative ranges did not resolve for this version" };
+}
+
+/**
+ * Reduce a candidate's range evidence and source verification into one explicit,
+ * final product-level decision. Kept separate from `range_assessment` so a weak,
+ * name-only affected range never reads as a gating vulnerability. Only a
+ * strong-identity AFFECTED, a source AFFECTED, or an operational ERROR is
+ * `gating_eligible`.
+ */
+function decideCandidate(candidate: ComponentCandidate): CandidateDecision {
+  const identity = candidate.identity_strength;
+  const rangeVerdict = candidate.range_assessment?.verdict;
+  const withRange = (decision: CandidateDecision): CandidateDecision =>
+    rangeVerdict ? { ...decision, range_verdict: rangeVerdict } : decision;
+  const verified = candidate.verification?.decision;
+  if (verified === "ERROR") {
+    return withRange({ decision: "ERROR", identity, gating_eligible: true, reason: "source verification could not execute" });
+  }
+  if (verified && verified !== "UNKNOWN") {
+    // Source evidence (VERIFIED_FIXED / TARGET_ABSENT / PATCH_NOT_FOUND / AFFECTED).
+    return withRange({
+      decision: verified,
+      identity,
+      gating_eligible: verified === "AFFECTED",
+      reason: `source verification: ${verified}`,
+    });
+  }
+  if (rangeVerdict === "affected") {
+    if (identity === "strong") {
+      return {
+        decision: "AFFECTED",
+        range_verdict: "affected",
+        identity,
+        gating_eligible: true,
+        reason: "strong identity within an authoritative affected range",
+      };
+    }
+    return {
+      decision: "UNKNOWN",
+      range_verdict: "affected",
+      identity,
+      gating_eligible: false,
+      reason: "weak identity (product-name match only); affected range is review evidence, not a gate",
+    };
+  }
+  if (rangeVerdict === "not_affected") {
+    return {
+      decision: "NOT_AFFECTED",
+      range_verdict: "not_affected",
+      identity,
+      gating_eligible: false,
+      reason: "version outside every authoritative affected range",
+    };
+  }
+  if (rangeVerdict === "unknown") {
+    return {
+      decision: "UNKNOWN",
+      range_verdict: "unknown",
+      identity,
+      gating_eligible: false,
+      reason: candidate.range_assessment?.reason ?? "authoritative range unresolved",
+    };
+  }
+  return {
+    decision: "UNKNOWN",
+    identity,
+    gating_eligible: false,
+    reason: "no authoritative range and no source verification",
+  };
 }
 
 export async function readSbomDocuments(file: string): Promise<unknown[]> {
@@ -269,6 +339,12 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
         }
       }
     }
+  }
+
+  // Reduce every candidate's evidence to one explicit final decision so a
+  // downstream consumer never mistakes range evidence for a gating disposition.
+  for (const candidate of candidates) {
+    candidate.candidate_decision = decideCandidate(candidate);
   }
 
   const packageComponentCount = components.filter(

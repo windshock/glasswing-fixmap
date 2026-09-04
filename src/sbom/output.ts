@@ -18,6 +18,12 @@ export function formatSbomCheck(report: SbomCheckReport): string {
       lines.push(
         `  ${candidate.ant_id}  ${candidate.match_type} (${candidate.confidence})  ${identity}`,
       );
+      if (candidate.candidate_decision) {
+        const decision = candidate.candidate_decision;
+        lines.push(
+          `    decision: ${decision.decision}${decision.gating_eligible ? " (gating)" : ""} — ${decision.reason}`,
+        );
+      }
       if (candidate.range_assessment) {
         lines.push(
           `    range: ${candidate.range_assessment.verdict.toUpperCase()} — ${candidate.range_assessment.reason}`,

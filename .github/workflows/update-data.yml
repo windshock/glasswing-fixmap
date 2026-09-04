@@ -33,7 +33,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Refresh every deterministic evidence artifact from the same snapshot,
+          # in dependency order, so ranges/impacts never lag a newer fixmap.
           npm run sync -- --verify-github
+          npm run sync:ranges
+          npm run sync:impacts
           npm run verify
 
       - name: Open or update data pull request

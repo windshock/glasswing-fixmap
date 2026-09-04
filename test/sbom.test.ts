@@ -501,6 +501,47 @@ test("a CVE List V5 product range is not_affected for an already-patched name-on
   assert.equal(report.candidates[0]!.range_assessment?.verdict, "not_affected");
 });
 
+test("candidate_decision separates the gating decision from weak range evidence", async () => {
+  // Weak, name-only openssl affected by a CVE product range: the evidence is
+  // affected, but the final decision is UNKNOWN and not gating-eligible.
+  const weakFile = await writeSbom(cyclonedx([{ type: "library", name: "openssl", version: "3.0.7" }]));
+  const weak = await checkSbom({
+    sbomFile: weakFile,
+    findings: [packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl")],
+    rangeDataset: rangeDataset([cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21")]),
+  });
+  const wc = weak.candidates[0]!;
+  assert.equal(wc.range_assessment?.verdict, "affected");
+  assert.equal(wc.candidate_decision?.decision, "UNKNOWN");
+  assert.equal(wc.candidate_decision?.range_verdict, "affected");
+  assert.equal(wc.candidate_decision?.gating_eligible, false);
+
+  // Strong identity (PURL) inside the range: AFFECTED and gating-eligible.
+  const strongFile = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "1.5.0", purl: "pkg:npm/left-pad@1.5.0" }]),
+  );
+  const strong = await checkSbom({
+    sbomFile: strongFile,
+    findings: [packageFinding("ANT-2026-AFF", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-AFF", "left-pad", "1.0.0", "2.0.0")]),
+  });
+  const sc = strong.candidates[0]!;
+  assert.equal(sc.candidate_decision?.decision, "AFFECTED");
+  assert.equal(sc.candidate_decision?.gating_eligible, true);
+
+  // Outside the range: NOT_AFFECTED, not gating.
+  const safeFile = await writeSbom(
+    cyclonedx([{ type: "library", name: "left-pad", version: "2.1.0", purl: "pkg:npm/left-pad@2.1.0" }]),
+  );
+  const safe = await checkSbom({
+    sbomFile: safeFile,
+    findings: [packageFinding("ANT-2026-NAF", "stevemao/left-pad", "npm", "left-pad")],
+    rangeDataset: rangeDataset([npmRange("ANT-2026-NAF", "left-pad", "1.0.0", "2.0.0")]),
+  });
+  assert.equal(safe.candidates[0]!.candidate_decision?.decision, "NOT_AFFECTED");
+  assert.equal(safe.candidates[0]!.candidate_decision?.gating_eligible, false);
+});
+
 test("a CVE List V5 product range matches case-insensitively by product name", async () => {
   const file = await writeSbom(cyclonedx([{ type: "library", name: "OpenSSL", version: "3.0.7" }]));
   const report = await checkSbom({
@@ -1160,6 +1201,8 @@ test("an explicit --source that cannot execute is an ERROR, not a passing warnin
   assert.ok(candidate, JSON.stringify(report, null, 2));
   // Fail closed: an explicit --source that cannot run is ERROR (drives non-zero exit).
   assert.equal(candidate!.verification!.decision, "ERROR");
+  assert.equal(candidate!.candidate_decision?.decision, "ERROR");
+  assert.equal(candidate!.candidate_decision?.gating_eligible, true);
   // An ERROR must not be bound as user_asserted source evidence.
   assert.equal(candidate!.source_binding, undefined);
   assert.ok(report.warnings.some((warning) => warning.includes("source verification ERROR")));
