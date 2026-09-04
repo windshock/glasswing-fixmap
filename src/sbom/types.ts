@@ -68,6 +68,13 @@ export type CandidateDecisionValue =
   | "UNKNOWN"
   | "ERROR";
 
+/** Machine-readable reason an UNKNOWN candidate is unresolved, for triage routing. */
+export type UnknownReason =
+  | "name_only_identity"
+  | "range_unresolved"
+  | "no_applicable_range"
+  | "source_inconclusive";
+
 /**
  * The explicit, final candidate decision, kept separate from `range_assessment`
  * (which is only version/range evidence). A weak, name-only candidate can carry
@@ -82,6 +89,8 @@ export interface CandidateDecision {
   identity: IdentityStrength;
   /** Whether this decision may fail a security gate (`--fail-on-affected`). */
   gating_eligible: boolean;
+  /** For `decision = "UNKNOWN"`, the category that routes triage. */
+  unknown_reason?: UnknownReason;
   reason: string;
 }
 

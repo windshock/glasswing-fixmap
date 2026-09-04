@@ -193,6 +193,7 @@ function decideCandidate(candidate: ComponentCandidate): CandidateDecision {
       range_verdict: "affected",
       identity,
       gating_eligible: false,
+      unknown_reason: "name_only_identity",
       reason: "weak identity (product-name match only); affected range is review evidence, not a gate",
     };
   }
@@ -211,6 +212,7 @@ function decideCandidate(candidate: ComponentCandidate): CandidateDecision {
       range_verdict: "unknown",
       identity,
       gating_eligible: false,
+      unknown_reason: "range_unresolved",
       reason: candidate.range_assessment?.reason ?? "authoritative range unresolved",
     };
   }
@@ -218,7 +220,11 @@ function decideCandidate(candidate: ComponentCandidate): CandidateDecision {
     decision: "UNKNOWN",
     identity,
     gating_eligible: false,
-    reason: "no authoritative range and no source verification",
+    unknown_reason: verified === "UNKNOWN" ? "source_inconclusive" : "no_applicable_range",
+    reason:
+      verified === "UNKNOWN"
+        ? "source verification was inconclusive and no authoritative range applied"
+        : "no authoritative range and no source verification",
   };
 }
 
@@ -473,8 +479,9 @@ export async function checkSbom(options: CheckSbomOptions): Promise<SbomCheckRep
       if (prior) {
         candidate.prior_adjudication = prior;
       } else if (candidate.candidate_decision.decision === "UNKNOWN") {
+        const reason = candidate.candidate_decision.unknown_reason ?? "unresolved";
         warnings.push(
-          `${candidate.ant_id}: ${candidate.component.name}@${candidate.component.version ?? "?"} is UNKNOWN with no current adjudication (evidence ${candidate.evidence_hash.slice(0, 12)}); needs review`,
+          `${candidate.ant_id}: ${candidate.component.name}@${candidate.component.version ?? "?"} is UNKNOWN (${reason}) with no current adjudication (evidence ${candidate.evidence_hash.slice(0, 12)}); needs review`,
         );
       }
     }

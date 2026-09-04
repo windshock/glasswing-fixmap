@@ -116,6 +116,9 @@
             "range_verdict": { "enum": ["affected", "not_affected", "unknown"] },
             "identity": { "enum": ["strong", "weak"] },
             "gating_eligible": { "type": "boolean" },
+            "unknown_reason": {
+              "enum": ["name_only_identity", "range_unresolved", "no_applicable_range", "source_inconclusive"]
+            },
             "reason": { "type": "string" }
           }
         }

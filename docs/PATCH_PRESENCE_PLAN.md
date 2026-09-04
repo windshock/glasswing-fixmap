@@ -758,7 +758,7 @@ The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (recor
     versionType=rpm    → univers/rpm     versionType=custom → product-specific or UNKNOWN
     ```
 
-14. **`UNKNOWN` reason categorization + batch reporting.** Emit the residual
+14. **`UNKNOWN` reason categorization + batch reporting.** *(done)* Emit the residual
     `UNKNOWN` cause (missing-comparator / non-parseable-version / name-only-identity
     / changes-unsupported) so triage routes to the adjudicator automatically, and
     add a `--dir` / summary mode for scanning many SBOMs at once.

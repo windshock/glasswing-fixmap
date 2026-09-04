@@ -16,6 +16,7 @@ import { VanirVerifier } from "./verification/vanir.js";
 import type { SourceVerifier } from "./verification/types.js";
 import { checkSbom } from "./sbom/check.js";
 import { formatSbomCheck, writeSbomCheck } from "./sbom/output.js";
+import { checkSbomDir, formatSbomBatch } from "./sbom/batch.js";
 import { syncAffectedRanges } from "./ranges/sync.js";
 import { readAffectedRangeDataset } from "./ranges/read.js";
 import {
@@ -75,7 +76,8 @@ Source verification options:
   --vanir-vuln <id,...>   Extra vulnerability IDs to select Vanir signatures
 
 Check SBOM options:
-  --sbom <file>           CycloneDX (1.5/1.6/1.7) or Syft JSON SBOM (required)
+  --sbom <file>           CycloneDX (1.4/1.5/1.6/1.7) or Syft JSON SBOM (--sbom or --dir)
+  --dir <directory>       Scan every JSON SBOM under a directory and aggregate
   --fixmap <file>         Findings input (default: data/fixmap.json)
   --source <dir>          Verify an unambiguous strong candidate against a tree
   --impacts <file>        Fix-impact input for --source (default: data/fix-impacts.json)
@@ -116,7 +118,7 @@ const COMMAND_OPTIONS: Record<string, readonly string[]> = {
   "sync-impacts": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", "--strict", ...COMMON_OPTIONS],
   "sync-ranges": ["--fixmap", "--output", "--cache", "--only", "--concurrency", "--offline", ...COMMON_OPTIONS],
   "verify-source": ["--ant", "--source", "--impacts", "--json", "--output", "--vanir-runner", "--vanir-signatures", "--vanir-vuln", ...COMMON_OPTIONS],
-  "check-sbom": ["--sbom", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
+  "check-sbom": ["--sbom", "--dir", "--fixmap", "--source", "--impacts", "--component", "--ranges", "--adjudications", "--fail-on-affected", "--json", "--output", ...COMMON_OPTIONS],
   adjudicate: ["--store", "--input", "--evidence-hash", "--author", "--output", ...COMMON_OPTIONS],
   report: [...COMMON_OPTIONS],
   validate: [...COMMON_OPTIONS],
@@ -143,6 +145,7 @@ function parseArguments(argv: string[]): ParsedArguments {
     "--component",
     "--ranges",
     "--adjudications",
+    "--dir",
     "--store",
     "--input",
     "--evidence-hash",
@@ -312,7 +315,9 @@ async function main(): Promise<void> {
   }
   if (args.command === "check-sbom") {
     const sbom = args.values.get("--sbom");
-    if (!sbom) throw new Error("check-sbom requires --sbom <file>");
+    const dir = args.values.get("--dir");
+    if (!sbom && !dir) throw new Error("check-sbom requires --sbom <file> or --dir <directory>");
+    if (sbom && dir) throw new Error("check-sbom accepts either --sbom or --dir, not both");
     const rangesFile = args.values.get("--ranges");
     // Explicit security-policy requests must fail fast rather than silently
     // degrade into a partial analysis.
@@ -322,6 +327,40 @@ async function main(): Promise<void> {
       );
     }
     const fixmap = await readDataset(path.resolve(args.values.get("--fixmap") ?? "data/fixmap.json"));
+    const rangeDataset = rangesFile
+      ? await readAffectedRangeDataset(path.resolve(rangesFile))
+      : undefined;
+    const adjudicationsFile = args.values.get("--adjudications");
+    const adjudicationStore = adjudicationsFile
+      ? await readAdjudicationStore(path.resolve(adjudicationsFile))
+      : undefined;
+    const shared = {
+      findings: fixmap.findings,
+      snapshot: {
+        source_as_of: fixmap.metadata.source_as_of,
+        source_revision: fixmap.metadata.source_revision,
+        source_manifest_sha3: fixmap.metadata.source_manifest_sha3,
+      },
+      ...(rangeDataset ? { rangeDataset } : {}),
+      ...(adjudicationStore ? { adjudicationStore } : {}),
+    };
+    const output = args.values.get("--output");
+
+    if (dir) {
+      // Batch mode is range/adjudication assessment across many SBOMs; per-component
+      // source verification (--source/--component) is a single-component operation.
+      if (args.values.get("--source") || args.values.get("--component")) {
+        throw new Error("--dir does not support --source or --component");
+      }
+      const summary = await checkSbomDir({ ...shared, directory: path.resolve(dir) });
+      const serialized = `${JSON.stringify(summary, null, 2)}\n`;
+      if (output) await atomicWrite(path.resolve(output), serialized);
+      process.stdout.write(args.flags.has("--json") ? serialized : formatSbomBatch(summary));
+      if (summary.errors.length > 0) process.exitCode = 2;
+      else if (summary.totals.gating > 0 && args.flags.has("--fail-on-affected")) process.exitCode = 3;
+      return;
+    }
+
     const source = args.values.get("--source");
     let impactDataset: FixImpactDataset | undefined;
     if (source) {
@@ -331,28 +370,13 @@ async function main(): Promise<void> {
       );
     }
     const component = args.values.get("--component");
-    const rangeDataset = rangesFile
-      ? await readAffectedRangeDataset(path.resolve(rangesFile))
-      : undefined;
-    const adjudicationsFile = args.values.get("--adjudications");
-    const adjudicationStore = adjudicationsFile
-      ? await readAdjudicationStore(path.resolve(adjudicationsFile))
-      : undefined;
     const report = await checkSbom({
-      sbomFile: path.resolve(sbom),
-      findings: fixmap.findings,
-      snapshot: {
-        source_as_of: fixmap.metadata.source_as_of,
-        source_revision: fixmap.metadata.source_revision,
-        source_manifest_sha3: fixmap.metadata.source_manifest_sha3,
-      },
+      sbomFile: path.resolve(sbom!),
+      ...shared,
       ...(source ? { sourceRoot: path.resolve(source) } : {}),
       ...(impactDataset ? { impactDataset } : {}),
       ...(component ? { component } : {}),
-      ...(rangeDataset ? { rangeDataset } : {}),
-      ...(adjudicationStore ? { adjudicationStore } : {}),
     });
-    const output = args.values.get("--output");
     if (output) await writeSbomCheck(report, path.resolve(output));
     process.stdout.write(
       args.flags.has("--json")

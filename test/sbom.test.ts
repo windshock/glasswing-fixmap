@@ -10,6 +10,7 @@ import { fingerprintPatch } from "../src/impact/fingerprint.js";
 import type { FixImpactDataset } from "../src/impact/types.js";
 import type { FindingRecord } from "../src/types.js";
 import { checkSbom } from "../src/sbom/check.js";
+import { checkSbomDir } from "../src/sbom/batch.js";
 import { CveVersionComparator, Pep440Comparator, SemverComparator } from "../src/sbom/comparator.js";
 import { canonicalizePurl } from "../src/sbom/purl.js";
 import { cpeRelation } from "../src/sbom/cpe.js";
@@ -628,6 +629,42 @@ test("a disjoint CPE excludes a namesake CVE range (JDBC driver vs server)", asy
   assert.equal(candidate.match_type, "name_heuristic");
   assert.equal(candidate.candidate_decision?.decision, "UNKNOWN");
   assert.equal(candidate.candidate_decision?.gating_eligible, false);
+});
+
+test("check-sbom --dir aggregates a directory, categorizes UNKNOWN, and counts unsupported", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "glasswing-batch-"));
+  // A weak name-only openssl affected by a CVE product range -> UNKNOWN name_only_identity.
+  await writeFile(
+    path.join(dir, "a.cdx.json"),
+    JSON.stringify(cyclonedx([{ type: "library", name: "openssl", version: "3.0.7" }])),
+  );
+  // A strong PURL candidate inside an npm range -> gating AFFECTED.
+  await writeFile(
+    path.join(dir, "b.cdx.json"),
+    JSON.stringify(cyclonedx([{ type: "library", name: "left-pad", version: "1.5.0", purl: "pkg:npm/left-pad@1.5.0" }])),
+  );
+  // Not an SBOM -> counted as unsupported, not an error.
+  await writeFile(path.join(dir, "note.json"), JSON.stringify({ hello: "world" }));
+
+  const summary = await checkSbomDir({
+    directory: dir,
+    findings: [
+      packageFinding("ANT-2026-OSSL", "openssl/openssl", "npm", "openssl"),
+      packageFinding("ANT-2026-AFF", "stevemao/left-pad", "npm", "left-pad"),
+    ],
+    rangeDataset: rangeDataset([
+      cveRange("ANT-2026-OSSL", "openssl", "3.0.0", "3.0.21"),
+      npmRange("ANT-2026-AFF", "left-pad", "1.0.0", "2.0.0"),
+    ]),
+  });
+
+  assert.equal(summary.file_count, 3);
+  assert.equal(summary.processed, 2);
+  assert.equal(summary.unsupported, 1);
+  assert.equal(summary.errors.length, 0);
+  assert.equal(summary.totals.gating, 1);
+  assert.equal(summary.gating_candidates[0]?.ant_id, "ANT-2026-AFF");
+  assert.equal(summary.unknown_by_reason["name_only_identity"], 1);
 });
 
 test("candidate_decision separates the gating decision from weak range evidence", async () => {
