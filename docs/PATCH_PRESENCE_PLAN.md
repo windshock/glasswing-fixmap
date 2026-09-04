@@ -1,8 +1,8 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Packagist comparators (blocked on a well-maintained library).
+Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Debian/RPM/Packagist comparators — not blocked on an algorithm (well-maintained implementations exist), but pending evaluation of an optional `univers` backend gated behind per-scheme differential conformance (Tier 3.13).
 
-Last updated: 2026-09-04 — issue #4 hardening: Tier 0 and Tier 1 complete; Tier 3.14 (Vanir hardening) and Tier 2.10 (evidence-hash foundation) done; Tier 2 store/OpenVEX and Tier 3.12–3.13 pending (see roadmap below).
+Last updated: 2026-09-04 — issue #4 hardening: Tier 0 and Tier 1 complete; Tier 3.15 (Vanir hardening), Tier 2.10 (evidence hash), and the Tier 2.9 store (prototype validated) done; Tier 2 CLI/OpenVEX and Tier 3.12–3.14 pending (see roadmap below). Tier 3.13 reframed: Maven/Debian/RPM/Composer comparators are not blocked on an algorithm — evaluate an optional `univers` backend under differential conformance.
 
 ## Objective
 
@@ -449,7 +449,7 @@ Acceptance testing against real exported SBOMs surfaced two input realities the 
 - Done: ran 16 real acceptance SBOMs plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
 - Done: confirmed existing outputs are byte-for-byte compatible — `data/fixmap.json` and `data/fixmap.csv` re-serialize identically through the current code, and `sync`/`report`/`validate` are unchanged.
 - Done: documented exit semantics (`0`/`1`/`2`/`3`) and limitations in the README and ACCEPTANCE.md.
-- Done: enabled Go and crates.io comparators (genuine SemVer) and a PyPI PEP 440 comparator (via `@renovatebot/pep440`), each with conformance vectors. Maven and Packagist remain `unknown`, blocked on a well-maintained JS version-comparison library — their schemes must not be hand-rolled per the version-comparison boundary.
+- Done: enabled Go and crates.io comparators (genuine SemVer) and a PyPI PEP 440 comparator (via `@renovatebot/pep440`), each with conformance vectors. Maven and Packagist remain `unknown` — their schemes must not be hand-rolled, and well-maintained implementations exist (Renovate TS, the official references, `univers`); the missing piece is a permissive standalone Node drop-in, so they are pending evaluation of an optional `univers` backend under differential conformance (Tier 3.13), not blocked on an algorithm.
 - Done: end-to-end `verify-source` on a real SBOM candidate (`cloudflare/circl` `v1.3.7` → `TARGET_ABSENT`); raised the rename-discovery cap 250 → 2000 so a genuinely absent target on real-world repositories resolves to `TARGET_ABSENT` instead of a truncated `UNKNOWN`.
 
 ### Next session — GitHub issues #1–#3 reflected
@@ -477,7 +477,7 @@ P2 — done:
 **Issue #3 — AI adjudicator Skill: delivered.** The reusable `glasswing-adjudicator` Skill lives at [`.claude/skills/glasswing-adjudicator`](../.claude/skills/glasswing-adjudicator) — a compact `SKILL.md` with detailed rules and six worked regression examples under `references/`. It gives an evidence-backed second opinion on unresolved results (`UNKNOWN`, `PATCH_NOT_FOUND`, `VERIFIER_CONFLICT`, unsupported comparator, missing range, package-identity ambiguity), never overwrites the deterministic decision, returns `CONFIRMED` / `LIKELY_TRUE_POSITIVE` / `LIKELY_FALSE_POSITIVE` / `INSUFFICIENT_EVIDENCE` with cited machine + upstream evidence, records contradictions and missing evidence, and never fabricates an affected range or auto-suppresses. The `cloudflare/circl` `v1.3.7` result (vulnerable subsystem introduced after the installed version → `TARGET_ABSENT`) is example 1.
 
 **Pre-existing feature work (unchanged priority, after the P0 fixes):**
-- Maven and Packagist comparators (PyPI PEP 440 is done) behind their own conformance fixtures, once a well-maintained JS library exists for each — these unblock `AFFECTED` for the Maven/Packagist ranges `sync-ranges` already collects.
+- Maven/Debian/RPM/Packagist comparators (PyPI PEP 440 is done) via an optional `univers` backend, each behind per-scheme differential conformance against the official reference implementation (Tier 3.13) — these unblock `AFFECTED` for the ranges `sync-ranges` already collects.
 - Scheduled `sync-impacts`/`sync-ranges` refresh, only after rate limits and generated-diff size are measured.
 - Done: reusable Docker-based Vanir runner wrapper (`tools/vanir-docker-runner` + `tools/Dockerfile.vanir`) so `verify-source --vanir-runner` drives the real Vanir detector in a `linux/amd64` container. Remaining (optional): promote Vanir to a documented optional install after broader real-Vanir coverage measurement.
 
@@ -648,7 +648,8 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
 ### Tier 2 — persistence / interoperability
 
 9. **Internal adjudication store, separate from VEX (append-only / superseding).**
-   VEX is an interchange/export representation, not the canonical internal model.
+   *(prototype validated 2026-09-04; CLI + check-sbom integration pending)* VEX is
+   an interchange/export representation, not the canonical internal model.
    Glasswing must preserve richer states VEX does not model (`PATCH_NOT_FOUND`,
    `VERIFIER_CONFLICT`, `SOURCE_BINDING_UNVERIFIED`, `LIKELY_FALSE_POSITIVE`,
    `INSUFFICIENT_EVIDENCE`, and machine vs AI vs human disposition). Record
@@ -656,6 +657,19 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
    validity, vex_projection }`; a later range / advisory / build change
    **supersedes** the prior review and preserves its audit history rather than
    overwriting one key.
+
+   Decided design (proven end to end by `src/adjudication/store.ts` +
+   `test/adjudication.test.ts`): a **file-based, append-only** store at
+   `data/adjudications.json`, keyed by the deterministic **evidence hash**
+   (Tier 2.10). `lookup` returns the latest record for a hash (latest-wins for a
+   same-evidence human correction) unless it was explicitly `invalidated`; a
+   *different* evidence hash returns nothing, so a version / range / snapshot /
+   decision change auto-invalidates the prior review while the old subject still
+   resolves. `supersedes` is a pure audit link. The store fails closed on
+   malformed input. This is exactly the "do not re-run the Skill on the same
+   residual" structure. Remaining wiring: attach a matched prior review to
+   `check-sbom` candidates and surface a hash-miss as "re-adjudication needed"; a
+   `record` / `query` CLI; and the OpenVEX projection (item 11).
 
 10. **Stronger evidence hash + invalidation.** *(hash done; invalidation wiring pending)* Bind the full decision context:
     ANT + CVE/GHSA IDs; canonical PURL/CPE + version + qualifiers; SBOM / document
@@ -694,13 +708,60 @@ All four Tier 1 items are implemented and covered by tests (78 passing).
     (Corrects the earlier roadmap claim that `libyang 0.16_p3` resolves
     deterministically to `AFFECTED`.)
 
-13. **Ecosystem comparators, `UNKNOWN` reason categorization, batch reporting.**
-    Maven / Debian / RPM / Packagist comparators (pending a well-maintained JS
-    implementation + conformance fixtures); emit the residual `UNKNOWN` cause
-    (missing-comparator / non-parseable-version / name-only-identity) to route
-    triage automatically; add a `--dir` / summary mode for many SBOMs.
+13. **Ecosystem comparators via an optional `univers` backend.** *Not blocked on a
+    missing algorithm* — that framing was too strong. Well-maintained
+    implementations exist for every target: Renovate ships TypeScript versioning
+    for Maven, Debian, RPM, and Composer, and each has an official reference
+    (Apache `ComparableVersion`, `dpkg --compare-versions`, `rpmvercmp`,
+    `composer/semver`). The real gap is a **permissive-license, standalone
+    Node/npm drop-in**: Renovate's modules are internal and `renovate` is AGPL, so
+    they are good references but not clean dependencies. The best fit for
+    Glasswing is [`univers`](https://pypi.org/project/univers/) — an
+    actively-maintained, Apache/BSD/MIT-family **Python** library purpose-built for
+    package/vulnerability version-range handling (Maven, Debian, RPM, Composer,
+    npm, PyPI, Go, Gentoo, Arch, …).
 
-14. **Vanir container hardening + optional-install promotion.** *(hardening done; optional-install promotion still pending)* Constrain the
+    Approach — treat it exactly like Vanir: a **core Node engine + optional
+    external backend**, not a port into Node.
+
+    ```text
+    VersionComparator
+      ├─ SemVer   → node-semver
+      ├─ PyPI     → @renovatebot/pep440
+      ├─ OpenSSL  → current native
+      └─ univers backend (optional): Maven | Debian | RPM | Composer
+    ```
+
+    ```text
+    univers absent            → UNKNOWN
+    univers run fails         → ERROR (backend error)
+    univers supports scheme
+      AND conformance passes  → deterministic range evaluation (gating allowed)
+    ```
+
+    Because it is a security gate, do not trust `univers` blindly: build a
+    one-time **differential conformance corpus** (hundreds–thousands of version
+    pairs) against each official reference — Maven ↔ `ComparableVersion`, Debian ↔
+    `dpkg`, RPM ↔ `rpmvercmp`, Composer ↔ `composer/semver` — and allow `AFFECTED`
+    gating **only for schemes that pass**. One Python runtime then covers all four,
+    which is far simpler than wiring Java, `dpkg`, an rpm library, and PHP
+    Composer separately.
+
+    This also lets the CVE `versionType` dispatch (Tier 0.1) route directly to a
+    proven comparator instead of collapsing everything through `ecosystem="cve"`:
+
+    ```text
+    versionType=semver → node-semver     versionType=maven  → univers/maven
+    versionType=python → pep440          versionType=debian → univers/debian
+    versionType=rpm    → univers/rpm     versionType=custom → product-specific or UNKNOWN
+    ```
+
+14. **`UNKNOWN` reason categorization + batch reporting.** Emit the residual
+    `UNKNOWN` cause (missing-comparator / non-parseable-version / name-only-identity
+    / changes-unsupported) so triage routes to the adjudicator automatically, and
+    add a `--dir` / summary mode for scanning many SBOMs at once.
+
+15. **Vanir container hardening + optional-install promotion.** *(hardening done; optional-install promotion still pending)* Constrain the
     Docker wrapper to preserve read-only inspection: source and signature mounts
     `:ro`, report dir `:rw`, `--network=none`, `--read-only`, `--cap-drop=ALL`,
     `--security-opt=no-new-privileges`; consider hash-locking transitive Python
