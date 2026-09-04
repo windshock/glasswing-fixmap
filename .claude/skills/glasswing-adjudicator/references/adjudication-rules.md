@@ -77,15 +77,41 @@ A pure identity problem (a name collision with no PURL/CPE, e.g. a JDBC driver v
 server) is *not* such a case: it is fixed upstream by emitting a PURL/CPE in the SBOM, not
 by a comparator.
 
+## Vulnerable-code presence decides the verdict (not version-in-range)
+
+An authoritative affected range establishes only that the version is inside the
+maintainer's affected set. It does **not** establish that the vulnerable code is present
+and reachable in this build. Adjudicate the code, not the version number:
+
+1. **Identify the vulnerable code** from the fix commit — the function(s)/file(s) it
+   changes and the pre-image (the vulnerable lines before the fix). Cite the commit.
+2. **Look for that code in the target version.** For an open-source component the source
+   is a `git clone`/tag/tarball away, so *fetch it* — do not settle for "unverified" when
+   the source is public. Check the file/function at the affected tag (or via
+   `verify-source` = Google's **Vanir** signatures + the native fix-fingerprint verifier).
+3. **Decide on presence:**
+   - vulnerable pre-image present, not backport-fixed → `CONFIRMED`.
+   - vulnerable function/behavior **absent** (removed, not compiled, feature/config
+     disabled, or refactored out) **and no equivalent code** carries it → `LIKELY_FALSE_
+     POSITIVE`, aligned with `TARGET_ABSENT` — *even though the version is in range*.
+   - present but a maintenance branch shows a backported fix → `LIKELY_FALSE_POSITIVE`.
+   - source not obtainable (closed component, no tag) → `LIKELY_TRUE_POSITIVE` with
+     "vulnerable-code presence not verified" as missing evidence.
+   Renames cut both ways: a missing *same-named* function is not absence if an equivalent
+   carries the behavior; a present same-named function is not presence if the behavior was
+   refactored out.
+
 ## Verdict selection
 
 - `CONFIRMED`: concrete evidence shows the vulnerable behavior is present in the installed
-  version and not fixed (e.g. the pre-image is present and no backport applied). Rare;
-  the deterministic engine usually reaches `PATCH_NOT_FOUND`/`AFFECTED` itself.
-- `LIKELY_TRUE_POSITIVE`: evidence leans toward the finding applying (vulnerable subsystem
-  present, version within an unofficial-but-credible range) but a proof gap remains.
-- `LIKELY_FALSE_POSITIVE`: evidence leans away (subsystem introduced later, product
-  mismatch, fix backported into this version) but is not conclusive.
+  version and not fixed — the pre-image is present in the fetched source and no backport
+  applied. **Version-in-range alone never reaches `CONFIRMED`.**
+- `LIKELY_TRUE_POSITIVE`: evidence leans toward the finding applying (version in an
+  authoritative range, vulnerable subsystem plausibly present) but code presence was not
+  positively verified — record that as the proof gap.
+- `LIKELY_FALSE_POSITIVE`: evidence leans away — the vulnerable function/behavior is absent
+  with no equivalent, the subsystem was introduced later, the product is a namesake, or the
+  fix was backported into this version.
 - `INSUFFICIENT_EVIDENCE`: evidence is absent or contradictory.
 
 ## What the Skill must never do

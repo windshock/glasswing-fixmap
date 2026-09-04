@@ -80,3 +80,27 @@ flavor and score the base version.
   the deliverable is the precise ask, never a fabricated patch level.
 - Trap avoided: averaging an imprecise version to a vague `low`, or treating a strict-parse
   failure as "cannot investigate".
+
+## 8. In range, but is the vulnerable code actually present?
+
+A version-in-range `AFFECTED` (or a range-only weak match) is not the end of the inquiry —
+the vulnerable code must be present and reachable in this build. For open-source
+components the source is public, so *fetch it* rather than asserting from memory.
+
+- **Present → `CONFIRMED`.** `openssl 3.0.7` matched CVE-2026-45447 (`PKCS7_verify`) by
+  range `[3.0.0, 3.0.21)`. Read the fix commit to find the changed function and its
+  pre-image, then fetch `crypto/pkcs7/pk7_smime.c` at tag `openssl-3.0.7`: the pre-image
+  (the caller-owned `indata` BIO free before the fix) is present and no backport applies.
+  Only now is `CONFIRMED` earned — the range alone would have been `LIKELY_TRUE_POSITIVE`.
+- **Absent → `LIKELY_FALSE_POSITIVE`, even in range.** The same finding against a build
+  that compiled out PKCS7 (`OPENSSL_NO_PKCS7`) or a stripped library where
+  `PKCS7_verify` is not present: the vulnerable code is absent and no equivalent carries
+  the behavior, so the finding does not apply — cite the missing symbol/`configdata.pm`.
+  This is `TARGET_ABSENT` reached by investigation.
+- **Mechanism.** `verify-source` (Google's **Vanir** signatures + the native fix-
+  fingerprint verifier) automates exactly this presence check against a source tree; an
+  SBOM range scan cannot, because it has no source. When neither source nor Vanir is
+  available, the honest verdict is `LIKELY_TRUE_POSITIVE` with "code presence not verified"
+  as the proof gap — not `CONFIRMED`.
+- Trap avoided: reading version-in-range as proof the vulnerable code runs here; asserting
+  a function is present/absent from memory instead of fetching the public source.

@@ -106,6 +106,25 @@ Verdicts (no generic `SAFE`): `CONFIRMED`, `LIKELY_TRUE_POSITIVE`,
    yields `INSUFFICIENT_EVIDENCE` or a low-confidence result with the conflict listed.
 6. Evidence-first citations — every material reason points to a file, commit, tag,
    advisory field, release note, or tool result.
+7. **Version-in-range is not code-presence.** An authoritative affected range only proves
+   the version is inside the maintainer's affected set — not that the vulnerable code is
+   present and reachable in *this* build. The decisive question is whether the vulnerable
+   function / file / behavior is actually there:
+   - **Absent** — the vulnerable function/behavior is not present (removed, never compiled,
+     feature- or config-disabled, or refactored away) **and no similar/equivalent code
+     carries the behavior** → the finding does not apply to this build:
+     `LIKELY_FALSE_POSITIVE` (aligned with `TARGET_ABSENT`), *even though the version is in
+     range*. Cite the source/build evidence.
+   - **Present** — the vulnerable pre-image / function is found and not backport-fixed →
+     this is what a `CONFIRMED` requires.
+   - **Unverified** — no source or build was inspected → the range verdict stands as
+     `LIKELY_TRUE_POSITIVE` with "vulnerable-code presence not verified" listed as missing
+     evidence. Version-in-range **alone never reaches `CONFIRMED`.**
+   The mechanism for this check in glasswing is `verify-source` — Google's **Vanir**
+   signature backend and the native fix-fingerprint verifier — which requires the source
+   tree; an SBOM range scan cannot establish code presence by itself. Beware renames: a
+   missing *same-named* function is not absence if an equivalent carries the behavior, and
+   a present same-named function is not presence if the behavior was refactored out.
 
 Detailed rules and worked regression examples:
 [references/adjudication-rules.md](references/adjudication-rules.md) and
