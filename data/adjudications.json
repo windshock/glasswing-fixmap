@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "schema_version": "1.0.0"
+  },
+  "records": [
+    {
+      "evidence_hash": "2f03c38bfed51ba8413d5b9c8953d4196fe386996594628dacef867d5a3c1be3",
+      "recorded_at": "2026-09-04T00:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-TZQ1KH7E",
+        "component": {
+          "name": "libyang",
+          "version": "0.16_p3"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-41401"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "base 0.16 line is entirely below fix 5.4.3 (coverage-dominant affected); a Gentoo _p3 backport of a 5.4.3-era fix is implausible given the version gap"
+      }
+    },
+    {
+      "evidence_hash": "7934e8bd3e8b0b65ce1976cedd6119a2af71071a2f1ece70d1da970553dfb5af",
+      "recorded_at": "2026-09-04T00:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-AYWQW7P2",
+        "component": {
+          "name": "OpenSSL",
+          "version": "3.4-fips3.1"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-45447"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "medium",
+        "summary": "FIPS is orthogonal to the default-provider PKCS7_verify bug; base 3.4 is affected below 3.4.6 and the string does not indicate >=3.4.6; confirm exact patch with 'openssl version -a'"
+      }
+    }
+  ]
+}
