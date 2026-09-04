@@ -780,6 +780,34 @@ do not infer outdated decision semantics:
 - `docs/ACCEPTANCE.md` still reflects the older 16-SBOM / no-`AFFECTED` corpus,
   while the latest sweep records deterministic affected / not_affected results.
 
+## Improvement log — coverage & hygiene (2026-09-04)
+
+Follow-on fixes from the Palo Alto sample audit:
+
+- **CVE product-name normalization.** The weak product-name fallback now strips a
+  small allowlist of distribution qualifiers ("NGINX Open Source" → nginx,
+  "OpenSSH portable" → openssh) while never stripping product differentiators
+  ("PostgreSQL JDBC Driver" stays distinct). Recovers ranges that existed but were
+  missed on a name mismatch.
+- **CVE List V5 `defaultStatus: "affected"`.** `parseCveRanges` now inverts an
+  open-ended unaffected cutoff to `[0, fixed)`; `data/affected-ranges.json` grew
+  615 → 737 records (+122). With the optional `univers` backend enabled these
+  resolve deterministically — the full sample sweep goes to `affected 88 /
+  not_affected 31 / unknown 1` (from `.../unknown 45`), still 0 gating; without
+  univers the rpm-typed additions stay conservatively `unknown`.
+- **SBOM-independent adjudication reuse.** The evidence hash no longer includes the
+  SBOM document digest, so one review is reused across every SBOM carrying the same
+  component (e.g. `libyang 0.16.46` now reuses one record across two SBOMs);
+  version/range/snapshot/decision changes still move the hash.
+- **fix-commit repository hygiene.** sync-impacts now skips github.com reserved
+  namespaces (`advisories/`, `user-attachments/`, …) that were parsed as
+  `owner/repo`; `data/fix-impacts.json` error_count 5 → 0.
+
+Known residual limits: util-linux CVE-2026-13595 is framed under Red Hat products
+(not util-linux) so it cannot match by name; name-only components without a
+PURL/CPE stay weak/non-gating (an SBOM-producer identity gap); and a closed vendor
+build string like OpenSSL `3.4-fips3.1` is not publicly source-verifiable.
+
 ## Definition of done
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.
