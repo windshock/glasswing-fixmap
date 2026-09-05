@@ -4817,6 +4817,25 @@
           },
           "package": "OpenSSL",
           "introduced": "4.0.0"
+        },
+        {
+          "version": "412.86.202608241157-0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
+              "locator": "containers.*.affected[].versions[].version",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "tag_not_found",
+            "detail": "Tried v412.86.202608241157-0, 412.86.202608241157-0"
+          },
+          "package": "rhcos"
         }
       ],
       "release_assessment": {
@@ -4826,6 +4845,12 @@
             "source": "cve_list_v5",
             "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
             "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
+            "locator": "containers.*.affected[].versions[].version",
             "note": "CVE version-status transition to unaffected"
           }
         ]
