@@ -9,7 +9,7 @@
       "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json"
     },
     "finding_count": 70,
-    "record_count": 737
+    "record_count": 738
   },
   "ranges": [
     {
@@ -3434,6 +3434,28 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
       "cpes": [
         "cpe:/a:redhat:acm:2.13::el9"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-AYWQW7P2",
+      "advisory": "CVE-2026-45447",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "rhcos",
+      "product": "rhcos",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "412.86.202608241157-0"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
+      "cpes": [
+        "cpe:/a:redhat:openshift:4.12::el8"
       ]
     },
     {
