@@ -1,8 +1,16 @@
 # Patch-Presence Verification Plan
 
-Status: Phases 1, 2a, and 3 candidate selection implemented. The Phase 2b Vanir backend is opt-in behind the `SourceVerifier` interface and has been validated end to end against the real Vanir 1.1.0 package (`linux/amd64`), which fixed a real signature-location parsing bug; promotion to a documented optional dependency still needs broader coverage measurement. Phase 3 `AFFECTED` is now reachable: `sync-ranges` persists authoritative OSV/GHSA ranges to `data/affected-ranges.json` and `check-sbom --ranges` consumes them (npm/Go/crates.io/PyPI comparators enabled; see Milestone 3c). Remaining work is Milestone 4 hardening and the Maven/Debian/RPM/Packagist comparators — not blocked on an algorithm (well-maintained implementations exist), but pending evaluation of an optional `univers` backend gated behind per-scheme differential conformance (Tier 3.13).
+Status: All numbered roadmap items are implemented and tested. The Phase 2b
+Vanir backend remains opt-in behind the `SourceVerifier` interface and has been
+validated end to end against Vanir 1.1.0 (`linux/amd64`). Phase 3 consumes
+authoritative OSV/GHSA/CVE ranges; native comparators cover npm, Go, crates.io,
+PyPI, and OpenSSL, while the conformance-gated optional `univers` backend covers
+Maven, Debian, RPM, and Composer.
 
-Last updated: 2026-09-04 — issue #4 hardening: Tier 0, Tier 1, and Tier 2 complete (adjudication store + evidence hash + check-sbom reuse + `adjudicate` record/query/export-vex CLI + OpenVEX projection), plus Tier 3.15 (Vanir hardening). Pending: none of the numbered roadmap items — Tier 3.12/3.13/3.14 are done. Remaining is operational (Vanir/univers optional-install promotion and scheduled-refresh tuning). See roadmap below.
+Last updated: 2026-09-08 — issue #4 hardening is complete: Tiers 0–3,
+adjudication persistence, OpenVEX export, optional comparator integration, and
+container hardening are implemented. Remaining work is operational rather than
+part of this roadmap (optional-install promotion and scheduled-refresh tuning).
 
 ## Objective
 
@@ -422,62 +430,62 @@ Any future policy/gating option must distinguish authoritative `AFFECTED` from i
 - The integration was exercised against the real Vanir 1.1.0 package end to end in a `linux/amd64` container (Vanir ships prebuilt x86-64 ELF parsers only, so it does not run natively on macOS). Vanir generated Function and Line signatures from a Git fix commit and produced a real differential: the pre-fix tree reported `missing_patches`, the post-fix tree reported none. The captured signature file and both reports are checked in under `test/fixtures/vanir/` and drive a regression test.
 - This surfaced a real bug the fake-runner fixtures could not: Vanir's own sign generator writes signatures under `affected.database_specific.vanir_signatures`, but the parser read only `ecosystem_specific`, so real signature files selected zero signatures and returned `BACKEND_UNSUPPORTED`. The parser now reads either location, matching Vanir's own precedence. Vanir's Git-ecosystem signature generation applies to C/C++/Java findings that carry a GitHub fix commit, so it is a genuine optional complement; making it a documented installation still requires broader coverage measurement.
 
-### Milestone 3 — `check-sbom` (candidate selection implemented)
+### Milestone 3 — `check-sbom` (implemented)
 
-- Official CycloneDX 1.5/1.6/1.7 `JsonStrictValidator` validation, thin JSON projection, and `packageurl-js` canonicalization are implemented.
+- Official CycloneDX 1.4/1.5/1.6/1.7 `JsonStrictValidator` validation, thin JSON projection, and `packageurl-js` canonicalization are implemented.
 - Exact-version official Syft schema (16.1.2) validation and the narrow `artifacts[]` projection are implemented; the schema is vendored under `schema/vendor/syft` with its upstream URL and SHA-256 recorded in `provenance.json`.
-- The SemVer comparator (npm, Go, crates.io) and a PEP 440 comparator (PyPI) are implemented behind the `VersionComparator` boundary; every other ecosystem or range type returns `UNKNOWN`. Coercion-requiring versions are rejected.
+- Native comparators cover npm, Go, crates.io, PyPI/PEP 440, and OpenSSL classic versions. The optional, conformance-gated `univers` backend covers Maven, Debian, RPM, and Composer. Unsupported or ambiguous version schemes return `UNKNOWN`, and coercion-requiring versions are rejected.
 - An unambiguous strong candidate is connected to `verify-source`; multiple strong candidates require `--component <purl>`.
 
-Remaining before `AFFECTED` is reachable from real data: the current dataset persists only collapsed `fixed_versions[]`, not an authoritative affected range with range type, `last_affected`/`limit` events, and provenance. The comparator machinery is complete and unit-tested against synthetic ranges, but `AFFECTED` will only be emitted once such ranges are persisted (a dedicated artifact) or consumed directly from OSV/GHSA/CVE. Until then, matched components remain candidate-only, never `AFFECTED`, consistent with the decision model.
+Milestone 3c closed the original authoritative-range gap. `AFFECTED` is reachable only when strong component identity, a provenance-bearing authoritative range, and a supported comparator all agree; a first-patched release is never converted into an inferred affected range.
 
-### Milestone 3b — real-world SBOM robustness (planned)
+### Milestone 3b — real-world SBOM robustness (implemented)
 
-Acceptance testing against real exported SBOMs surfaced two input realities the initial strict path did not handle. Both are scoped robustness fixes, not new analysis capability, and neither weakens a security gate.
+Acceptance testing against real exported SBOMs surfaced two input realities the initial strict path did not handle. Both were addressed as scoped robustness fixes without weakening the security gate.
 
-- Multi-document input: several exports concatenate multiple CycloneDX BOMs in one file, either as newline-delimited JSON or as back-to-back pretty-printed documents. A single `JSON.parse` fails on the second document. Parse each document in sequence, run the adapter on each, and aggregate components and candidates while reporting the document count.
-- Cosmetic-violation tolerance: real SBOMs commonly violate the official CycloneDX schema in fields irrelevant to component identity (a non-UUID `serialNumber`; a license carrying both `id` and `name`). Run the official validator, but hard-reject only when a violation touches a projected identity field (`name`, `version`, `purl`, `cpe`, `type`) or the structural shape of `components`; tolerate other violations with a warning, since projection is already type-guarded. Candidates from such a document stay conservative and non-gating.
+- Multi-document input: newline-delimited and back-to-back pretty-printed CycloneDX documents are parsed individually and aggregated while retaining the document count. Non-whitespace outside JSON documents and unsupported members of a multi-document input fail closed.
+- Cosmetic-violation tolerance: official validation still runs, but violations outside projected identity fields are reported as warnings. Violations involving `name`, `version`, `purl`, `cpe`, `type`, or the structural shape of `components` are rejected; tolerated documents remain conservative and non-gating.
 
 ### Milestone 3c — `AFFECTED` via authoritative-range consumption (implemented)
 
 `AFFECTED` is now reachable without inferring ranges or maintaining a curated range database. `sync-ranges` consumes OSV/GHSA records exactly as published and writes the full authoritative ranges to a companion artifact (`data/affected-ranges.json`, mirroring the `fix-impacts.json` pattern) with ecosystem, package, range type, events, and provenance; `fixmap.json` is unchanged. A live run over 30 GHSA-bearing findings collected real ranges across Packagist, npm, crates.io, Maven, and Go (for example `twig/twig` `[3.24.0, 3.26.0)`), confirming the parser works on published data.
 
-`check-sbom --ranges` consumes the artifact offline: for a strong-identity candidate with a version, it selects a comparator that explicitly supports the range's ecosystem and type and evaluates it, attaching a `range_assessment`. `AFFECTED` requires all three of strong identity, an authoritative range with provenance, and a supporting comparator; a name-only candidate is never evaluated, and any unresolved case stays `unknown`. The SemVer comparator covers npm, Go, and crates.io, and a PEP 440 comparator (via `@renovatebot/pep440`) covers PyPI, each with conformance vectors; Maven, Packagist, and other schemes return `unknown` until a well-maintained library is available — they are not hand-rolled. `--fail-on-affected` makes an authoritative `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
+`check-sbom --ranges` consumes the artifact offline, selects a comparator only when the authoritative ecosystem/version type is supported, and attaches a separate `range_assessment`. `AFFECTED` requires strong identity, an authoritative provenance-bearing range, and a supporting comparator. A weak name-only candidate may retain an `affected` range verdict as review evidence, but its final `candidate_decision` remains non-gating `UNKNOWN`. Native comparators cover npm, Go, crates.io, PyPI, and OpenSSL; the optional conformance-gated `univers` runner covers Maven, Debian, RPM, and Composer. `--fail-on-affected` makes only a gating-eligible `AFFECTED` exit non-zero, distinct from inconclusive patch evidence.
 
-### Milestone 4 — Hardening and release (in progress)
+### Milestone 4 — Hardening and release (completed)
 
-- Done: ran 16 real acceptance SBOMs plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
+- Done: processed 101 real acceptance SBOMs (102 JSON inputs, one unsupported) plus the real Vanir 1.1.0 backend and retained aggregate, non-sensitive notes in [ACCEPTANCE.md](ACCEPTANCE.md).
 - Done: confirmed existing outputs are byte-for-byte compatible — `data/fixmap.json` and `data/fixmap.csv` re-serialize identically through the current code, and `sync`/`report`/`validate` are unchanged.
 - Done: documented exit semantics (`0`/`1`/`2`/`3`) and limitations in the README and ACCEPTANCE.md.
-- Done: enabled Go and crates.io comparators (genuine SemVer) and a PyPI PEP 440 comparator (via `@renovatebot/pep440`), each with conformance vectors. Maven and Packagist remain `unknown` — their schemes must not be hand-rolled, and well-maintained implementations exist (Renovate TS, the official references, `univers`); the missing piece is a permissive standalone Node drop-in, so they are pending evaluation of an optional `univers` backend under differential conformance (Tier 3.13), not blocked on an algorithm.
+- Done: enabled native npm/Go/crates.io SemVer, PyPI PEP 440, and OpenSSL comparators, plus an optional `univers` backend for Maven, Debian, RPM, and Composer. Every optional scheme is guarded by differential conformance checks.
 - Done: end-to-end `verify-source` on a real SBOM candidate (`cloudflare/circl` `v1.3.7` → `TARGET_ABSENT`); raised the rename-discovery cap 250 → 2000 so a genuinely absent target on real-world repositories resolves to `TARGET_ABSENT` instead of a truncated `UNKNOWN`.
 
-### Next session — GitHub issues #1–#3 reflected
+### Implementation history — GitHub issues #1–#3
 
-Priority order leads with the correctness/security bugs from issue #2, then feature and packaging work.
+The earlier issue work below is retained as an implementation record.
 
-**Issue #1 — Phase 2 multi-verifier source verification: essentially delivered.** Phase 2a (`SourceVerifier`, `GitAncestryVerifier`, `GlasswingFingerprintVerifier`, observation/evidence model, conservative fusion, `verify-source`, and the fixed/vulnerable/backported/reverted/moved/partial differential tests) and the Phase 2b real-Vanir evaluation are implemented. Candidate to close after publishing the Vanir differential write-up.
+**Issue #1 — Phase 2 multi-verifier source verification: delivered.** Phase 2a (`SourceVerifier`, `GitAncestryVerifier`, `GlasswingFingerprintVerifier`, observation/evidence model, conservative fusion, `verify-source`, and the fixed/vulnerable/backported/reverted/moved/partial differential tests) and the Phase 2b real-Vanir evaluation are implemented and documented.
 
-**Issue #2 — hardening review. The P0 correctness/security bugs are fixed; P1/P2 remain.**
+**Issue #2 — hardening review: delivered.**
 
 P0 — done this session:
 - Deletion-heavy false positive (`native-fingerprint.ts`): `evaluateHunk` now checks a still-present deleted line and the pre-fix image before any post-fix match, so a pure-deletion hunk's context overlap can no longer read as `VERIFIED_FIXED`. Pure-deletion regression test added.
-- Range `unknown` propagation (`check.ts assessRanges`): a `not_affected` no longer overrides an unresolved range — any applicable unresolved range keeps the result `unknown` (affected still dominates). OSV `limit` events are now preserved in the artifact. Remaining: also ingest `affected.versions[]` as exact positive evidence when range comparison is unavailable.
-- SBOM ↔ source binding (`check.ts` bridge): a `source_binding` provenance (`verified` / `user_asserted` / `unverified`) is recorded; a repository-identity conflict is `unverified`, otherwise `user_asserted` (version not machine-bound), surfaced as a warning, and source evidence stays separate from the range assessment. Remaining: emit `verified` once a VCS-revision/version binding exists.
+- Range `unknown` propagation (`check.ts assessRanges`): a `not_affected` no longer overrides an unresolved range — any applicable unresolved range keeps the result `unknown` (affected still dominates). OSV `limit` events and `affected.versions[]` exact positive evidence are preserved in the artifact.
+- SBOM ↔ source binding (`check.ts` bridge): a `source_binding` provenance (`verified` / `user_asserted` / `unverified`) is recorded; a repository-identity conflict is `unverified`, otherwise the explicitly supplied checkout is `user_asserted`, surfaced as a warning, and source evidence stays separate from the range assessment. `verified` remains deliberately reserved for a future machine-confirmed VCS revision/version binding.
 - Fail-open policy paths (`cli.ts`): `--fail-on-affected` without `--ranges`, `--source` with an unreadable fix-impact dataset, and a malformed explicit `--component` PURL all now error instead of silently degrading.
 
 P1:
 - Done: partial-impact gating — the native verifier emits an `IMPACT_INCOMPLETE` observation for a non-`complete` fix impact, and fusion treats it as inconclusive so a partial extraction can no longer reach `VERIFIED_FIXED` even when every extracted hunk matches.
 - Done: CycloneDX root component — `metadata.component` and its nested structure are now projected, so the BOM's primary application is not missed.
-- Remaining: multi-commit fix-set semantics (`relation: all_of | any_of`, optional `branch`). Deferred because it needs a data-model design that fixmap does not currently carry; a naive "require every commit" default would wrongly fail legitimate branch-specific fixes (e.g. Rocket.Chat 7.x vs 8.x), so it must be modeled from real relation/branch evidence rather than assumed.
+- Done: multi-commit fix-set semantics — `FixImpact` carries optional `relation: all_of | any_of` and `branch`; unknown relation is handled conservatively as `all_of`, and applicable impacts cannot disappear from fusion merely because their files are absent.
 
 P2 — done:
 - Added `.github/workflows/ci.yml` running `npm ci`, `npm run check`, `npm test`, and `npm run validate` on push to `main` and on pull requests, separate from the scheduled data-refresh workflow, with read-only permissions and no untrusted input.
 
 **Issue #3 — AI adjudicator Skill: delivered.** The reusable `glasswing-adjudicator` Skill lives at [`.claude/skills/glasswing-adjudicator`](../.claude/skills/glasswing-adjudicator) — a compact `SKILL.md` with detailed rules and six worked regression examples under `references/`. It gives an evidence-backed second opinion on unresolved results (`UNKNOWN`, `PATCH_NOT_FOUND`, `VERIFIER_CONFLICT`, unsupported comparator, missing range, package-identity ambiguity), never overwrites the deterministic decision, returns `CONFIRMED` / `LIKELY_TRUE_POSITIVE` / `LIKELY_FALSE_POSITIVE` / `INSUFFICIENT_EVIDENCE` with cited machine + upstream evidence, records contradictions and missing evidence, and never fabricates an affected range or auto-suppresses. The `cloudflare/circl` `v1.3.7` result (vulnerable subsystem introduced after the installed version → `TARGET_ABSENT`) is example 1.
 
-**Pre-existing feature work (unchanged priority, after the P0 fixes):**
-- Maven/Debian/RPM/Packagist comparators (PyPI PEP 440 is done) via an optional `univers` backend, each behind per-scheme differential conformance against the official reference implementation (Tier 3.13) — these unblock `AFFECTED` for the ranges `sync-ranges` already collects.
+**Follow-on feature work:**
+- Done: Maven/Debian/RPM/Composer comparators via the optional `univers` backend, each behind per-scheme differential conformance against the official reference implementation (Tier 3.13).
 - Scheduled `sync-impacts`/`sync-ranges` refresh, only after rate limits and generated-diff size are measured.
 - Done: reusable Docker-based Vanir runner wrapper (`tools/vanir-docker-runner` + `tools/Dockerfile.vanir`) so `verify-source --vanir-runner` drives the real Vanir detector in a `linux/amd64` container. Remaining (optional): promote Vanir to a documented optional install after broader real-Vanir coverage measurement.
 
@@ -555,13 +563,9 @@ Fix:
 
 The pipeline now runs SBOM → component identity → authoritative range →
 source/patch verification → residual `UNKNOWN` → AI adjudication → human
-disposition → planned persisted decision / VEX. Before CPE-based strong identity
-and a persisted VEX/adjudication store turn these results into stronger
-automation, the trust-boundary issues below must close: **a weak, non-gating hint
-today can become an incorrect BLOCK or suppression once CPE and VEX are wired
-in.** This section is a plan only — not yet implemented. It supersedes and
-reorganizes the earlier four-item roadmap; the correctness / fail-closed work
-(Tier 0) now precedes CPE, VEX, and distro normalization.
+disposition → persisted adjudication → OpenVEX export. CPE-based strong identity
+and the append-only adjudication store are wired in. This section is retained as
+the implementation record for the trust-boundary work completed under issue #4.
 
 Design invariant:
 > Deterministic coverage should expand until only the genuinely ambiguous long
@@ -571,62 +575,46 @@ Design invariant:
 
 ### Tier 0 — correctness / fail-closed (highest priority) — implemented 2026-09-03
 
-All four Tier 0 items are implemented and covered by tests; the full sample sweep
-holds at `affected 42 / not_affected 72 / unknown 3`, where the residual `unknown`
-is now the genuinely unresolvable long tail (FIPS variant `3.4-fips3.1`, Gentoo
-`0.16_p3`, and the `postgresql 42.4.0` rpm-typed JDBC namesake).
+All four Tier 0 items are implemented and covered by tests. Current native and
+optional-comparator sample results are recorded in `docs/ACCEPTANCE.md`.
 
-1. **Preserve and honor CVE List V5 `versionType`.** *(done)* `parseCveRanges()` flattens
-   every CVE record to `ecosystem: "cve"`, `range_type: "SEMVER"` and discards
-   `versionType` (only `git` is skipped); `CveVersionComparator` then treats the
-   `cve` sentinel as OpenSSL-classic / three-part ordering universally. But `cve`
-   is a *provenance* category, not a version scheme. Preserve the authoritative
-   `versionType` and dispatch explicitly: `semver` → node-semver; `git` → source
-   verification, never string comparison; `rpm`/`debian`/`maven`/… →
-   ecosystem-specific comparator when supported; OpenSSL product + compatible
-   classic form → the dedicated OpenSSL comparator; unknown/custom scheme with no
-   proven comparator → `UNKNOWN`. No universal "CVE comparator". (Supersedes the
-   `cve`-sentinel design of the OpenSSL-comparator section above.) Ref:
-   CVEProject/cve-schema `schema/docs/versions.md`.
+1. **Preserve and honor CVE List V5 `versionType`.** *(done)* `parseCveRanges()`
+   preserves the authoritative `versionType` and dispatches explicitly: `semver`
+   → node-semver; `git` → source verification, never string comparison;
+   `rpm`/`debian`/`maven`/… → the optional ecosystem comparator; OpenSSL product
+   + compatible classic form → the dedicated OpenSSL comparator; unknown/custom
+   schemes without a proven comparator → `UNKNOWN`. `cve` remains provenance,
+   not a universal version scheme. Ref: CVEProject/cve-schema
+   `schema/docs/versions.md`.
 
-2. **Preserve / evaluate CVE List V5 `changes[]`.** *(done)* The range-projection path
-   ignores within-line status transitions (e.g. affected → unaffected at 2.5.2 →
-   affected at 2.6.0 → unaffected at 2.6.3), which can flatten a non-contiguous
-   range into a broad false `AFFECTED`. Preferred: preserve `changes[]` in the
-   range artifact, evaluate transitions per the declared `versionType`, keep
-   provenance for every boundary. Minimum fail-safe if deferred: any entry with
-   `changes[]` → mark the range unsupported / `UNKNOWN`; never emit a gating
-   `AFFECTED` from the simplified interval.
+2. **Preserve / evaluate CVE List V5 `changes[]`.** *(done)* Until transition
+   evaluation is implemented for every declared version scheme, a version entry
+   containing `changes[]` is preserved as `CHANGES_UNSUPPORTED` and evaluates to
+   `UNKNOWN`. A non-contiguous range is never flattened into a broad gating
+   `AFFECTED` interval.
 
-3. **Explicit `--source` must not fail open.** *(done)* `checkSbom()` catches
-   `verifySource()` exceptions and converts them to warnings, so an explicitly
-   requested source verification can exit 0 without ever completing. Required:
-   `check-sbom --source …` + `verifySource()` throws / cannot execute →
-   operational `ERROR` + non-zero exit. A best-effort warning is acceptable only
-   when source verification was not explicitly part of the command contract.
+3. **Explicit `--source` must not fail open.** *(done)* `check-sbom --source …`
+   now reports an operational `ERROR` and exits non-zero when `verifySource()`
+   throws or cannot execute; it is never reduced to a passing warning.
 
-4. **Validate external `--ranges` input before use.** *(done)* `readAffectedRangeDataset()`
-   does a raw `JSON.parse(… as AffectedRangeDataset)`, so a user-supplied or
-   modified ranges file reaches the decision engine unvalidated. Change the path
-   to read → structural / schema / semantic validation → snapshot-compatibility
-   validation → evaluate. Malformed security-decision input must fail closed.
+4. **Validate external `--ranges` input before use.** *(done)*
+   `readAffectedRangeDataset()` performs structural, schema, and semantic
+   validation before evaluation; scan-time snapshot compatibility is checked
+   against the fixmap. Malformed security-decision input fails closed.
 
 ### Tier 1 — evidence integrity — implemented 2026-09-04
 
-All four Tier 1 items are implemented and covered by tests (78 passing).
+All four Tier 1 items are implemented and covered by the full test suite.
 
-5. **Bind fixmap / ranges / impacts to one snapshot.** *(done)* Companion datasets carry
-   only partial `generated_from` (schema version, `source_as_of`, source URL).
-   Propagate and validate at least `fixmap_schema_version`, `source_as_of`,
-   `source_revision`, and a `source_manifest` digest. At scan time, reject or
-   explicitly mark incompatible / stale companions rather than silently combining
-   a newer fixmap with older ranges/impacts.
+5. **Bind fixmap / ranges / impacts to one snapshot.** *(done)* Companion datasets
+   carry `fixmap_schema_version`, `source_as_of`, `source_revision`, and
+   `source_manifest_sha3`. Scan-time compatibility checks reject or explicitly
+   flag stale companions instead of silently combining evidence snapshots.
 
 6. **Atomic scheduled refresh of all companion datasets.** *(done)*
-   `.github/workflows/update-data.yml` refreshes `fixmap` only. Run `sync` +
-   `sync-ranges` + `sync-impacts` + snapshot-compatibility validation + verify /
-   test → one data PR. (Now unblocked: `sync-ranges` measured 27s over 93
-   findings.) Prevents stale range / impact data pairing with a newer fixmap.
+   `.github/workflows/update-data.yml` runs `sync` + `sync-ranges` +
+   `sync-impacts` + validation/tests and opens one data PR, preventing a newer
+   fixmap from being paired with stale range or impact data.
 
 7. **Real CPE 2.3 matching (not string equality).** *(done)* Adapters already preserve
    CPEs and range records can carry CPEs; adding CPE as a strong identity source
@@ -669,18 +657,19 @@ The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (recor
    decision change auto-invalidates the prior review while the old subject still
    resolves. `supersedes` is a pure audit link. The store fails closed on
    malformed input. This is exactly the "do not re-run the Skill on the same
-   residual" structure. Remaining wiring: attach a matched prior review to
-   `check-sbom` candidates and surface a hash-miss as "re-adjudication needed"; a
-   `record` / `query` CLI; and the OpenVEX projection (item 11).
+   residual" structure. `check-sbom` attaches a matching prior review and flags
+   hash misses for re-adjudication; the `record`, `query`, and `export-vex` CLI
+   paths complete the persistence and export loop.
 
-10. **Stronger evidence hash + invalidation.** *(done — hash + check-sbom auto-invalidation on evidence change)* Bind the full decision context:
-    ANT + CVE/GHSA IDs; canonical PURL/CPE + version + qualifiers; SBOM / document
-    digest; fixmap source revision / manifest digest; affected-range record
-    digest; fix-impact dataset / record digest; source-verification report digest;
-    `source_binding` status; machine decision; adjudicator ruleset / Skill commit
-    SHA; and the AI review's upstream evidence references. Invalidate /
-    re-adjudicate when any material input changes. Suppression stays explicitly
-    human-approved and auditable.
+10. **Stronger evidence hash + invalidation.** *(done — hash + check-sbom
+    auto-invalidation on evidence change)* The scan-time key binds the ANT ID,
+    canonical PURL/CPE and version, fixmap source revision/manifest, applied-range
+    digest, source-verification report digest and binding, and machine decision.
+    It intentionally excludes the SBOM document digest so the same component
+    decision can be reused across documents; a change to material component,
+    range, snapshot, source, or decision evidence moves the hash. The generic
+    `EvidenceKey` also supports document-bound callers and adjudicator-ruleset
+    binding. Suppression remains explicitly human-approved and auditable.
 
 11. **Conservative VEX projection (OpenVEX first).** *(done — projectToOpenVex + `adjudicate export-vex`)* Suggested mapping: `AFFECTED`
     + strong identity → affected; `VERIFIED_FIXED` + `source_binding == verified`
@@ -763,22 +752,20 @@ The adjudication store, evidence hash, check-sbom reuse, `adjudicate` CLI (recor
     / changes-unsupported) so triage routes to the adjudicator automatically, and
     add a `--dir` / summary mode for scanning many SBOMs at once.
 
-15. **Vanir container hardening + optional-install promotion.** *(hardening done; optional-install promotion still pending)* Constrain the
-    Docker wrapper to preserve read-only inspection: source and signature mounts
-    `:ro`, report dir `:rw`, `--network=none`, `--read-only`, `--cap-drop=ALL`,
-    `--security-opt=no-new-privileges`; consider hash-locking transitive Python
-    dependencies if reproducible container builds become a release requirement.
+15. **Vanir container hardening.** *(done)* The Docker wrapper preserves read-only
+    inspection: source and signature mounts are `:ro`, the report directory is
+    `:rw`, and the container uses `--network=none`, `--read-only`,
+    `--cap-drop=ALL`, and `--security-opt=no-new-privileges`. Optional-install
+    promotion and transitive Python hash locking remain operational follow-ups,
+    not blockers for this roadmap.
 
-### P2 — docs / acceptance reconciliation (after the correctness work)
+### P2 — docs / acceptance reconciliation — completed 2026-09-08
 
-Several docs now lag the implementation and should be reconciled so external users
-do not infer outdated decision semantics:
-- README / CLI help still say CycloneDX 1.5/1.6/1.7, but 1.4 is now supported.
-- README says name-only candidates are never evaluated for `AFFECTED`, while the
-  code now attaches a weak CVE product-name `range_assessment: affected` and only
-  prevents gating.
-- `docs/ACCEPTANCE.md` still reflects the older 16-SBOM / no-`AFFECTED` corpus,
-  while the latest sweep records deterministic affected / not_affected results.
+- README and CLI help document CycloneDX 1.4–1.7 support.
+- README separates weak range evidence from the non-gating final candidate
+  decision.
+- `docs/ACCEPTANCE.md` records the current 101-SBOM sweep and distinguishes
+  affected range evidence from gating-eligible `AFFECTED` decisions.
 
 ## Improvement log — coverage & hygiene (2026-09-04)
 
@@ -812,4 +799,4 @@ build string like OpenSSL `3.4-fips3.1` is not publicly source-verifiable.
 
 The first release is complete when it can extract compact impact evidence for supported GitHub fix commits, distinguish all six decisions without conflating their meanings, verify exact and backported fixes in a source tree, use the supplied CycloneDX and Syft SBOMs only for conservative candidate selection, and preserve every existing fixmap workflow.
 
-The following remain intentionally deferred: broad AST parsing, unsupported SBOM formats, VEX/SARIF output, binary/package-tree inspection without source, inferred affected ranges, automatic source downloads, and heuristic security gating.
+The following remain intentionally deferred: broad AST parsing, unsupported SBOM formats, CycloneDX VEX and SARIF output, binary/package-tree inspection without source, inferred affected ranges, automatic source downloads, and heuristic security gating. OpenVEX export is implemented.

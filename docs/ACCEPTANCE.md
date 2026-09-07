@@ -17,17 +17,22 @@ so existing behaviour was checked for byte-for-byte compatibility:
 - `sync` serialization, `report`, `validate` (214 findings), and `--help` are
   unchanged; the full test suite passes.
 
-## SBOM corpus (16 real SBOMs)
+## SBOM corpus (101 processed real SBOMs)
 
-> Update (2026-09-04): after `sync-ranges` began consuming CVE List V5 ranges and
-> the OpenSSL/`versionType` comparator work, a larger private sweep (101 SBOMs)
-> now reaches deterministic range verdicts — `affected 42 / not_affected 72 /
-> unknown 3` — while still gating nothing, because every affected component in the
-> corpus is name-only (weak) identity. The residual `unknown` is the genuinely
-> unresolvable tail (a FIPS build variant, a Gentoo distro suffix, and the
-> `postgresql 42.4.0` rpm-typed JDBC namesake). The no-incorrect-decision and
-> non-gating properties below still hold; a CPE-bearing SBOM would let the engine
-> gate and would exclude the JDBC namesake outright.
+Current sweep (2026-09-08), using the committed fixmap, ranges, impacts, and
+adjudications:
+
+- 102 JSON files discovered: 101 processed, 1 unsupported, 0 errored.
+- 401 candidate occurrences selected.
+- Native comparators: `affected 45 / not_affected 30 / unknown 45 /
+  no-assessment 281`.
+- With the optional `univers` backend installed and all four scheme conformance
+  checks passing: `affected 88 / not_affected 31 / unknown 1 /
+  no-assessment 281`.
+- Gating-eligible `AFFECTED`: 0. Every affected range result in this corpus has
+  weak, name-only component identity and therefore remains a non-gating final
+  `UNKNOWN` decision. The remaining range-level unknown is a downstream build
+  variant whose backport state is not known.
 
 Formats exercised: CycloneDX 1.4, 1.5, 1.6, and 1.7, and Syft native JSON 16.1.2.
 Shapes exercised: single-document, newline-delimited multi-document, and
@@ -35,10 +40,11 @@ concatenated pretty-printed multi-document (up to 83 BOMs in one file).
 Component counts ranged from a handful to 10,435 (a file-only inventory that
 correctly yields zero package candidates).
 
-- No authoritative `AFFECTED` match was found in the corpus. That is the
-  expected clean result, not a reason to weaken matching.
-- A small number of low-confidence `name_heuristic` candidates appeared for
-  SBOMs that carry no PURL/CPE. All were non-gating (exit 0). One illustrative
+- No gating-eligible `AFFECTED` decision was produced. Authoritative affected
+  range evidence was retained on weak candidates without being promoted to a
+  product-level security gate.
+- Low-confidence `name_heuristic` candidates appeared for SBOMs that carry no
+  PURL/CPE. All were non-gating (exit 0). One illustrative
   case: a component named `postgresql` at a `42.x` version (the JDBC driver) was
   name-matched to a PostgreSQL *server* finding — a genuine false positive that
   the decision model correctly kept low-confidence and non-gating, and that a
