@@ -244,6 +244,28 @@
         "confidence": "high",
         "summary": "Source-verified via verify-source (native glasswing-fingerprint): the vulnerable PKCS7_verify pre-image (the caller-owned indata BIO free before the fix) is present in the upstream openssl tree at this version and the fix is absent (PATCH_NOT_FOUND, PREIMAGE_PRESENT). Range-affected AND upstream code presence confirmed; the SBOM->Palo-Alto-build binding is only user_asserted (a vendor backport cannot be ruled out from the version string), so LIKELY_TRUE_POSITIVE (high), not CONFIRMED."
       }
+    },
+    {
+      "evidence_hash": "20fac132635dc028f115158cfdda79a10cebbbe0e8f08799866c9640d2445e24",
+      "recorded_at": "2026-09-07T00:00:00Z",
+      "subject": {
+        "ant_id": "ANT-2026-HY56VRSB",
+        "component": {
+          "name": "nginx",
+          "version": "1.0.15"
+        }
+      },
+      "finding": {
+        "vulnerability_ids": [
+          "CVE-2026-27654"
+        ]
+      },
+      "machine_decision": "UNKNOWN",
+      "ai_review": {
+        "verdict": "LIKELY_TRUE_POSITIVE",
+        "confidence": "high",
+        "summary": "Source-verified: nginx 1.0.15 contains the vulnerable ngx_http_dav_copy_move_handler (DAV COPY/MOVE) in src/http/modules/ngx_http_dav_module.c, and the version is inside the authoritative NGINX Open Source range [0.5.13, 1.28.3) — introduced=0.5.13 (not 0), so this is a genuine window, not an over-broad range like libyang 0.16. No public fix commit to fingerprint; SBOM->build binding user_asserted -> LIKELY_TRUE_POSITIVE (high)."
+      }
     }
   ]
 }
