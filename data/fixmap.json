@@ -2388,9 +2388,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45752"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -2401,6 +2399,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-61Y3NTY3"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45752.json"
         },
         {
           "source": "github_advisory_database",
@@ -16306,9 +16308,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45751"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -16319,6 +16319,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-WCSVRYAX"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45751.json"
         },
         {
           "source": "github_advisory_database",
