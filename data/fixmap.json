@@ -7,11 +7,11 @@
     "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json",
     "finding_count": 214,
     "patched_count": 212,
-    "with_fix_commit": 111,
+    "with_fix_commit": 112,
     "with_fixed_version": 81,
     "complete_count": 51,
-    "partial_count": 90,
-    "unresolved_count": 72
+    "partial_count": 91,
+    "unresolved_count": 71
   },
   "findings": [
     {
@@ -2388,9 +2388,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45752"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -2401,6 +2399,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-61Y3NTY3"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45752.json"
         },
         {
           "source": "github_advisory_database",
@@ -6487,11 +6489,31 @@
               "source": "anthropic_finding",
               "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-D7FC4YDQ",
               "locator": "linked reference"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+              "locator": "containers.*.references"
             }
           ]
         }
       ],
-      "fix_references": [],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/alanxz/rabbitmq-c/pull/879",
+          "repository": "alanxz/rabbitmq-c",
+          "number": 879,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
       "fixed_versions": [
         {
           "version": "0.16.0",
@@ -6534,9 +6556,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-44236"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -6547,6 +6567,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-D7FC4YDQ"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json"
         },
         {
           "source": "github_advisory_database",
@@ -8228,18 +8252,52 @@
       "ghsa_ids": [
         "GHSA-9mmv-r8g3-qp46"
       ],
-      "fix_commits": [],
-      "fix_references": [],
+      "fix_commits": [
+        {
+          "sha": "1d3afbb056fee5cc9ea05680bf32288715d0d802",
+          "url": "https://github.com/alanxz/rabbitmq-c/commit/1d3afbb056fee5cc9ea05680bf32288715d0d802",
+          "repository": "alanxz/rabbitmq-c",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/alanxz/rabbitmq-c/pull/878",
+          "repository": "alanxz/rabbitmq-c",
+          "number": 878,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+            "locator": "containers.*.references"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": [
-          "No CVE List V5 record found for CVE-2026-44235",
           "No OSV or GitHub Advisory Database record found for GHSA-9mmv-r8g3-qp46"
         ]
       },
@@ -8252,6 +8310,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-GTGXBRXN"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json"
         }
       ]
     },
@@ -10181,6 +10243,11 @@
           "confidence": "high",
           "evidence": [
             {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+              "locator": "containers.*.references"
+            },
+            {
               "source": "github_advisory_database",
               "url": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-wc3v-3457-c8cm/GHSA-wc3v-3457-c8cm.json",
               "locator": "references"
@@ -10189,6 +10256,34 @@
         }
       ],
       "fixed_versions": [
+        {
+          "version": "1.0.0-beta.228",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/openmeterio/openmeter/compare/6ce29e743165890c10346f4c71d5bf79f1ecaf6f...6ce29e743165890c10346f4c71d5bf79f1ecaf6f",
+              "locator": "6ce29e743165890c10346f4c71d5bf79f1ecaf6f is an ancestor of v1.0.0-beta.228"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "openmeterio/openmeter",
+            "tag": "v1.0.0-beta.228",
+            "fix_sha": "6ce29e743165890c10346f4c71d5bf79f1ecaf6f",
+            "url": "https://github.com/openmeterio/openmeter/compare/6ce29e743165890c10346f4c71d5bf79f1ecaf6f...6ce29e743165890c10346f4c71d5bf79f1ecaf6f"
+          },
+          "package": "openmeter",
+          "introduced": "1.0.0"
+        },
         {
           "version": "1.0.0-beta.228",
           "role": "first_patched",
@@ -10223,6 +10318,12 @@
         "status": "confirmed_versions",
         "evidence": [
           {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
             "source": "github_advisory_database",
             "url": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-wc3v-3457-c8cm/GHSA-wc3v-3457-c8cm.json",
             "locator": "affected.ranges[ECOSYSTEM].events.fixed",
@@ -10232,9 +10333,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-8462"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -10245,6 +10344,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-KC1Y51NF"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json"
         },
         {
           "source": "github_advisory_database",
@@ -16306,9 +16409,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45751"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -16319,6 +16420,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-WCSVRYAX"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45751.json"
         },
         {
           "source": "github_advisory_database",
