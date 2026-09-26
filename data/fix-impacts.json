@@ -8,13 +8,218 @@
       "source_manifest_sha3": "f89b26dc49393d86613a9687a7b6e152d60e1b8de4066640707ded608fd51f5bd354b29ac790490fc0fc6ee3b01dcf7ae11617318a95129c9cbc0ae353b6d281",
       "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json"
     },
-    "finding_count": 100,
-    "impact_count": 112,
-    "complete_count": 112,
+    "finding_count": 101,
+    "impact_count": 113,
+    "complete_count": 113,
     "partial_count": 0,
     "error_count": 0
   },
   "impacts": [
+    {
+      "repository": "alanxz/rabbitmq-c",
+      "commit": "1d3afbb056fee5cc9ea05680bf32288715d0d802",
+      "ant_ids": [
+        "ANT-2026-GTGXBRXN"
+      ],
+      "extraction_status": "complete",
+      "files": [
+        {
+          "status": "added",
+          "patch_available": false,
+          "hunks": [],
+          "path_after": "fuzz/input/fuzz_server_ghsa-9mmv-r8g3-qp46.raw"
+        },
+        {
+          "status": "modified",
+          "patch_available": true,
+          "hunks": [
+            {
+              "old_range": {
+                "start": 320,
+                "count": 6
+              },
+              "new_range": {
+                "start": 320,
+                "count": 13
+              },
+              "signatures": [
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "added",
+                  "digest": "f2dae486395cfcb1b5003ab7cebb03a63eba9857286a75a0044b77da13884c8d",
+                  "line_count": 7,
+                  "normalized_length": 352
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "postimage",
+                  "digest": "c11f06cc0337bc78a3129ca8dfa6a9464356c526bb58011aa4eae4ad6b241c0f",
+                  "line_count": 12,
+                  "normalized_length": 552
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "preimage",
+                  "digest": "18afae9337cbbfdc5d73e16a774bbdd222f04093618cce61dbd5121d5ca4c299",
+                  "line_count": 5,
+                  "normalized_length": 199
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "babadd9744aa6f992b2589954debb7ee62e001b4017014c0fbf3aa7b816e1a92",
+                  "line_count": 3,
+                  "normalized_length": 138
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "e97c76e7a50c7f754d84ecaa4a8ee3892038d716da4253e16638b561378a6e65",
+                  "line_count": 2,
+                  "normalized_length": 60
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "combined",
+                  "digest": "3ec8d800d22598af9f7779742a1f99a1c59d1d4196cf0a2fc986fe408b05f816",
+                  "line_count": 12,
+                  "normalized_length": 526
+                }
+              ],
+              "context": "int amqp_handle_input(amqp_connection_state_t state, amqp_bytes_t received_data,"
+            },
+            {
+              "old_range": {
+                "start": 335,
+                "count": 6
+              },
+              "new_range": {
+                "start": 342,
+                "count": 15
+              },
+              "signatures": [
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "added",
+                  "digest": "74c51df466498cee24d899272c2d9cc91f6441ff93ba7e4e09c6f505894b934d",
+                  "line_count": 9,
+                  "normalized_length": 426
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "postimage",
+                  "digest": "44c9a9d5590a85bdcdd8d137c69c64dbb238a5e727a68d9ed839a6dc79221544",
+                  "line_count": 15,
+                  "normalized_length": 593
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "preimage",
+                  "digest": "c0197c880a694fd373ac6324a2558f2a91487bbc9b77613c6a376526e499c9be",
+                  "line_count": 6,
+                  "normalized_length": 166
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "0db815a8a4b792b0ef803b7705f0374c7d264cf005af5b4c65afc468c87a9779",
+                  "line_count": 3,
+                  "normalized_length": 134
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "0e4b26ac770f930e7e97d87b4b6263933db1946205fabe600a024dcdc1af8b49",
+                  "line_count": 3,
+                  "normalized_length": 31
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "combined",
+                  "digest": "9bec4e1b6d0d5aba4849d0e7b415d6b0bf840869069503b75853b876af37ac51",
+                  "line_count": 15,
+                  "normalized_length": 526
+                }
+              ],
+              "context": "int amqp_handle_input(amqp_connection_state_t state, amqp_bytes_t received_data,"
+            },
+            {
+              "old_range": {
+                "start": 354,
+                "count": 6
+              },
+              "new_range": {
+                "start": 370,
+                "count": 9
+              },
+              "signatures": [
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "added",
+                  "digest": "7bb166fdf2b38a4c33a20cc4a80f308b6d4905b576d6212155acd219243aa1cb",
+                  "line_count": 3,
+                  "normalized_length": 89
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "postimage",
+                  "digest": "79494f329b114bafe5ffc8ada7891471903fb1c0886c48010a69889a5bc070bf",
+                  "line_count": 9,
+                  "normalized_length": 255
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "preimage",
+                  "digest": "a649518549577cfd55ae7c322a45fe1a648cf3d3dce12a91ec6c699080796fb8",
+                  "line_count": 6,
+                  "normalized_length": 165
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "c69edb452eca234976c8d9afa58d70e0e918fff166b014b0ddc7dc02c8ace2be",
+                  "line_count": 3,
+                  "normalized_length": 29
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "unchanged_context",
+                  "digest": "eb467158d6bfc51f8654175d65c308f06b509778328527deab8298d4babf1c2d",
+                  "line_count": 3,
+                  "normalized_length": 135
+                },
+                {
+                  "algorithm": "glasswing-normalized-sha256-v1",
+                  "kind": "combined",
+                  "digest": "b314ab0b2c463896899599ae8f97226b6490aa2ef9df3e6b13a43ea9cb6d759a",
+                  "line_count": 9,
+                  "normalized_length": 526
+                }
+              ],
+              "context": "int amqp_handle_input(amqp_connection_state_t state, amqp_bytes_t received_data,"
+            }
+          ],
+          "path_before": "librabbitmq/amqp_connection.c",
+          "path_after": "librabbitmq/amqp_connection.c",
+          "functions": [
+            "int amqp_handle_input(amqp_connection_state_t state, amqp_bytes_t received_data,"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+          "locator": "containers.*.references"
+        },
+        {
+          "source": "github_repository",
+          "url": "https://github.com/alanxz/rabbitmq-c/commit/1d3afbb056fee5cc9ea05680bf32288715d0d802",
+          "locator": "commit files and patch hunks"
+        }
+      ],
+      "warnings": []
+    },
     {
       "repository": "alanxz/rabbitmq-c",
       "commit": "4777d0b5c58cb02966a04a85832436bd66ed5d1f",
@@ -431,6 +636,11 @@
           "source": "anthropic_finding",
           "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-D7FC4YDQ",
           "locator": "linked reference"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+          "locator": "containers.*.references"
         },
         {
           "source": "github_repository",
