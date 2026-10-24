@@ -1,19 +1,133 @@
 {
   "metadata": {
     "schema_version": "1.0.0",
-    "source_as_of": "2026-08-26T18:55:53.809770Z",
-    "source_revision": 32,
-    "source_manifest_sha3": "f89b26dc49393d86613a9687a7b6e152d60e1b8de4066640707ded608fd51f5bd354b29ac790490fc0fc6ee3b01dcf7ae11617318a95129c9cbc0ae353b6d281",
+    "source_as_of": "2026-10-02T19:47:20.314425Z",
+    "source_revision": 35,
+    "source_manifest_sha3": "1fca6b3bafbdab0c2a55896e88c547016e90b28c554dc0b051895fc5639b0e5160b07598ccb6d2dcbfb9277b09a99ea81b4a4ba49cf36796a76fa7b6d97888f9",
     "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json",
-    "finding_count": 214,
-    "patched_count": 212,
-    "with_fix_commit": 111,
-    "with_fixed_version": 81,
-    "complete_count": 51,
-    "partial_count": 90,
-    "unresolved_count": 72
+    "finding_count": 237,
+    "patched_count": 234,
+    "with_fix_commit": 153,
+    "with_fixed_version": 97,
+    "complete_count": 70,
+    "partial_count": 110,
+    "unresolved_count": 55
   },
   "findings": [
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-05VXN1Y6",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-05VXN1Y6: RDP ZGFX decompressor history buffer overflow",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "low"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-12T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:40:19.719501Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-76888"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "d50d557d84ddb546ca4a43f51034780e2493c409",
+          "url": "https://github.com/wireshark/wireshark/commit/d50d557d84ddb546ca4a43f51034780e2493c409",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-05VXN1Y6",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.4.18",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.4.18",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.4.0"
+        },
+        {
+          "version": "4.6.8",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.8",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-05VXN1Y6"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-05VXN1Y6"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json"
+        }
+      ]
+    },
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-09SNWQBT",
@@ -227,7 +341,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-0HC68EK6",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-0HC68EK6: Heap Buffer Overflow via Unsafe static_cast in OOXML VML Textbox Replay",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -287,21 +401,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-05T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:14.462509Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "7e6f2e473e5d4ac8bb09bb06c55cc2ed4e20a102",
+          "url": "https://github.com/supabase/auth/commit/7e6f2e473e5d4ac8bb09bb06c55cc2ed4e20a102",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-0JJXMV3G",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-0JJXMV3G",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -445,6 +579,69 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-0NGQ3EZK",
+      "project": "gpg/gnupg",
+      "title": "ANT-2026-0NGQ3EZK: TOFU trust bypass via forged certification without signature verification",
+      "bug_class": "auth-bypass",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-10T00:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T22:41:50.075763Z",
+      "withdrawn": false,
+      "cve_ids": [],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "08611f5da8ad4b9cc80bb05f0f8610ec6baa6063",
+          "url": "https://github.com/gpg/gnupg/commit/08611f5da8ad4b9cc80bb05f0f8610ec6baa6063",
+          "repository": "gpg/gnupg",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-0NGQ3EZK",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-0NGQ3EZK",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-0NGQ3EZK"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-0NGQ3EZK"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-0Y1VS937",
       "project": "ffmpeg/ffmpeg",
       "title": "ANT-2026-0Y1VS937: Heap underflow in H.264 xchg_mb_border via slice_num/sentinel collision",
@@ -509,7 +706,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-110HTZ5M",
-      "project": "jsrsasign",
+      "project": "kjur/jsrsasign",
       "title": "ANT-2026-110HTZ5M: jsrsasign npm — ECDSA nonce RNG seeded entirely from Math.random() in Node.js",
       "bug_class": "other",
       "severity": {
@@ -520,7 +717,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-12T12:00:00Z",
-      "discovered_on": "2026-03-27",
+      "discovered_on": "2026-03-28",
       "revealed_at": "2026-08-17T20:01:13.764645Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -563,7 +760,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-26T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:04.882839Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -929,7 +1126,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-1FT5E1XF",
-      "project": "lcms",
+      "project": "mm2/little-cms",
       "title": "ANT-2026-1FT5E1XF: Stack-buffer-overflow in cmslut.c:1373",
       "bug_class": "stack-buffer-overflow",
       "severity": {
@@ -1079,7 +1276,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-20T00:00:00Z",
-      "discovered_on": "2026-04-18",
+      "discovered_on": "2026-04-19",
       "revealed_at": "2026-08-17T17:47:46.910590Z",
       "withdrawn": false,
       "cve_ids": [
@@ -1193,6 +1390,120 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-27KVBTTP",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-27KVBTTP: sharkd tap request leaves dangling stack-object listeners",
+      "bug_class": "other",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "low"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-12T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:36:48.404769Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-76891"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "178939f126d5eeb442d96e10b0ea4c1cfc6920e9",
+          "url": "https://github.com/wireshark/wireshark/commit/178939f126d5eeb442d96e10b0ea4c1cfc6920e9",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-27KVBTTP",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.4.18",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.4.18",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.4.0"
+        },
+        {
+          "version": "4.6.8",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.8",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-27KVBTTP"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-27KVBTTP"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-2BX2DMM1",
       "project": "opensc",
       "title": "ANT-2026-2BX2DMM1: Stack buffer overflow in rtecp_cipher APDU response handling via unbounded apdu.resplen copy",
@@ -1260,7 +1571,7 @@
       "fix_commits": [
         {
           "sha": "70da513",
-          "url": "https://github.com/advisories/GHSA-v782-6fq4-q827/commit/70da513",
+          "url": "https://github.com/randombit/botan/commit/70da513",
           "confidence": "medium",
           "evidence": [
             {
@@ -1270,7 +1581,7 @@
               "note": "Commit identifier reported in the public finding body"
             }
           ],
-          "repository": "advisories/GHSA-v782-6fq4-q827"
+          "repository": "randombit/botan"
         }
       ],
       "fix_references": [],
@@ -1279,18 +1590,26 @@
           "version": "3.11.1",
           "role": "first_patched",
           "first_patched": true,
-          "confidence": "high",
+          "confidence": "verified",
           "evidence": [
             {
               "source": "github_advisory_database",
               "url": "https://github.com/randombit/botan/security/advisories/GHSA-v782-6fq4-q827",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/randombit/botan/compare/70da513...86d105523def181ae833e3aaaf773b1b0c20dda4",
+              "locator": "70da513 is an ancestor of 3.11.1"
             }
           ],
           "commit_verification": {
-            "status": "tag_not_found",
-            "detail": "Tried v3.11.1, 3.11.1"
+            "status": "verified_contains_fix",
+            "repository": "randombit/botan",
+            "tag": "3.11.1",
+            "fix_sha": "70da513",
+            "url": "https://github.com/randombit/botan/compare/70da513...86d105523def181ae833e3aaaf773b1b0c20dda4"
           },
           "package": "botan"
         }
@@ -1333,7 +1652,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-2NNMB24E",
-      "project": "openssh",
+      "project": "openssh/openssh-portable",
       "title": "ANT-2026-2NNMB24E: stack-overflow in openssh",
       "bug_class": "stack-overflow",
       "severity": {
@@ -1344,7 +1663,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-31T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T20:01:19.023076Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -1366,7 +1685,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v10.4, 10.4"
           }
         },
         {
@@ -1383,7 +1703,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v10.4p1, 10.4p1"
           }
         }
       ],
@@ -1526,6 +1847,124 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-3FWTCMVC",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-3FWTCMVC: Z39.50 MARC directory count floor/ceil mismatch overflow",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-08T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:01:14.754661Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-15170"
+      ],
+      "ghsa_ids": [
+        "GHSA-hfrj-29vh-pcf2"
+      ],
+      "fix_commits": [
+        {
+          "sha": "c9bd49828f4e9cd8c04f90aacb11e2238016bc31",
+          "url": "https://github.com/wireshark/wireshark/commit/c9bd49828f4e9cd8c04f90aacb11e2238016bc31",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-3FWTCMVC",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.4.17",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.4.17",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.4.0"
+        },
+        {
+          "version": "4.6.7",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.7",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": [
+          "No OSV or GitHub Advisory Database record found for GHSA-hfrj-29vh-pcf2"
+        ]
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-3FWTCMVC"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-3FWTCMVC"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-3JR8RVFB",
       "project": "danbloomberg/leptonica",
       "title": "ANT-2026-3JR8RVFB: Heap buffer underwrite via negative size field in sarrayReadStream causing null byte underwrite",
@@ -1644,7 +2083,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-18T12:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-08-17T17:47:31.579689Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -1814,7 +2253,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-06T12:00:00Z",
-      "discovered_on": "2026-03-27",
+      "discovered_on": "2026-03-28",
       "revealed_at": "2026-08-17T20:01:08.118888Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -1905,27 +2344,47 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "75cbc453e7491ec10442ee1c9d37a03aef237a00",
+          "url": "https://github.com/OSGeo/gdal/commit/75cbc453e7491ec10442ee1c9d37a03aef237a00",
+          "repository": "OSGeo/gdal",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-4PKJCSR8",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [
         {
           "version": "3.13.2",
           "role": "operational_baseline",
           "first_patched": false,
-          "confidence": "medium",
+          "confidence": "verified",
           "evidence": [
             {
               "source": "manual_override",
               "url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
               "locator": "ANT-2026-4PKJCSR8",
               "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/OSGeo/gdal/compare/75cbc453e7491ec10442ee1c9d37a03aef237a00...b40672525acf3f5c4f29d8541aa7dcff1e18eb92",
+              "locator": "75cbc453e7491ec10442ee1c9d37a03aef237a00 is an ancestor of v3.13.2"
             }
           ],
           "commit_verification": {
-            "status": "fix_not_in_tag",
-            "repository": "osgeo/gdal",
+            "status": "verified_contains_fix",
+            "repository": "OSGeo/gdal",
             "tag": "v3.13.2",
-            "detail": "No known fix commit was an ancestor of this tag"
+            "fix_sha": "75cbc453e7491ec10442ee1c9d37a03aef237a00",
+            "url": "https://github.com/OSGeo/gdal/compare/75cbc453e7491ec10442ee1c9d37a03aef237a00...b40672525acf3f5c4f29d8541aa7dcff1e18eb92"
           }
         }
       ],
@@ -1942,7 +2401,7 @@
         ]
       },
       "enrichment": {
-        "status": "partial",
+        "status": "complete",
         "warnings": []
       },
       "sources": [
@@ -2029,7 +2488,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-50T0MN89",
-      "project": "uboot",
+      "project": "u-boot/u-boot",
       "title": "ANT-2026-50T0MN89: U-Boot EFI Image Loader: Out-of-Bounds Write via Unbounded PE Relocation",
       "bug_class": "oob-write",
       "severity": {
@@ -2066,6 +2525,96 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-50T0MN89"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-573F8CSS",
+      "project": "cesnet/libyang",
+      "title": "ANT-2026-573F8CSS: Stack buffer overflow storing LYB integer values",
+      "bug_class": "stack-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-22T07:29:13.797466Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T22:27:05.986636Z",
+      "withdrawn": false,
+      "cve_ids": [],
+      "ghsa_ids": [
+        "GHSA-44h9-v855-6rj3"
+      ],
+      "fix_commits": [
+        {
+          "sha": "72fc9e724957b569a5f02cde9d6431684da4e8fa",
+          "url": "https://github.com/CESNET/libyang/commit/72fc9e724957b569a5f02cde9d6431684da4e8fa",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-573F8CSS",
+              "locator": "REPORT fix statement",
+              "note": "Commit identifier reported in the public finding body"
+            }
+          ],
+          "repository": "CESNET/libyang"
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "6.0.1",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/CESNET/libyang/security/advisories/GHSA-44h9-v855-6rj3",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            }
+          ],
+          "commit_verification": {
+            "status": "tag_not_found",
+            "detail": "Tried v6.0.1, 6.0.1"
+          },
+          "package": "No package listed"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/CESNET/libyang/security/advisories/GHSA-44h9-v855-6rj3",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-573F8CSS"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-573F8CSS"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/CESNET/libyang/security/advisories/GHSA-44h9-v855-6rj3"
         }
       ]
     },
@@ -2388,9 +2937,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45752"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -2401,6 +2948,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-61Y3NTY3"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45752.json"
         },
         {
           "source": "github_advisory_database",
@@ -2422,7 +2973,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-08T00:00:00Z",
-      "discovered_on": "2026-03-25",
+      "discovered_on": "2026-03-26",
       "revealed_at": "2026-05-20T07:40:37.681447Z",
       "withdrawn": false,
       "cve_ids": [
@@ -2578,7 +3129,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-08T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:04.168558Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -2641,7 +3192,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-02-16T00:00:00Z",
-      "discovered_on": "2026-02-14",
+      "discovered_on": "2026-02-15",
       "revealed_at": "2026-06-03T00:00:21.791565Z",
       "withdrawn": false,
       "cve_ids": [
@@ -2897,7 +3448,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-01T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:03.389518Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -2960,23 +3511,43 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-17T00:00:00Z",
-      "discovered_on": "2026-04-18",
+      "discovered_on": "2026-04-19",
       "revealed_at": "2026-08-17T17:47:21.609344Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [
         "GHSA-h4jf-rhmw-rjfw"
       ],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "5d266a213d8d3d15c2281e2e00ab71ee30ca3ffe",
+          "url": "https://github.com/langchain-ai/deepagentsjs/commit/5d266a213d8d3d15c2281e2e00ab71ee30ca3ffe",
+          "repository": "langchain-ai/deepagentsjs",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-6JWE6ZK7",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-6JWE6ZK7",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": [
           "No OSV or GitHub Advisory Database record found for GHSA-h4jf-rhmw-rjfw"
         ]
@@ -3007,7 +3578,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-24T12:00:00Z",
-      "discovered_on": "2026-03-09",
+      "discovered_on": "2026-03-10",
       "revealed_at": "2026-05-20T07:40:37.681447Z",
       "withdrawn": false,
       "cve_ids": [
@@ -3242,7 +3813,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-6X60WXT0",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-6X60WXT0: Heap use-after-free write in number format blank-width parsing via out-of-bounds remove() on freed buffer",
       "bug_class": "use-after-free",
       "severity": {
@@ -3302,7 +3873,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-26T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:02.502536Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -3543,10 +4114,10 @@
         "firm": null,
         "maintainer": null
       },
-      "status": "fixed",
-      "patched": true,
-      "patched_at": "2026-08-06T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "status": "disclosed",
+      "patched": false,
+      "patched_at": null,
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:10.998848Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -3555,12 +4126,11 @@
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
+        "status": "not_applicable",
         "evidence": []
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "not_patched",
         "warnings": []
       },
       "sources": [
@@ -3752,27 +4322,47 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "19950fbba60193ba1f1213e007a2fc434e97c18f",
+          "url": "https://github.com/OSGeo/gdal/commit/19950fbba60193ba1f1213e007a2fc434e97c18f",
+          "repository": "OSGeo/gdal",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-8AZGCAHG",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [
         {
           "version": "3.13.2",
           "role": "operational_baseline",
           "first_patched": false,
-          "confidence": "medium",
+          "confidence": "verified",
           "evidence": [
             {
               "source": "manual_override",
               "url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
               "locator": "ANT-2026-8AZGCAHG",
               "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/OSGeo/gdal/compare/19950fbba60193ba1f1213e007a2fc434e97c18f...b40672525acf3f5c4f29d8541aa7dcff1e18eb92",
+              "locator": "19950fbba60193ba1f1213e007a2fc434e97c18f is an ancestor of v3.13.2"
             }
           ],
           "commit_verification": {
-            "status": "fix_not_in_tag",
-            "repository": "osgeo/gdal",
+            "status": "verified_contains_fix",
+            "repository": "OSGeo/gdal",
             "tag": "v3.13.2",
-            "detail": "No known fix commit was an ancestor of this tag"
+            "fix_sha": "19950fbba60193ba1f1213e007a2fc434e97c18f",
+            "url": "https://github.com/OSGeo/gdal/compare/19950fbba60193ba1f1213e007a2fc434e97c18f...b40672525acf3f5c4f29d8541aa7dcff1e18eb92"
           }
         }
       ],
@@ -3789,7 +4379,7 @@
         ]
       },
       "enrichment": {
-        "status": "partial",
+        "status": "complete",
         "warnings": []
       },
       "sources": [
@@ -3897,7 +4487,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-17T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T23:05:17.137974Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -3949,7 +4539,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-8FZYKRTH",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-8FZYKRTH: Heap buffer overflow in DXF LWPOLYLINE import via integer truncation from sal_Int32 to sal_uInt16",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -4056,7 +4646,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-13T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T23:08:25.345316Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -4119,23 +4709,43 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-30T00:00:00Z",
-      "discovered_on": "2026-04-21",
+      "discovered_on": "2026-04-22",
       "revealed_at": "2026-08-17T17:47:39.173383Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [
         "GHSA-89mx-58f6-9q79"
       ],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "df1250dc64f53db849503618d2f911645cd43e3a",
+          "url": "https://github.com/php/php-src/commit/df1250dc64f53db849503618d2f911645cd43e3a",
+          "repository": "php/php-src",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-8RX9XHEB",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-8RX9XHEB",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": [
           "No OSV or GitHub Advisory Database record found for GHSA-89mx-58f6-9q79"
         ]
@@ -4166,21 +4776,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-06T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:21.281711Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "dfe62d0fcc047099614c2eaff4b4d20d807671d9",
+          "url": "https://github.com/supabase/auth/commit/dfe62d0fcc047099614c2eaff4b4d20d807671d9",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-96NHD13X",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-96NHD13X",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -4511,14 +5141,14 @@
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-A5580GNM",
       "project": "xdao",
-      "title": "ANT-2026-A5580GNM: XDAO CrowdfundingModule: cross-tenant token confusion — attacker DAO closeSale() steals victim LP",
+      "title": null,
       "bug_class": "logic-error",
       "severity": {
         "claude": "high",
         "firm": "high",
         "maintainer": null
       },
-      "status": "fixed",
+      "status": "withdrawn",
       "patched": true,
       "patched_at": "2026-04-16T12:00:00Z",
       "discovered_on": "2026-04-10",
@@ -4564,7 +5194,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-08-10T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:11:57.394428Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -4627,7 +5257,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-09T00:00:00Z",
-      "discovered_on": "2026-03-27",
+      "discovered_on": "2026-03-28",
       "revealed_at": "2026-08-17T17:47:37.894817Z",
       "withdrawn": false,
       "cve_ids": [
@@ -5002,7 +5632,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-02-05T00:00:00Z",
-      "discovered_on": "2025-11-27",
+      "discovered_on": "2025-11-28",
       "revealed_at": "2026-07-21T05:14:19.127195Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -5065,7 +5695,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-24T00:00:00Z",
-      "discovered_on": "2026-03-29",
+      "discovered_on": "2026-03-30",
       "revealed_at": "2026-08-17T21:12:06.153085Z",
       "withdrawn": false,
       "cve_ids": [
@@ -5154,7 +5784,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-17T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T23:05:18.799430Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -5314,7 +5944,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-BRQZSDGZ",
-      "project": "minio",
+      "project": "minio/minio",
       "title": null,
       "bug_class": "path-traversal",
       "severity": {
@@ -5351,7 +5981,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v0.0.0-20260414213245, 0.0.0-20260414213245"
           },
           "package": "github.com/minio/minio",
           "ecosystem": "Go",
@@ -5488,7 +6119,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-27T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T00:36:07.211868Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -5551,21 +6182,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-01T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:10.327738Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "26adce254d2119a59e72454364a079d88b43a00f",
+          "url": "https://github.com/supabase/auth/commit/26adce254d2119a59e72454364a079d88b43a00f",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-BVDWY3J9",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-BVDWY3J9",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -5583,7 +6234,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-C0BW3XD3",
-      "project": "dlplibs",
+      "project": "libmspub",
       "title": "ANT-2026-C0BW3XD3: Heap-buffer-overflow in MSPUBParser.cpp:1575",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -5637,7 +6288,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-12T00:00:00Z",
-      "discovered_on": "2026-03-31",
+      "discovered_on": "2026-04-01",
       "revealed_at": "2026-08-17T17:47:24.483530Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -5851,21 +6502,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-14T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:20.592319Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "bdbf01eb99ac8750bfa6ec06626002673cf5479d",
+          "url": "https://github.com/supabase/auth/commit/bdbf01eb99ac8750bfa6ec06626002673cf5479d",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CGR7Y3J8",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CGR7Y3J8",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -5894,7 +6565,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-14T14:03:27.383924Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-07-21T18:01:02.780174Z",
       "withdrawn": false,
       "cve_ids": [
@@ -6077,6 +6748,19 @@
       "ghsa_ids": [],
       "fix_commits": [
         {
+          "sha": "07712db80857d5d09ae08f3df85a708ecfc3b61f",
+          "url": "https://github.com/torvalds/linux/commit/07712db80857d5d09ae08f3df85a708ecfc3b61f",
+          "repository": "torvalds/linux",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CM0TCREP",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        },
+        {
           "sha": "f2e467a48287",
           "url": "https://github.com/torvalds/linux/commit/f2e467a48287",
           "confidence": "medium",
@@ -6183,16 +6867,16 @@
             },
             {
               "source": "github_repository",
-              "url": "https://github.com/torvalds/linux/compare/f2e467a48287...028ef9c96e96197026887c0f092424679298aae8",
-              "locator": "f2e467a48287 is an ancestor of v7.0"
+              "url": "https://github.com/torvalds/linux/compare/07712db80857d5d09ae08f3df85a708ecfc3b61f...028ef9c96e96197026887c0f092424679298aae8",
+              "locator": "07712db80857d5d09ae08f3df85a708ecfc3b61f is an ancestor of v7.0"
             }
           ],
           "commit_verification": {
             "status": "verified_contains_fix",
             "repository": "torvalds/linux",
             "tag": "v7.0",
-            "fix_sha": "f2e467a48287",
-            "url": "https://github.com/torvalds/linux/compare/f2e467a48287...028ef9c96e96197026887c0f092424679298aae8"
+            "fix_sha": "07712db80857d5d09ae08f3df85a708ecfc3b61f",
+            "url": "https://github.com/torvalds/linux/compare/07712db80857d5d09ae08f3df85a708ecfc3b61f...028ef9c96e96197026887c0f092424679298aae8"
           },
           "package": "Linux"
         }
@@ -6349,6 +7033,75 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-CRFDC4JM",
+      "project": "libreoffice/core",
+      "title": "ANT-2026-CRFDC4JM: WMF Unicode-escape text DX-array heap overflow",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-24T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:05:25.844801Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63272"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "4406da79b0",
+          "url": "https://github.com/LibreOffice/core/commit/4406da79b0",
+          "repository": "LibreOffice/core",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CRFDC4JM",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CRFDC4JM",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CRFDC4JM"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-CRFDC4JM"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63272.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-CT4ZXP4Z",
       "project": "supabase/auth",
       "title": "ANT-2026-CT4ZXP4Z: Parent refresh token of post-MFA token yields AAL2 without MFA",
@@ -6361,21 +7114,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-14T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:09.657009Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "87480005e2c3a16e35e5f6eacb97ea22b82ac9a5",
+          "url": "https://github.com/supabase/auth/commit/87480005e2c3a16e35e5f6eacb97ea22b82ac9a5",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CT4ZXP4Z",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-CT4ZXP4Z",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -6404,7 +7177,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-03T12:00:00Z",
-      "discovered_on": "2026-04-15",
+      "discovered_on": "2026-04-16",
       "revealed_at": "2026-07-14T02:25:39.587885Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -6455,6 +7228,135 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-D5W3VWPN",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-D5W3VWPN: Windows clipboard stream read ignores caller buffer size",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-16T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:38:07.729394Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-68579"
+      ],
+      "ghsa_ids": [
+        "GHSA-m37j-jcr2-8gcc"
+      ],
+      "fix_commits": [
+        {
+          "sha": "5e8e987b469b60a3bafadf8f5afc40f91c09f458",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/5e8e987b469b60a3bafadf8f5afc40f91c09f458",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/68xxx/CVE-2026-68579.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "680426e58a986b6fd0f1c352624f813708fc3432",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/680426e58a986b6fd0f1c352624f813708fc3432",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-D5W3VWPN",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "3.30.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/68xxx/CVE-2026-68579.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-m37j-jcr2-8gcc",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/5e8e987b469b60a3bafadf8f5afc40f91c09f458...6b107f0aadbabc47941c5a5b893b88c01792af6d",
+              "locator": "5e8e987b469b60a3bafadf8f5afc40f91c09f458 is an ancestor of 3.30.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.30.0",
+            "fix_sha": "5e8e987b469b60a3bafadf8f5afc40f91c09f458",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/5e8e987b469b60a3bafadf8f5afc40f91c09f458...6b107f0aadbabc47941c5a5b893b88c01792af6d"
+          },
+          "package": "FreeRDP",
+          "introduced": "0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/68xxx/CVE-2026-68579.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-m37j-jcr2-8gcc",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-D5W3VWPN"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-D5W3VWPN"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/68xxx/CVE-2026-68579.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-m37j-jcr2-8gcc"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-D7FC4YDQ",
       "project": "rabbitmq-c",
       "title": "ANT-2026-D7FC4YDQ: Heap-buffer-overflow in rabbitmq-c",
@@ -6487,11 +7389,31 @@
               "source": "anthropic_finding",
               "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-D7FC4YDQ",
               "locator": "linked reference"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+              "locator": "containers.*.references"
             }
           ]
         }
       ],
-      "fix_references": [],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/alanxz/rabbitmq-c/pull/879",
+          "repository": "alanxz/rabbitmq-c",
+          "number": 879,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
       "fixed_versions": [
         {
           "version": "0.16.0",
@@ -6534,9 +7456,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-44236"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -6547,6 +7467,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-D7FC4YDQ"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json"
         },
         {
           "source": "github_advisory_database",
@@ -6611,7 +7535,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-01T12:00:00Z",
-      "discovered_on": "2026-03-21",
+      "discovered_on": "2026-03-22",
       "revealed_at": "2026-05-20T07:40:37.681447Z",
       "withdrawn": false,
       "cve_ids": [
@@ -6716,16 +7640,36 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "73bee2f4fd375b973717f6b45365ed29c058f8a0",
+          "url": "https://github.com/OISF/suricata/commit/73bee2f4fd375b973717f6b45365ed29c058f8a0",
+          "repository": "OISF/suricata",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-DVZKVAV1",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-DVZKVAV1",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -6895,7 +7839,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-12T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:00.823849Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -6941,6 +7885,279 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-EFRBDRNP"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-EKGJXN5A",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-EKGJXN5A: TTL reader fixed-offset write into undersized buffer",
+      "bug_class": "buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-12T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:39:44.691086Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-19694"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "f9fdd24295456219f39be01beeaf734c2e3a8a2c",
+          "url": "https://github.com/wireshark/wireshark/commit/f9fdd24295456219f39be01beeaf734c2e3a8a2c",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EKGJXN5A",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.6.8",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19694.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.8",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19694.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EKGJXN5A"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-EKGJXN5A"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19694.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-EWM7B5QP",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-EWM7B5QP: Opus audio decode resizes wrong stream, overflows output",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "disclosed",
+      "patched": true,
+      "patched_at": "2026-07-06T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:59:08.599452Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-31883",
+        "CVE-2026-63633"
+      ],
+      "ghsa_ids": [
+        "GHSA-72j9-356v-88xq"
+      ],
+      "fix_commits": [
+        {
+          "sha": "0ed1f95d36913581cf31124f94eb5843d4263eae",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/0ed1f95d36913581cf31124f94eb5843d4263eae",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EWM7B5QP",
+              "locator": "UPSTREAM FIX"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63633.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "16df2300e1e3f5a51f68fb1626429e58b531b7c8",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/16df2300e1e3f5a51f68fb1626429e58b531b7c8",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/31xxx/CVE-2026-31883.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "330f7ae0a",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/330f7ae0a",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EWM7B5QP",
+              "locator": "REPORT fix statement",
+              "note": "Commit identifier reported in the public finding body"
+            }
+          ],
+          "repository": "FreeRDP/FreeRDP"
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/FreeRDP/FreeRDP/pull/12993",
+          "repository": "FreeRDP/FreeRDP",
+          "number": 12993,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63633.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fixed_versions": [
+        {
+          "version": "3.24.0",
+          "role": "patched",
+          "first_patched": null,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EWM7B5QP",
+              "locator": "REPORT release statement",
+              "note": "Release version reported in the public finding body"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/16df2300e1e3f5a51f68fb1626429e58b531b7c8...b00402d3258402c868224b6ffed04182cbed78d9",
+              "locator": "16df2300e1e3f5a51f68fb1626429e58b531b7c8 is an ancestor of 3.24.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.24.0",
+            "fix_sha": "16df2300e1e3f5a51f68fb1626429e58b531b7c8",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/16df2300e1e3f5a51f68fb1626429e58b531b7c8...b00402d3258402c868224b6ffed04182cbed78d9"
+          }
+        },
+        {
+          "version": "3.28.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-72j9-356v-88xq",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/0ed1f95d36913581cf31124f94eb5843d4263eae...5370fb26fbf034ecd11d3026b6ad639b5fff493f",
+              "locator": "0ed1f95d36913581cf31124f94eb5843d4263eae is an ancestor of 3.28.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.28.0",
+            "fix_sha": "0ed1f95d36913581cf31124f94eb5843d4263eae",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/0ed1f95d36913581cf31124f94eb5843d4263eae...5370fb26fbf034ecd11d3026b6ad639b5fff493f"
+          },
+          "package": "FreeRDP"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-72j9-356v-88xq",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-EWM7B5QP"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-EWM7B5QP"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/31xxx/CVE-2026-31883.json"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63633.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-72j9-356v-88xq"
         }
       ]
     },
@@ -7024,21 +8241,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-22T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T00:36:17.914506Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "74aba22f77cd8e5e4d602322d60f80c80e1148de",
+          "url": "https://github.com/supabase/postgres/commit/74aba22f77cd8e5e4d602322d60f80c80e1148de",
+          "repository": "supabase/postgres",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-F5JK7RDG",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-F5JK7RDG",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -7067,7 +8304,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-01T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T20:04:02.300260Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -7175,7 +8412,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-09T00:00:00Z",
-      "discovered_on": "2026-04-15",
+      "discovered_on": "2026-04-16",
       "revealed_at": "2026-08-17T17:47:10.611462Z",
       "withdrawn": false,
       "cve_ids": [
@@ -7447,7 +8684,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-01-19T12:00:00Z",
-      "discovered_on": "2025-12-17",
+      "discovered_on": "2025-12-18",
       "revealed_at": "2026-07-21T05:13:28.288666Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -7494,7 +8731,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-G7GNYY68",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-G7GNYY68: Heap Buffer Overflow via Integer Overflow in EMF+ Brush Blend Point Parsing",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -7542,6 +8779,120 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-GACTPNVK",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-GACTPNVK: sharkd iograph error path leaks stack-array listeners",
+      "bug_class": "other",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "low"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-12T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:38:47.164796Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-76890"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "d43d89d201b18f1c6d77460e52b4e6b5a4ec68f8",
+          "url": "https://github.com/wireshark/wireshark/commit/d43d89d201b18f1c6d77460e52b4e6b5a4ec68f8",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-GACTPNVK",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.4.18",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.4.18",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.4.0"
+        },
+        {
+          "version": "4.6.8",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.8",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-GACTPNVK"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-GACTPNVK"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-GBSMA7AY",
       "project": "tz",
       "title": "ANT-2026-GBSMA7AY: Stack buffer overflow via abbreviation suffix-alias expansion",
@@ -7554,7 +8905,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-23T12:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-07-08T22:59:29.814159Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -7618,7 +8969,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-22T23:30:15.355000Z",
-      "discovered_on": "2026-02-19",
+      "discovered_on": "2026-02-20",
       "revealed_at": "2026-08-18T00:36:04.735238Z",
       "withdrawn": false,
       "cve_ids": [
@@ -7931,21 +9282,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-28T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:09.007836Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "b6878c2fa63f805dbd27436c36ba7ebbc2b7e44d",
+          "url": "https://github.com/supabase/auth/commit/b6878c2fa63f805dbd27436c36ba7ebbc2b7e44d",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-GQ8G77M4",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-GQ8G77M4",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -8072,7 +9443,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-15T12:00:00Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-08-17T17:47:17.196558Z",
       "withdrawn": false,
       "cve_ids": [
@@ -8228,18 +9599,52 @@
       "ghsa_ids": [
         "GHSA-9mmv-r8g3-qp46"
       ],
-      "fix_commits": [],
-      "fix_references": [],
+      "fix_commits": [
+        {
+          "sha": "1d3afbb056fee5cc9ea05680bf32288715d0d802",
+          "url": "https://github.com/alanxz/rabbitmq-c/commit/1d3afbb056fee5cc9ea05680bf32288715d0d802",
+          "repository": "alanxz/rabbitmq-c",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/alanxz/rabbitmq-c/pull/878",
+          "repository": "alanxz/rabbitmq-c",
+          "number": 878,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+            "locator": "containers.*.references"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": [
-          "No CVE List V5 record found for CVE-2026-44235",
           "No OSV or GitHub Advisory Database record found for GHSA-9mmv-r8g3-qp46"
         ]
       },
@@ -8252,6 +9657,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-GTGXBRXN"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json"
         }
       ]
     },
@@ -8571,7 +9980,7 @@
       "fix_commits": [
         {
           "sha": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
-          "url": "https://github.com/advisories/GHSA-mpxh-8fq3-x8mh/commit/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
           "confidence": "medium",
           "evidence": [
             {
@@ -8581,7 +9990,7 @@
               "note": "Commit identifier reported in the public finding body"
             }
           ],
-          "repository": "advisories/GHSA-mpxh-8fq3-x8mh"
+          "repository": "FreeRDP/FreeRDP"
         }
       ],
       "fix_references": [],
@@ -8590,30 +9999,38 @@
           "version": "3.26.0",
           "role": "first_patched",
           "first_patched": true,
-          "confidence": "high",
+          "confidence": "verified",
           "evidence": [
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6",
+              "locator": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7 is an ancestor of 3.26.0"
             }
           ],
           "commit_verification": {
-            "status": "tag_not_found",
-            "detail": "Tried v3.26.0, 3.26.0"
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.26.0",
+            "fix_sha": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6"
           },
           "package": "FreeRDP"
         }
@@ -8623,19 +10040,19 @@
         "evidence": [
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           }
@@ -8665,15 +10082,15 @@
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff"
         }
       ]
     },
@@ -9027,19 +10444,19 @@
           "evidence": [
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             }
@@ -9058,19 +10475,19 @@
         "evidence": [
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           }
@@ -9100,22 +10517,22 @@
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff"
         }
       ]
     },
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-HRZEDXBB",
-      "project": "ghostscript",
+      "project": "artifexsoftware/ghostpdl",
       "title": "ANT-2026-HRZEDXBB: Stack-buffer-overflow in ghostscript",
       "bug_class": "stack-buffer-overflow",
       "severity": {
@@ -9386,6 +10803,75 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-J00S1S9Y",
+      "project": "libreoffice/core",
+      "title": "ANT-2026-J00S1S9Y: PDF encryption key-length field drives out-of-bounds key buffer write",
+      "bug_class": "oob-write",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-24T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:51:15.856172Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63273"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "21124741e0134f0f1222a42726c223bf6da41dca",
+          "url": "https://github.com/LibreOffice/core/commit/21124741e0134f0f1222a42726c223bf6da41dca",
+          "repository": "LibreOffice/core",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-J00S1S9Y",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-J00S1S9Y",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-J00S1S9Y"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-J00S1S9Y"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63273.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-J3EVXWDY",
       "project": "twigphp/twig",
       "title": "ANT-2026-J3EVXWDY: PHP code injection via single quote in {% use %} template name",
@@ -9398,7 +10884,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-19T00:00:00Z",
-      "discovered_on": "2026-04-18",
+      "discovered_on": "2026-04-19",
       "revealed_at": "2026-08-17T17:47:47.734001Z",
       "withdrawn": false,
       "cve_ids": [
@@ -9542,21 +11028,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-28T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:08.338162Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "b6878c2fa63f805dbd27436c36ba7ebbc2b7e44d",
+          "url": "https://github.com/supabase/auth/commit/b6878c2fa63f805dbd27436c36ba7ebbc2b7e44d",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-J5P6B5WQ",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-J5P6B5WQ",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -9708,7 +11214,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-28T15:10:20.332393Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-05-28T18:00:41.330685Z",
       "withdrawn": false,
       "cve_ids": [
@@ -10136,6 +11642,184 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-K9VH6KBR",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-K9VH6KBR: Pre-auth server heap overflow decrypting client random",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "disclosed",
+      "patched": true,
+      "patched_at": "2026-07-06T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T22:00:58.829261Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2020-13398",
+        "CVE-2026-33982",
+        "CVE-2026-64620"
+      ],
+      "ghsa_ids": [
+        "GHSA-pjqx-v446-x7fc"
+      ],
+      "fix_commits": [
+        {
+          "sha": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64620.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "27014741a8c22a34d3040c559c82f4ed82841bef",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/27014741a8c22a34d3040c559c82f4ed82841bef",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-K9VH6KBR",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        },
+        {
+          "sha": "8305349a943c68b1bc8c158f431dc607655aadea",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/8305349a943c68b1bc8c158f431dc607655aadea",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2020/13xxx/CVE-2020-13398.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "8fb6336a4072abcee8ce5bd6ae91104628c7bb69",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/8fb6336a4072abcee8ce5bd6ae91104628c7bb69",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2020/13xxx/CVE-2020-13398.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "a48dbde2c8a5b8b70a9d1c045d969a71afd6284c",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/a48dbde2c8a5b8b70a9d1c045d969a71afd6284c",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/33xxx/CVE-2026-33982.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "3.28.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64620.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-pjqx-v446-x7fc",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef...5370fb26fbf034ecd11d3026b6ad639b5fff493f",
+              "locator": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef is an ancestor of 3.28.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.28.0",
+            "fix_sha": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef...5370fb26fbf034ecd11d3026b6ad639b5fff493f"
+          },
+          "package": "FreeRDP",
+          "introduced": "0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64620.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-pjqx-v446-x7fc",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-K9VH6KBR"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-K9VH6KBR"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2020/13xxx/CVE-2020-13398.json"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/33xxx/CVE-2026-33982.json"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64620.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-pjqx-v446-x7fc"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-KC1Y51NF",
       "project": "openmeterio/openmeter",
       "title": "ANT-2026-KC1Y51NF: SQL injection in ClickHouse JSONPath validation",
@@ -10148,7 +11832,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-19T21:41:15.574761Z",
-      "discovered_on": "2026-04-18",
+      "discovered_on": "2026-04-19",
       "revealed_at": "2026-08-17T17:47:34.922002Z",
       "withdrawn": false,
       "cve_ids": [
@@ -10164,6 +11848,11 @@
           "repository": "openmeterio/openmeter",
           "confidence": "high",
           "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-KC1Y51NF",
+              "locator": "UPSTREAM FIX"
+            },
             {
               "source": "github_advisory_database",
               "url": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-wc3v-3457-c8cm/GHSA-wc3v-3457-c8cm.json",
@@ -10181,6 +11870,11 @@
           "confidence": "high",
           "evidence": [
             {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+              "locator": "containers.*.references"
+            },
+            {
               "source": "github_advisory_database",
               "url": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-wc3v-3457-c8cm/GHSA-wc3v-3457-c8cm.json",
               "locator": "references"
@@ -10189,6 +11883,34 @@
         }
       ],
       "fixed_versions": [
+        {
+          "version": "1.0.0-beta.228",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/openmeterio/openmeter/compare/6ce29e743165890c10346f4c71d5bf79f1ecaf6f...6ce29e743165890c10346f4c71d5bf79f1ecaf6f",
+              "locator": "6ce29e743165890c10346f4c71d5bf79f1ecaf6f is an ancestor of v1.0.0-beta.228"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "openmeterio/openmeter",
+            "tag": "v1.0.0-beta.228",
+            "fix_sha": "6ce29e743165890c10346f4c71d5bf79f1ecaf6f",
+            "url": "https://github.com/openmeterio/openmeter/compare/6ce29e743165890c10346f4c71d5bf79f1ecaf6f...6ce29e743165890c10346f4c71d5bf79f1ecaf6f"
+          },
+          "package": "openmeter",
+          "introduced": "1.0.0"
+        },
         {
           "version": "1.0.0-beta.228",
           "role": "first_patched",
@@ -10223,6 +11945,12 @@
         "status": "confirmed_versions",
         "evidence": [
           {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
             "source": "github_advisory_database",
             "url": "https://github.com/github/advisory-database/blob/main/advisories/github-reviewed/2026/06/GHSA-wc3v-3457-c8cm/GHSA-wc3v-3457-c8cm.json",
             "locator": "affected.ranges[ECOSYSTEM].events.fixed",
@@ -10232,9 +11960,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-8462"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -10245,6 +11971,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-KC1Y51NF"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8462.json"
         },
         {
           "source": "github_advisory_database",
@@ -10406,7 +12136,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-02T00:00:00Z",
-      "discovered_on": "2026-04-21",
+      "discovered_on": "2026-04-22",
       "revealed_at": "2026-08-17T17:47:39.831854Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -10516,7 +12246,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-03-16T00:00:00Z",
-      "discovered_on": "2026-02-22",
+      "discovered_on": "2026-02-23",
       "revealed_at": "2026-07-01T01:10:17.294569Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -10564,16 +12294,36 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "79698857cb85daa32efe64bea7227dcc420f672a",
+          "url": "https://github.com/OSGeo/gdal/commit/79698857cb85daa32efe64bea7227dcc420f672a",
+          "repository": "OSGeo/gdal",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-M5V8FQ8Z",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-M5V8FQ8Z",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -10602,7 +12352,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-03-04T12:00:00Z",
-      "discovered_on": "2026-02-13",
+      "discovered_on": "2026-02-14",
       "revealed_at": "2026-07-21T05:18:51.270789Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -10626,6 +12376,19 @@
               "note": "Commit identifier reported in the public finding body"
             }
           ]
+        },
+        {
+          "sha": "6b4f875aac344cdd52a1f34cc70ed2f874a65757",
+          "url": "https://github.com/torvalds/linux/commit/6b4f875aac344cdd52a1f34cc70ed2f874a65757",
+          "repository": "torvalds/linux",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-M8R2AWBV",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
         }
       ],
       "fix_references": [],
@@ -10644,6 +12407,11 @@
             "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-M8R2AWBV",
             "locator": "REPORT fix statement",
             "note": "Commit identifier reported in the public finding body"
+          },
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-M8R2AWBV",
+            "locator": "UPSTREAM FIX"
           }
         ]
       },
@@ -10724,7 +12492,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-04-16T00:00:00Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-08-18T00:36:12.699342Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -10903,7 +12671,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-MHV0A2SD",
-      "project": "freetype2",
+      "project": "freetype/freetype",
       "title": "ANT-2026-MHV0A2SD: Heap buffer overflow in Type 1 Multi-Master BuildCharArray via struct field corruption bypassing bounds check",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -11006,7 +12774,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-06T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T23:06:22.699985Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -11069,7 +12837,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-13T00:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-08-17T17:47:44.800737Z",
       "withdrawn": false,
       "cve_ids": [
@@ -11334,7 +13102,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-26T00:00:00Z",
-      "discovered_on": "2026-02-25",
+      "discovered_on": "2026-02-26",
       "revealed_at": "2026-05-28T09:00:00.008565Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -11377,7 +13145,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-10T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T23:43:49.640878Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -11857,7 +13625,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-10T00:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-08-17T17:47:11.568433Z",
       "withdrawn": false,
       "cve_ids": [
@@ -11961,7 +13729,7 @@
       "status": "disclosed",
       "patched": false,
       "patched_at": null,
-      "discovered_on": "2026-02-21",
+      "discovered_on": "2026-02-22",
       "revealed_at": "2026-05-28T09:00:00.008565Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -12174,7 +13942,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-PJV7Z0AR",
-      "project": "open62541",
+      "project": "open62541/open62541",
       "title": "ANT-2026-PJV7Z0AR: Integer overflow in variant dimension validation allowing wild-address write via arrayDimensions product overflow",
       "bug_class": "integer-overflow",
       "severity": {
@@ -12316,7 +14084,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-07T00:00:00Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-08-17T23:50:42.492187Z",
       "withdrawn": false,
       "cve_ids": [
@@ -12531,16 +14299,36 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "96d6b7415c8d43f5f9cefef609052dc9c6ae084b",
+          "url": "https://github.com/OSGeo/gdal/commit/96d6b7415c8d43f5f9cefef609052dc9c6ae084b",
+          "repository": "OSGeo/gdal",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-PVQH654C",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-PVQH654C",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -12558,7 +14346,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-Q430PMKE",
-      "project": "linux-sctp",
+      "project": "sctp/lksctp-tools",
       "title": "ANT-2026-Q430PMKE: Heap-buffer-overflow in sendmsg.c:169",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -12611,7 +14399,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-02T00:00:00Z",
-      "discovered_on": "2026-04-10",
+      "discovered_on": "2026-04-11",
       "revealed_at": "2026-08-17T17:47:25.835698Z",
       "withdrawn": false,
       "cve_ids": [
@@ -12700,7 +14488,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-QA1CT79B",
-      "project": "ghostscript",
+      "project": "artifexsoftware/ghostpdl",
       "title": "Stack and heap buffer overflows (gdevcups, gstype2, gsfunc0, gdevpx)",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -12719,7 +14507,7 @@
       "fix_commits": [
         {
           "sha": "5f1a5c6ba3d61f4f95cb793715728927af1900ba",
-          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QA1CT79B",
+          "url": "https://github.com/artifexsoftware/ghostpdl/commit/5f1a5c6ba3d61f4f95cb793715728927af1900ba",
           "confidence": "medium",
           "evidence": [
             {
@@ -12728,7 +14516,8 @@
               "locator": "REPORT fix statement",
               "note": "Commit identifier reported in the public finding body"
             }
-          ]
+          ],
+          "repository": "artifexsoftware/ghostpdl"
         }
       ],
       "fix_references": [],
@@ -12780,27 +14569,47 @@
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "92ceff5a227dc46a567c53ce8a6c5d477379df9a",
+          "url": "https://github.com/OSGeo/gdal/commit/92ceff5a227dc46a567c53ce8a6c5d477379df9a",
+          "repository": "OSGeo/gdal",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QPYFFTMS",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [
         {
           "version": "3.13.2",
           "role": "operational_baseline",
           "first_patched": false,
-          "confidence": "medium",
+          "confidence": "verified",
           "evidence": [
             {
               "source": "manual_override",
               "url": "https://github.com/OSGeo/gdal/releases/tag/v3.13.2",
               "locator": "ANT-2026-QPYFFTMS",
               "note": "Conservative maintenance baseline; not asserted as the first fixed release for this ANT finding."
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/OSGeo/gdal/compare/92ceff5a227dc46a567c53ce8a6c5d477379df9a...b40672525acf3f5c4f29d8541aa7dcff1e18eb92",
+              "locator": "92ceff5a227dc46a567c53ce8a6c5d477379df9a is an ancestor of v3.13.2"
             }
           ],
           "commit_verification": {
-            "status": "fix_not_in_tag",
-            "repository": "osgeo/gdal",
+            "status": "verified_contains_fix",
+            "repository": "OSGeo/gdal",
             "tag": "v3.13.2",
-            "detail": "No known fix commit was an ancestor of this tag"
+            "fix_sha": "92ceff5a227dc46a567c53ce8a6c5d477379df9a",
+            "url": "https://github.com/OSGeo/gdal/compare/92ceff5a227dc46a567c53ce8a6c5d477379df9a...b40672525acf3f5c4f29d8541aa7dcff1e18eb92"
           }
         }
       ],
@@ -12817,7 +14626,7 @@
         ]
       },
       "enrichment": {
-        "status": "partial",
+        "status": "complete",
         "warnings": []
       },
       "sources": [
@@ -13047,7 +14856,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-10T00:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-08-17T17:47:12.337785Z",
       "withdrawn": false,
       "cve_ids": [
@@ -13134,6 +14943,75 @@
         {
           "source": "cve_list_v5",
           "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/4xxx/CVE-2026-4890.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-QT406EDT",
+      "project": "libreoffice/core",
+      "title": "ANT-2026-QT406EDT: Heap overflow from unclamped /Length in hybrid-PDF stream extraction",
+      "bug_class": "other",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-24T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:49:10.332777Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63274"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "dcf16d610a32861349d4e4b84e7bef4b9420929c",
+          "url": "https://github.com/LibreOffice/core/commit/dcf16d610a32861349d4e4b84e7bef4b9420929c",
+          "repository": "LibreOffice/core",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QT406EDT",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QT406EDT",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-QT406EDT"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-QT406EDT"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63274.json"
         }
       ]
     },
@@ -13461,7 +15339,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-21T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:11:52.261700Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -13512,6 +15390,75 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-RNHRV8B9",
+      "project": "libreoffice/core",
+      "title": "ANT-2026-RNHRV8B9: CFF hint-stack bound compared against double the array size",
+      "bug_class": "stack-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-24T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:06:20.364229Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63275"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "1db305f340787ab7e59d089e51ac9d6fc07c2715",
+          "url": "https://github.com/LibreOffice/core/commit/1db305f340787ab7e59d089e51ac9d6fc07c2715",
+          "repository": "LibreOffice/core",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-RNHRV8B9",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-RNHRV8B9",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-RNHRV8B9"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-RNHRV8B9"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63275.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-RPE1YJCH",
       "project": "universal-ctags/ctags",
       "title": "ANT-2026-RPE1YJCH: Heap overflow via integer truncation in field array growth",
@@ -13524,7 +15471,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-14T12:00:00Z",
-      "discovered_on": "2026-04-08",
+      "discovered_on": "2026-04-09",
       "revealed_at": "2026-07-08T22:59:09.753226Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -13833,7 +15780,7 @@
       "fix_commits": [
         {
           "sha": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
-          "url": "https://github.com/advisories/GHSA-mpxh-8fq3-x8mh/commit/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
           "confidence": "medium",
           "evidence": [
             {
@@ -13843,7 +15790,7 @@
               "note": "Commit identifier reported in the public finding body"
             }
           ],
-          "repository": "advisories/GHSA-mpxh-8fq3-x8mh"
+          "repository": "FreeRDP/FreeRDP"
         },
         {
           "sha": "d7508ebcd82842a691ae4941e5104d14240a89ae",
@@ -13890,34 +15837,34 @@
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_advisory_database",
-              "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
               "locator": "Patched versions",
               "note": "Explicit patched version on the repository security advisory"
             },
             {
               "source": "github_repository",
-              "url": "https://github.com/FreeRDP/FreeRDP/compare/d7508ebcd82842a691ae4941e5104d14240a89ae...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6",
-              "locator": "d7508ebcd82842a691ae4941e5104d14240a89ae is an ancestor of 3.26.0"
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6",
+              "locator": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7 is an ancestor of 3.26.0"
             }
           ],
           "commit_verification": {
             "status": "verified_contains_fix",
             "repository": "FreeRDP/FreeRDP",
             "tag": "3.26.0",
-            "fix_sha": "d7508ebcd82842a691ae4941e5104d14240a89ae",
-            "url": "https://github.com/FreeRDP/FreeRDP/compare/d7508ebcd82842a691ae4941e5104d14240a89ae...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6"
+            "fix_sha": "23b36cd00ebf0ccd97750fcdbc9aa2f362352da7",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/23b36cd00ebf0ccd97750fcdbc9aa2f362352da7...3f6d7cb1f8973cc84c66b258a9a61c4e2b2f30a6"
           },
           "package": "FreeRDP",
           "introduced": "0"
@@ -13934,19 +15881,19 @@
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           },
           {
             "source": "github_advisory_database",
-            "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff",
             "locator": "Patched versions",
             "note": "Explicit patched version on the repository security advisory"
           }
@@ -13984,15 +15931,138 @@
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mpxh-8fq3-x8mh"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mpxh-8fq3-x8mh"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-mvpx-xj7r-3p3r"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-mvpx-xj7r-3p3r"
         },
         {
           "source": "github_advisory_database",
-          "url": "https://github.com/freerdp/freerdp/security/advisories/GHSA-p6r2-4hgm-m6ff"
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-p6r2-4hgm-m6ff"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-S1E4Y69J",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-S1E4Y69J: Kerberos wrap-token EC field drives out-of-bounds decrypt",
+      "bug_class": "oob-write",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-16T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:57:11.128561Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-73242"
+      ],
+      "ghsa_ids": [
+        "GHSA-vv64-95pc-vj9v"
+      ],
+      "fix_commits": [
+        {
+          "sha": "0adf5e30d01be84e190a359a7bdd37bc51d740cc",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/0adf5e30d01be84e190a359a7bdd37bc51d740cc",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-S1E4Y69J",
+              "locator": "UPSTREAM FIX"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73242.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/FreeRDP/FreeRDP/pull/13065",
+          "repository": "FreeRDP/FreeRDP",
+          "number": 13065,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73242.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fixed_versions": [
+        {
+          "version": "3.30.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-vv64-95pc-vj9v",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/0adf5e30d01be84e190a359a7bdd37bc51d740cc...6b107f0aadbabc47941c5a5b893b88c01792af6d",
+              "locator": "0adf5e30d01be84e190a359a7bdd37bc51d740cc is an ancestor of 3.30.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.30.0",
+            "fix_sha": "0adf5e30d01be84e190a359a7bdd37bc51d740cc",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/0adf5e30d01be84e190a359a7bdd37bc51d740cc...6b107f0aadbabc47941c5a5b893b88c01792af6d"
+          },
+          "package": "FreeRDP"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-vv64-95pc-vj9v",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-S1E4Y69J"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-S1E4Y69J"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73242.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-vv64-95pc-vj9v"
         }
       ]
     },
@@ -14010,7 +16080,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-03-26T12:00:00Z",
-      "discovered_on": "2026-03-31",
+      "discovered_on": "2026-04-01",
       "revealed_at": "2026-07-08T22:58:52.923452Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -14559,7 +16629,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-05-04T00:00:00Z",
-      "discovered_on": "2026-04-01",
+      "discovered_on": "2026-04-02",
       "revealed_at": "2026-08-18T00:36:15.029665Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -15091,7 +17161,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-T6EKK5DB",
-      "project": "openssh",
+      "project": "openssh/openssh-portable",
       "title": "ANT-2026-T6EKK5DB: heap-buffer-overflow (READ of size 1, 1 byte before allocation) in openssh",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -15102,7 +17172,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-31T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T20:02:32.828151Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -15124,7 +17194,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v10.4, 10.4"
           }
         },
         {
@@ -15141,7 +17212,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v10.4p1, 10.4p1"
           }
         }
       ],
@@ -15168,6 +17240,108 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-T6EKK5DB"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-TAV704VS",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-TAV704VS: .rdp file lines injected as CLI options enabling command execution",
+      "bug_class": "rce",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "disclosed",
+      "patched": true,
+      "patched_at": "2026-07-06T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:46:27.527850Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-64624"
+      ],
+      "ghsa_ids": [
+        "GHSA-rq8f-9xjh-pr3m"
+      ],
+      "fix_commits": [
+        {
+          "sha": "22c5deea52404f51a13276b3abda44e1e60704cf",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/22c5deea52404f51a13276b3abda44e1e60704cf",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TAV704VS",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "3.28.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64624.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/22c5deea52404f51a13276b3abda44e1e60704cf...5370fb26fbf034ecd11d3026b6ad639b5fff493f",
+              "locator": "22c5deea52404f51a13276b3abda44e1e60704cf is an ancestor of 3.28.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.28.0",
+            "fix_sha": "22c5deea52404f51a13276b3abda44e1e60704cf",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/22c5deea52404f51a13276b3abda44e1e60704cf...5370fb26fbf034ecd11d3026b6ad639b5fff493f"
+          },
+          "package": "FreeRDP",
+          "introduced": "0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64624.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": [
+          "No OSV or GitHub Advisory Database record found for GHSA-rq8f-9xjh-pr3m"
+        ]
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TAV704VS"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-TAV704VS"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64624.json"
         }
       ]
     },
@@ -15313,7 +17487,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-TNXYTAEH",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-TNXYTAEH: Stack-buffer-overflow in libreoffice",
       "bug_class": "stack-buffer-overflow",
       "severity": {
@@ -15347,7 +17521,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v26.2.4, 26.2.4"
           }
         }
       ],
@@ -15378,6 +17553,110 @@
         {
           "source": "cve_list_v5",
           "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8356.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-TVG98XT0",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-TVG98XT0: RDSTLS server authentication bypass via PDU-type confusion",
+      "bug_class": "auth-bypass",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-16T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:58:10.465424Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-72746",
+        "CVE-2026-73241"
+      ],
+      "ghsa_ids": [
+        "GHSA-rqgv-grx4-xm6x"
+      ],
+      "fix_commits": [
+        {
+          "sha": "b05a9510787c83c87ffc5fa8d7cc9f06ed971695",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/b05a9510787c83c87ffc5fa8d7cc9f06ed971695",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TVG98XT0",
+              "locator": "UPSTREAM FIX"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73241.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/FreeRDP/FreeRDP/pull/13065",
+          "repository": "FreeRDP/FreeRDP",
+          "number": 13065,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73241.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TVG98XT0",
+            "locator": "UPSTREAM FIX"
+          },
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73241.json",
+            "locator": "containers.*.references"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": [
+          "CVE-2026-72746 state is REJECTED",
+          "No OSV or GitHub Advisory Database record found for GHSA-rqgv-grx4-xm6x"
+        ]
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-TVG98XT0"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-TVG98XT0"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/72xxx/CVE-2026-72746.json"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73241.json"
         }
       ]
     },
@@ -15521,7 +17800,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-V6YZYDKK",
-      "project": "freetype2",
+      "project": "freetype/freetype",
       "title": "ANT-2026-V6YZYDKK: Stack buffer overflow via pop after unknown callothersubr in Type 1 charstring interpreter",
       "bug_class": "stack-buffer-overflow",
       "severity": {
@@ -15684,7 +17963,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-VS18SA90",
-      "project": "nginx",
+      "project": "nginx/nginx",
       "title": null,
       "bug_class": "arbitrary-file-write",
       "severity": {
@@ -15695,7 +17974,7 @@
       "status": "merged",
       "patched": true,
       "patched_at": "2026-05-07T14:53:12.364699Z",
-      "discovered_on": null,
+      "discovered_on": "2026-03-29",
       "revealed_at": "2026-05-20T07:40:37.681447Z",
       "withdrawn": false,
       "cve_ids": [
@@ -15719,7 +17998,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v1.28.3, 1.28.3"
           },
           "package": "NGINX Open Source",
           "introduced": "0.5.13"
@@ -15738,7 +18018,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v1.29.7, 1.29.7"
           },
           "package": "NGINX Open Source",
           "introduced": "1.29.0"
@@ -15757,7 +18038,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v1.30.0-1.hum1, 1.30.0-1.hum1"
           },
           "package": "nginx-main"
         },
@@ -15775,7 +18057,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v9040020260504195322.9, 9040020260504195322.9"
           },
           "package": "nginx:1.24"
         },
@@ -15793,7 +18076,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v9060020260504194843.9, 9060020260504194843.9"
           },
           "package": "nginx:1.24"
         },
@@ -15811,7 +18095,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v9070020260331134728.9, 9070020260331134728.9"
           },
           "package": "nginx:1.24"
         },
@@ -15829,7 +18114,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v9060020260504154614.9, 9060020260504154614.9"
           },
           "package": "nginx:1.26"
         },
@@ -15847,7 +18133,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v9070020260407080353.9, 9070020260407080353.9"
           },
           "package": "nginx:1.26"
         }
@@ -15965,7 +18252,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-08T12:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-05-21T23:00:15.637084Z",
       "withdrawn": false,
       "cve_ids": [
@@ -16167,7 +18454,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-24T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:22.773253Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -16230,7 +18517,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-05-18T00:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T17:47:45.433346Z",
       "withdrawn": false,
       "cve_ids": [
@@ -16306,9 +18593,7 @@
       },
       "enrichment": {
         "status": "complete",
-        "warnings": [
-          "No CVE List V5 record found for CVE-2026-45751"
-        ]
+        "warnings": []
       },
       "sources": [
         {
@@ -16319,6 +18604,10 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-WCSVRYAX"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45751.json"
         },
         {
           "source": "github_advisory_database",
@@ -16473,7 +18762,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-05-13T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:28.212095Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -16519,6 +18808,124 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-WQ7HHBE1"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-WT5AMKP5",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-WT5AMKP5: 802.11 EAPOL key-data decryption stack buffer overflow",
+      "bug_class": "stack-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-08T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:34:19.332896Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-15166"
+      ],
+      "ghsa_ids": [
+        "GHSA-h9wc-3j4p-q5g3"
+      ],
+      "fix_commits": [
+        {
+          "sha": "68a91452afc0a68b37314efa969b9232e1ec6711",
+          "url": "https://github.com/wireshark/wireshark/commit/68a91452afc0a68b37314efa969b9232e1ec6711",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-WT5AMKP5",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.4.17",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.4.17",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.4.0"
+        },
+        {
+          "version": "4.6.7",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.7",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": [
+          "No OSV or GitHub Advisory Database record found for GHSA-h9wc-3j4p-q5g3"
+        ]
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-WT5AMKP5"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-WT5AMKP5"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json"
         }
       ]
     },
@@ -16760,21 +19167,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-06-03T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:17.797092Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "a39858b6e9d194198005eceff9e707c0cd3118e1",
+          "url": "https://github.com/supabase/auth/commit/a39858b6e9d194198005eceff9e707c0cd3118e1",
+          "repository": "supabase/auth",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XJKJSANG",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XJKJSANG",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -16803,7 +19230,7 @@
       "status": "disclosed",
       "patched": true,
       "patched_at": "2026-04-16T12:00:00Z",
-      "discovered_on": "2026-03-26",
+      "discovered_on": "2026-03-27",
       "revealed_at": "2026-08-17T20:01:17.000087Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -16935,21 +19362,41 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-07-29T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:12:27.535821Z",
       "withdrawn": false,
       "cve_ids": [],
       "ghsa_ids": [],
-      "fix_commits": [],
+      "fix_commits": [
+        {
+          "sha": "aae1bedc9d6906ba329529ad2435ba124c428a7e",
+          "url": "https://github.com/supabase/postgres/commit/aae1bedc9d6906ba329529ad2435ba124c428a7e",
+          "repository": "supabase/postgres",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XKHXVCFV",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
       "fix_references": [],
       "fixed_versions": [],
       "release_assessment": {
-        "status": "unresolved",
-        "note": "Anthropic marks the finding patched, but no fix commit or first patched release was resolved",
-        "evidence": []
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XKHXVCFV",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
       },
       "enrichment": {
-        "status": "unresolved",
+        "status": "partial",
         "warnings": []
       },
       "sources": [
@@ -16966,8 +19413,137 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-XQVPKKPB",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-XQVPKKPB: Double-free of MonitorIds when parsing malformed selectedmonitors",
+      "bug_class": "double-free",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "disclosed",
+      "patched": true,
+      "patched_at": "2026-07-06T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:48:40.709670Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-64621"
+      ],
+      "ghsa_ids": [
+        "GHSA-f27x-frr8-j9hc"
+      ],
+      "fix_commits": [
+        {
+          "sha": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64621.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        },
+        {
+          "sha": "7696267929ae8ba045c1bbe275b3915653828313",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/7696267929ae8ba045c1bbe275b3915653828313",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XQVPKKPB",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "3.28.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64621.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            },
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-f27x-frr8-j9hc",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef...5370fb26fbf034ecd11d3026b6ad639b5fff493f",
+              "locator": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef is an ancestor of 3.28.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.28.0",
+            "fix_sha": "1f7a716d39b5605bb8a83b0c3c97a6ce386609ef",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/1f7a716d39b5605bb8a83b0c3c97a6ce386609ef...5370fb26fbf034ecd11d3026b6ad639b5fff493f"
+          },
+          "package": "FreeRDP",
+          "introduced": "0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64621.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          },
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-f27x-frr8-j9hc",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-XQVPKKPB"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-XQVPKKPB"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64621.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-f27x-frr8-j9hc"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-XV1EVAMH",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-XV1EVAMH: Heap-buffer-overflow in libreoffice",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -17001,7 +19577,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v26.2.4, 26.2.4"
           }
         }
       ],
@@ -17037,6 +19614,197 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-Y5M37QY4",
+      "project": "wireshark/wireshark",
+      "title": "ANT-2026-Y5M37QY4: TLS ECH transcript reconstruction heap overflow",
+      "bug_class": "heap-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-08T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:35:57.356601Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-15165"
+      ],
+      "ghsa_ids": [
+        "GHSA-3q2h-7599-7r76"
+      ],
+      "fix_commits": [
+        {
+          "sha": "39a3c437378890840e201d773ba52b2cdb762bc9",
+          "url": "https://github.com/wireshark/wireshark/commit/39a3c437378890840e201d773ba52b2cdb762bc9",
+          "repository": "wireshark/wireshark",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-Y5M37QY4",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "4.6.7",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15165.json",
+              "locator": "containers.*.affected[].versions[].lessThan",
+              "note": "CVE version-status transition to unaffected"
+            }
+          ],
+          "commit_verification": {
+            "status": "fix_not_in_tag",
+            "repository": "wireshark/wireshark",
+            "tag": "v4.6.7",
+            "detail": "No known fix commit was an ancestor of this tag"
+          },
+          "package": "Wireshark",
+          "introduced": "4.6.0"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "cve_list_v5",
+            "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15165.json",
+            "locator": "containers.*.affected[].versions[].lessThan",
+            "note": "CVE version-status transition to unaffected"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": [
+          "No OSV or GitHub Advisory Database record found for GHSA-3q2h-7599-7r76"
+        ]
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-Y5M37QY4"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-Y5M37QY4"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15165.json"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-Y9CTVKPP",
+      "project": "jetty/jetty.project",
+      "title": "ANT-2026-Y9CTVKPP: WebSocket reserved opcode bypasses frame size limits",
+      "bug_class": "denial-of-service",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-08-04T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T22:29:40.624637Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-19204"
+      ],
+      "ghsa_ids": [
+        "GHSA-85fq-fc5f-7j7g"
+      ],
+      "fix_commits": [
+        {
+          "sha": "b5bdc24629cac46ed51c12de11afd7a068cb3b48",
+          "url": "https://github.com/jetty/jetty.project/commit/b5bdc24629cac46ed51c12de11afd7a068cb3b48",
+          "repository": "jetty/jetty.project",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-Y9CTVKPP",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [
+        {
+          "version": "12.1.12",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/jetty/jetty.project/security/advisories/GHSA-85fq-fc5f-7j7g",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            }
+          ],
+          "commit_verification": {
+            "status": "tag_not_found",
+            "detail": "Tried v12.1.12, 12.1.12"
+          },
+          "package": "org.eclipse.jetty.websocket:websocket-core-common"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/jetty/jetty.project/security/advisories/GHSA-85fq-fc5f-7j7g",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-Y9CTVKPP"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-Y9CTVKPP"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19204.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/jetty/jetty.project/security/advisories/GHSA-85fq-fc5f-7j7g"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-Y9HESEM8",
       "project": "supabase/supabase",
       "title": "ANT-2026-Y9HESEM8: AI data-sharing opt-in bypassed by mismatched org and project",
@@ -17049,7 +19817,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-08-10T00:00:00Z",
-      "discovered_on": "2026-05-09",
+      "discovered_on": "2026-05-10",
       "revealed_at": "2026-08-18T14:11:48.162302Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -17095,6 +19863,75 @@
           "source": "anthropic_ledger",
           "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
           "locator": "ANT-2026-Y9HESEM8"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-YA6ADR86",
+      "project": "libreoffice/core",
+      "title": "ANT-2026-YA6ADR86: CFF charstring to Type1 conversion stack buffer overflow",
+      "bug_class": "stack-buffer-overflow",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": "medium"
+      },
+      "status": "fixed",
+      "patched": true,
+      "patched_at": "2026-07-24T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T20:47:40.092706Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63276"
+      ],
+      "ghsa_ids": [],
+      "fix_commits": [
+        {
+          "sha": "49360f34f5caff4eee29489e339def8cf13053cc",
+          "url": "https://github.com/LibreOffice/core/commit/49360f34f5caff4eee29489e339def8cf13053cc",
+          "repository": "LibreOffice/core",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-YA6ADR86",
+              "locator": "UPSTREAM FIX"
+            }
+          ]
+        }
+      ],
+      "fix_references": [],
+      "fixed_versions": [],
+      "release_assessment": {
+        "status": "commit_only",
+        "note": "A fix commit is known, but no authoritative first patched release boundary was found",
+        "evidence": [
+          {
+            "source": "anthropic_finding",
+            "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-YA6ADR86",
+            "locator": "UPSTREAM FIX"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "partial",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-YA6ADR86"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-YA6ADR86"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63276.json"
         }
       ]
     },
@@ -17175,7 +20012,7 @@
     {
       "schema_version": "1.0.0",
       "ant_id": "ANT-2026-YN5QG0SH",
-      "project": "libreoffice",
+      "project": "libreoffice/core",
       "title": "ANT-2026-YN5QG0SH: Heap-buffer-overflow in libreoffice",
       "bug_class": "heap-buffer-overflow",
       "severity": {
@@ -17209,7 +20046,8 @@
             }
           ],
           "commit_verification": {
-            "status": "repository_unknown"
+            "status": "tag_not_found",
+            "detail": "Tried v26.2.4, 26.2.4"
           }
         }
       ],
@@ -17348,12 +20186,12 @@
           "sha": "cb8a9a3fa39f9165f6db93dcee871cfa625a9753",
           "url": "https://github.com/facebook/hermes/commit/cb8a9a3fa39f9165f6db93dcee871cfa625a9753",
           "repository": "facebook/hermes",
-          "confidence": "medium",
+          "confidence": "high",
           "evidence": [
             {
               "source": "anthropic_finding",
               "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-YZAKBHEW",
-              "locator": "linked reference"
+              "locator": "UPSTREAM FIX"
             }
           ]
         }
@@ -17411,7 +20249,7 @@
       "status": "fixed",
       "patched": true,
       "patched_at": "2026-04-30T00:00:00Z",
-      "discovered_on": "2026-04-18",
+      "discovered_on": "2026-04-19",
       "revealed_at": "2026-08-17T20:01:03.683396Z",
       "withdrawn": false,
       "cve_ids": [],
@@ -17621,6 +20459,129 @@
     },
     {
       "schema_version": "1.0.0",
+      "ant_id": "ANT-2026-ZPF40VKS",
+      "project": "freerdp/freerdp",
+      "title": "ANT-2026-ZPF40VKS: Audio server double-free of client format list",
+      "bug_class": "double-free",
+      "severity": {
+        "claude": "high",
+        "firm": "high",
+        "maintainer": null
+      },
+      "status": "disclosed",
+      "patched": true,
+      "patched_at": "2026-07-06T12:00:00Z",
+      "discovered_on": "2026-04-02",
+      "revealed_at": "2026-09-28T21:43:02.118118Z",
+      "withdrawn": false,
+      "cve_ids": [
+        "CVE-2026-63652"
+      ],
+      "ghsa_ids": [
+        "GHSA-9g22-w2gr-vcmp"
+      ],
+      "fix_commits": [
+        {
+          "sha": "caf653c0ba1c75ec8f298d1baa59770102a5d14c",
+          "url": "https://github.com/FreeRDP/FreeRDP/commit/caf653c0ba1c75ec8f298d1baa59770102a5d14c",
+          "repository": "FreeRDP/FreeRDP",
+          "confidence": "high",
+          "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-ZPF40VKS",
+              "locator": "UPSTREAM FIX"
+            },
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63652.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fix_references": [
+        {
+          "kind": "pull_request",
+          "url": "https://github.com/FreeRDP/FreeRDP/pull/12993",
+          "repository": "FreeRDP/FreeRDP",
+          "number": 12993,
+          "confidence": "medium",
+          "evidence": [
+            {
+              "source": "cve_list_v5",
+              "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63652.json",
+              "locator": "containers.*.references"
+            }
+          ]
+        }
+      ],
+      "fixed_versions": [
+        {
+          "version": "3.28.0",
+          "role": "first_patched",
+          "first_patched": true,
+          "confidence": "verified",
+          "evidence": [
+            {
+              "source": "github_advisory_database",
+              "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-9g22-w2gr-vcmp",
+              "locator": "Patched versions",
+              "note": "Explicit patched version on the repository security advisory"
+            },
+            {
+              "source": "github_repository",
+              "url": "https://github.com/FreeRDP/FreeRDP/compare/caf653c0ba1c75ec8f298d1baa59770102a5d14c...5370fb26fbf034ecd11d3026b6ad639b5fff493f",
+              "locator": "caf653c0ba1c75ec8f298d1baa59770102a5d14c is an ancestor of 3.28.0"
+            }
+          ],
+          "commit_verification": {
+            "status": "verified_contains_fix",
+            "repository": "FreeRDP/FreeRDP",
+            "tag": "3.28.0",
+            "fix_sha": "caf653c0ba1c75ec8f298d1baa59770102a5d14c",
+            "url": "https://github.com/FreeRDP/FreeRDP/compare/caf653c0ba1c75ec8f298d1baa59770102a5d14c...5370fb26fbf034ecd11d3026b6ad639b5fff493f"
+          },
+          "package": "FreeRDP"
+        }
+      ],
+      "release_assessment": {
+        "status": "confirmed_versions",
+        "evidence": [
+          {
+            "source": "github_advisory_database",
+            "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-9g22-w2gr-vcmp",
+            "locator": "Patched versions",
+            "note": "Explicit patched version on the repository security advisory"
+          }
+        ]
+      },
+      "enrichment": {
+        "status": "complete",
+        "warnings": []
+      },
+      "sources": [
+        {
+          "source": "anthropic_finding",
+          "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-ZPF40VKS"
+        },
+        {
+          "source": "anthropic_ledger",
+          "url": "https://red.anthropic.com/2026/cvd/data/payload.json",
+          "locator": "ANT-2026-ZPF40VKS"
+        },
+        {
+          "source": "cve_list_v5",
+          "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63652.json"
+        },
+        {
+          "source": "github_advisory_database",
+          "url": "https://github.com/FreeRDP/FreeRDP/security/advisories/GHSA-9g22-w2gr-vcmp"
+        }
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "ant_id": "ANT-2026-ZQ8AY22X",
       "project": "craftcms/cms",
       "title": "ANT-2026-ZQ8AY22X: Privilege Escalation/Bypass through UsersController->actionImpersonateWithToken()",
@@ -17649,6 +20610,11 @@
           "repository": "craftcms/cms",
           "confidence": "high",
           "evidence": [
+            {
+              "source": "anthropic_finding",
+              "url": "https://red.anthropic.com/2026/cvd/findings/ANT-2026-ZQ8AY22X",
+              "locator": "UPSTREAM FIX"
+            },
             {
               "source": "cve_list_v5",
               "url": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/32xxx/CVE-2026-32267.json",
