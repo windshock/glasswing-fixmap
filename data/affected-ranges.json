@@ -3,15 +3,53 @@
     "schema_version": "1.0.0",
     "generated_from": {
       "fixmap_schema_version": "1.0.0",
-      "source_as_of": "2026-08-26T18:55:53.809770Z",
-      "source_revision": 32,
-      "source_manifest_sha3": "f89b26dc49393d86613a9687a7b6e152d60e1b8de4066640707ded608fd51f5bd354b29ac790490fc0fc6ee3b01dcf7ae11617318a95129c9cbc0ae353b6d281",
+      "source_as_of": "2026-11-02T19:30:24.781518Z",
+      "source_revision": 40,
+      "source_manifest_sha3": "25d811e7b56632ef5bbb23eb25f82a46ebe97446ce2b5d3d2b1a17dc556dac9496752a21b063ebfb4d822074e621ae109af6b97aca35762cacc8c960d868e23f",
       "source_url": "https://red.anthropic.com/2026/cvd/data/payload.json"
     },
-    "finding_count": 70,
-    "record_count": 738
+    "finding_count": 98,
+    "record_count": 800
   },
   "ranges": [
+    {
+      "ant_id": "ANT-2026-05VXN1Y6",
+      "advisory": "CVE-2026-76888",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.4.0"
+        },
+        {
+          "fixed": "4.4.18"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json"
+    },
+    {
+      "ant_id": "ANT-2026-05VXN1Y6",
+      "advisory": "CVE-2026-76888",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.8"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76888.json"
+    },
     {
       "ant_id": "ANT-2026-0HC68EK6",
       "advisory": "CVE-2026-6047",
@@ -241,12 +279,50 @@
         }
       ],
       "provenance": "https://api.osv.dev/v1/vulns/GHSA-mm6w-gr99-p3jj",
-      "purl": "pkg:composer/twig%2Ftwig",
+      "purl": "pkg:composer/twig/twig",
       "versions": [
         "v3.24.0",
         "v3.25.0"
       ],
       "source": "osv"
+    },
+    {
+      "ant_id": "ANT-2026-27KVBTTP",
+      "advisory": "CVE-2026-76891",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.4.0"
+        },
+        {
+          "fixed": "4.4.18"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json"
+    },
+    {
+      "ant_id": "ANT-2026-27KVBTTP",
+      "advisory": "CVE-2026-76891",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.8"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76891.json"
     },
     {
       "ant_id": "ANT-2026-2FETJP49",
@@ -264,6 +340,44 @@
       ]
     },
     {
+      "ant_id": "ANT-2026-3FWTCMVC",
+      "advisory": "CVE-2026-15170",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.4.0"
+        },
+        {
+          "fixed": "4.4.17"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json"
+    },
+    {
+      "ant_id": "ANT-2026-3FWTCMVC",
+      "advisory": "CVE-2026-15170",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.7"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15170.json"
+    },
+    {
       "ant_id": "ANT-2026-5DFBSQR9",
       "advisory": "CVE-2026-5398",
       "source": "cve_list_v5",
@@ -414,6 +528,21 @@
         }
       ],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/6xxx/CVE-2026-6386.json"
+    },
+    {
+      "ant_id": "ANT-2026-61Y3NTY3",
+      "advisory": "CVE-2026-45752",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "suricata",
+      "product": "suricata",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45752.json",
+      "versions": [
+        ">= 8.0.0, < 8.0.5"
+      ]
     },
     {
       "ant_id": "ANT-2026-6615Y595",
@@ -2951,6 +3080,21 @@
       "source": "osv"
     },
     {
+      "ant_id": "ANT-2026-9WB9SMM6",
+      "advisory": "CVE-2026-61627",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "libass",
+      "product": "libass",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/61xxx/CVE-2026-61627.json",
+      "versions": [
+        "< 0.17.5"
+      ]
+    },
+    {
       "ant_id": "ANT-2026-AYWQW7P2",
       "advisory": "CVE-2026-45447",
       "source": "cve_list_v5",
@@ -3190,6 +3334,28 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
       "cpes": [
         "cpe:/a:redhat:multicluster_engine:2.8::el9"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-AYWQW7P2",
+      "advisory": "CVE-2026-45447",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "openssl",
+      "product": "openssl",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "0:1.0.1e-61.el6_10.1"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45447.json",
+      "cpes": [
+        "cpe:/o:redhat:rhel_els:6"
       ]
     },
     {
@@ -3872,6 +4038,21 @@
     {
       "ant_id": "ANT-2026-CM0TCREP",
       "advisory": "CVE-2026-43074",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 TM MFP - GNU/Linux subsystem",
+      "product": "SIMATIC S7-1500 TM MFP - GNU/Linux subsystem",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/43xxx/CVE-2026-43074.json",
+      "versions": [
+        "0"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-CM0TCREP",
+      "advisory": "CVE-2026-43074",
       "ecosystem": "Linux",
       "package": "Kernel",
       "range_type": "ECOSYSTEM",
@@ -3973,6 +4154,59 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/7xxx/CVE-2026-7474.json"
     },
     {
+      "ant_id": "ANT-2026-CRFDC4JM",
+      "advisory": "CVE-2026-63272",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "LibreOffice",
+      "product": "LibreOffice",
+      "version_type": "26.2 series",
+      "range_type": "26.2 SERIES",
+      "events": [
+        {
+          "introduced": "26.2"
+        },
+        {
+          "fixed": "< 26.2.5"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63272.json"
+    },
+    {
+      "ant_id": "ANT-2026-D5W3VWPN",
+      "advisory": "CVE-2026-68579",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "3.30.0"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/68xxx/CVE-2026-68579.json"
+    },
+    {
+      "ant_id": "ANT-2026-D7FC4YDQ",
+      "advisory": "CVE-2026-44236",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "rabbitmq-c",
+      "product": "rabbitmq-c",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44236.json",
+      "versions": [
+        "< 0.16.0"
+      ]
+    },
+    {
       "ant_id": "ANT-2026-DJBBBBPE",
       "advisory": "CVE-2026-5199",
       "source": "cve_list_v5",
@@ -4023,6 +4257,55 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/32xxx/CVE-2026-32316.json",
       "versions": [
         "< e47e56d226519635768e6aab2f38f0ab037c09e5"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-EKGJXN5A",
+      "advisory": "CVE-2026-19694",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.8"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19694.json"
+    },
+    {
+      "ant_id": "ANT-2026-EWM7B5QP",
+      "advisory": "CVE-2026-31883",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/31xxx/CVE-2026-31883.json",
+      "versions": [
+        "< 3.24.0"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-EWM7B5QP",
+      "advisory": "CVE-2026-63633",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63633.json",
+      "versions": [
+        "< 3.28.0"
       ]
     },
     {
@@ -4139,6 +4422,44 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/6xxx/CVE-2026-6045.json"
     },
     {
+      "ant_id": "ANT-2026-GACTPNVK",
+      "advisory": "CVE-2026-76890",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.4.0"
+        },
+        {
+          "fixed": "4.4.18"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json"
+    },
+    {
+      "ant_id": "ANT-2026-GACTPNVK",
+      "advisory": "CVE-2026-76890",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.8"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/76xxx/CVE-2026-76890.json"
+    },
+    {
       "ant_id": "ANT-2026-GSDN3H7W",
       "advisory": "CVE-2026-40528",
       "source": "cve_list_v5",
@@ -4204,6 +4525,21 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/40xxx/CVE-2026-40384.json",
       "versions": [
         "6.0.0-6.1.0"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-GTGXBRXN",
+      "advisory": "CVE-2026-44235",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "rabbitmq-c",
+      "product": "rabbitmq-c",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/44xxx/CVE-2026-44235.json",
+      "versions": [
+        "< 0.16.0"
       ]
     },
     {
@@ -4531,6 +4867,96 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45700.json",
       "versions": [
         "< 3.26.0"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "asterisk",
+      "product": "asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        "< 20.20.1"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "asterisk",
+      "product": "asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        ">= 21.0.0-pre1, < 21.12.3"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "asterisk",
+      "product": "asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        ">= 22.0.0-pre1, < 22.10.1"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "asterisk",
+      "product": "asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        ">= 23.0.0-pre1, < 23.4.1"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "certified-asterisk",
+      "product": "certified-asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        "< 20.7-cert11"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-HFGGE6HR",
+      "advisory": "CVE-2026-57191",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "certified-asterisk",
+      "product": "certified-asterisk",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/57xxx/CVE-2026-57191.json",
+      "versions": [
+        ">= 22.8-cert1-pre1, < 22.8-cert3"
       ]
     },
     {
@@ -5335,6 +5761,25 @@
       ]
     },
     {
+      "ant_id": "ANT-2026-J00S1S9Y",
+      "advisory": "CVE-2026-63273",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "LibreOffice",
+      "product": "LibreOffice",
+      "version_type": "26.2 series",
+      "range_type": "26.2 SERIES",
+      "events": [
+        {
+          "introduced": "26.2"
+        },
+        {
+          "fixed": "< 26.2.5"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63273.json"
+    },
+    {
       "ant_id": "ANT-2026-J3EVXWDY",
       "advisory": "CVE-2026-46633",
       "source": "cve_list_v5",
@@ -5346,7 +5791,7 @@
       "events": [],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/46xxx/CVE-2026-46633.json",
       "versions": [
-        "< 3.26.0"
+        ">= 1.15.1, < 3.26.0"
       ]
     },
     {
@@ -5357,43 +5802,15 @@
       "range_type": "ECOSYSTEM",
       "events": [
         {
-          "introduced": "0"
+          "introduced": "1.15.1"
         },
         {
           "fixed": "3.26.0"
         }
       ],
       "provenance": "https://api.osv.dev/v1/vulns/GHSA-7p85-w9px-jpjp",
-      "purl": "pkg:composer/twig%2Ftwig",
+      "purl": "pkg:composer/twig/twig",
       "versions": [
-        "1.3.0",
-        "1.4.0",
-        "1.5.0",
-        "1.5.1",
-        "1.6.0",
-        "1.6.1",
-        "1.6.2",
-        "1.6.3",
-        "1.6.4",
-        "1.6.5",
-        "v1.10.0",
-        "v1.10.1",
-        "v1.10.2",
-        "v1.10.3",
-        "v1.11.0",
-        "v1.11.1",
-        "v1.12.0",
-        "v1.12.0-RC1",
-        "v1.12.1",
-        "v1.12.2",
-        "v1.12.3",
-        "v1.13.0",
-        "v1.13.1",
-        "v1.13.2",
-        "v1.14.0",
-        "v1.14.1",
-        "v1.14.2",
-        "v1.15.0",
         "v1.15.1",
         "v1.16.0",
         "v1.16.1",
@@ -5473,14 +5890,6 @@
         "v1.44.6",
         "v1.44.7",
         "v1.44.8",
-        "v1.7.0",
-        "v1.8.0",
-        "v1.8.1",
-        "v1.8.2",
-        "v1.8.3",
-        "v1.9.0",
-        "v1.9.1",
-        "v1.9.2",
         "v2.0.0",
         "v2.1.0",
         "v2.10.0",
@@ -5684,6 +6093,55 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/5xxx/CVE-2026-5501.json"
     },
     {
+      "ant_id": "ANT-2026-K9VH6KBR",
+      "advisory": "CVE-2026-33982",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/33xxx/CVE-2026-33982.json",
+      "versions": [
+        "< 3.24.2"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-K9VH6KBR",
+      "advisory": "CVE-2026-64620",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "3.28.0"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64620.json"
+    },
+    {
+      "ant_id": "ANT-2026-K9VH6KBR",
+      "advisory": "CVE-2020-13398",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "n/a",
+      "product": "n/a",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2020/13xxx/CVE-2020-13398.json",
+      "versions": [
+        "n/a"
+      ]
+    },
+    {
       "ant_id": "ANT-2026-KC1Y51NF",
       "advisory": "GHSA-wc3v-3457-c8cm",
       "ecosystem": "Go",
@@ -5754,7 +6212,7 @@
         }
       ],
       "provenance": "https://api.osv.dev/v1/vulns/GHSA-p5j5-4j3q-8mq8",
-      "purl": "pkg:composer/typo3%2Fhtml-sanitizer",
+      "purl": "pkg:composer/typo3/html-sanitizer",
       "versions": [
         "v1.0.0",
         "v1.0.1",
@@ -6003,6 +6461,21 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/46xxx/CVE-2026-46349.json",
       "versions": [
         ">= 4.5.0-beta.1, < 4.5.10"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-P7DSVPH6",
+      "advisory": "CVE-2026-54914",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "wasm-micro-runtime",
+      "product": "wasm-micro-runtime",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/54xxx/CVE-2026-54914.json",
+      "versions": [
+        "< 2.4.5"
       ]
     },
     {
@@ -6332,6 +6805,81 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json"
     },
     {
+      "ant_id": "ANT-2026-Q5A1RHS0",
+      "advisory": "CVE-2026-66032",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AB0)",
+      "product": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AB0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-Q5A1RHS0",
+      "advisory": "CVE-2026-66032",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AC0)",
+      "product": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-Q5A1RHS0",
+      "advisory": "CVE-2026-66032",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AB0)",
+      "product": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AB0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-Q5A1RHS0",
+      "advisory": "CVE-2026-66032",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AC0)",
+      "product": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-Q5A1RHS0",
+      "advisory": "CVE-2026-66032",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIPLUS S7-1500 CPU 1518-4 PN/DP MFP (6AG1518-4AX00-4AC0)",
+      "product": "SIPLUS S7-1500 CPU 1518-4 PN/DP MFP (6AG1518-4AX00-4AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/66xxx/CVE-2026-66032.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
       "ant_id": "ANT-2026-QQ2P9M9V",
       "advisory": "CVE-2026-45696",
       "source": "cve_list_v5",
@@ -6474,6 +7022,25 @@
       "cpes": [
         "cpe:/a:redhat:openshift:4.19::el9"
       ]
+    },
+    {
+      "ant_id": "ANT-2026-QT406EDT",
+      "advisory": "CVE-2026-63274",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "LibreOffice",
+      "product": "LibreOffice",
+      "version_type": "26.2 series",
+      "range_type": "26.2 SERIES",
+      "events": [
+        {
+          "introduced": "26.2"
+        },
+        {
+          "fixed": "< 26.2.5"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63274.json"
     },
     {
       "ant_id": "ANT-2026-QXNF2N9K",
@@ -6626,6 +7193,25 @@
         }
       ],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/48xxx/CVE-2026-48929.json"
+    },
+    {
+      "ant_id": "ANT-2026-RNHRV8B9",
+      "advisory": "CVE-2026-63275",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "LibreOffice",
+      "product": "LibreOffice",
+      "version_type": "26.2 series",
+      "range_type": "26.2 SERIES",
+      "events": [
+        {
+          "introduced": "26.2"
+        },
+        {
+          "fixed": "< 26.2.5"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63275.json"
     },
     {
       "ant_id": "ANT-2026-RSSMAMA7",
@@ -7016,6 +7602,21 @@
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45700.json",
       "versions": [
         "< 3.26.0"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-S1E4Y69J",
+      "advisory": "CVE-2026-73242",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73242.json",
+      "versions": [
+        "< 3.30.0"
       ]
     },
     {
@@ -9948,6 +10549,25 @@
       "source": "osv"
     },
     {
+      "ant_id": "ANT-2026-TAV704VS",
+      "advisory": "CVE-2026-64624",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "3.28.0"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64624.json"
+    },
+    {
       "ant_id": "ANT-2026-TNXYTAEH",
       "advisory": "CVE-2026-8356",
       "source": "cve_list_v5",
@@ -9965,6 +10585,21 @@
         }
       ],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8356.json"
+    },
+    {
+      "ant_id": "ANT-2026-TVG98XT0",
+      "advisory": "CVE-2026-73241",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/73xxx/CVE-2026-73241.json",
+      "versions": [
+        "< 3.30.0"
+      ]
     },
     {
       "ant_id": "ANT-2026-TZQ1KH7E",
@@ -12709,6 +13344,74 @@
       ]
     },
     {
+      "ant_id": "ANT-2026-WCSVRYAX",
+      "advisory": "CVE-2026-45751",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "suricata",
+      "product": "suricata",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45751.json",
+      "versions": [
+        "< 7.0.16"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-WCSVRYAX",
+      "advisory": "CVE-2026-45751",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "suricata",
+      "product": "suricata",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/45xxx/CVE-2026-45751.json",
+      "versions": [
+        ">= 8.0.0, < 8.0.5"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-WT5AMKP5",
+      "advisory": "CVE-2026-15166",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.4.0"
+        },
+        {
+          "fixed": "4.4.17"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json"
+    },
+    {
+      "ant_id": "ANT-2026-WT5AMKP5",
+      "advisory": "CVE-2026-15166",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.7"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15166.json"
+    },
+    {
       "ant_id": "ANT-2026-X3EB6DN3",
       "advisory": "CVE-2026-56132",
       "source": "cve_list_v5",
@@ -12726,6 +13429,100 @@
         }
       ],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json"
+    },
+    {
+      "ant_id": "ANT-2026-X3EB6DN3",
+      "advisory": "CVE-2026-56132",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AB0)",
+      "product": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AB0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-X3EB6DN3",
+      "advisory": "CVE-2026-56132",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AC0)",
+      "product": "SIMATIC S7-1500 CPU 1518-4 PN/DP MFP (6ES7518-4AX00-1AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-X3EB6DN3",
+      "advisory": "CVE-2026-56132",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AB0)",
+      "product": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AB0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-X3EB6DN3",
+      "advisory": "CVE-2026-56132",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AC0)",
+      "product": "SIMATIC S7-1500 CPU 1518F-4 PN/DP MFP (6ES7518-4FX00-1AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-X3EB6DN3",
+      "advisory": "CVE-2026-56132",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "SIPLUS S7-1500 CPU 1518-4 PN/DP MFP (6AG1518-4AX00-4AC0)",
+      "product": "SIPLUS S7-1500 CPU 1518-4 PN/DP MFP (6AG1518-4AX00-4AC0)",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/56xxx/CVE-2026-56132.json",
+      "versions": [
+        "V3.1.7"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-XQVPKKPB",
+      "advisory": "CVE-2026-64621",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "3.28.0"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/64xxx/CVE-2026-64621.json"
     },
     {
       "ant_id": "ANT-2026-XV1EVAMH",
@@ -12943,6 +13740,120 @@
         }
       ],
       "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/8xxx/CVE-2026-8357.json"
+    },
+    {
+      "ant_id": "ANT-2026-Y5M37QY4",
+      "advisory": "CVE-2026-15165",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Wireshark",
+      "product": "Wireshark",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "4.6.0"
+        },
+        {
+          "fixed": "4.6.7"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/15xxx/CVE-2026-15165.json"
+    },
+    {
+      "ant_id": "ANT-2026-Y9CTVKPP",
+      "advisory": "CVE-2026-19204",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Eclipse Jetty",
+      "product": "Eclipse Jetty",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "10.0.0"
+        },
+        {
+          "last_affected": "10.0.31"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19204.json"
+    },
+    {
+      "ant_id": "ANT-2026-Y9CTVKPP",
+      "advisory": "CVE-2026-19204",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Eclipse Jetty",
+      "product": "Eclipse Jetty",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "11.0.0"
+        },
+        {
+          "last_affected": "11.0.31"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19204.json"
+    },
+    {
+      "ant_id": "ANT-2026-Y9CTVKPP",
+      "advisory": "CVE-2026-19204",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Eclipse Jetty",
+      "product": "Eclipse Jetty",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "12.0.0"
+        },
+        {
+          "last_affected": "12.0.37"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19204.json"
+    },
+    {
+      "ant_id": "ANT-2026-Y9CTVKPP",
+      "advisory": "CVE-2026-19204",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "Eclipse Jetty",
+      "product": "Eclipse Jetty",
+      "version_type": "semver",
+      "range_type": "SEMVER",
+      "events": [
+        {
+          "introduced": "12.1.0"
+        },
+        {
+          "last_affected": "12.1.11"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/19xxx/CVE-2026-19204.json"
+    },
+    {
+      "ant_id": "ANT-2026-YA6ADR86",
+      "advisory": "CVE-2026-63276",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "LibreOffice",
+      "product": "LibreOffice",
+      "version_type": "26.2 series",
+      "range_type": "26.2 SERIES",
+      "events": [
+        {
+          "introduced": "26.2"
+        },
+        {
+          "fixed": "< 26.2.5"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63276.json"
     },
     {
       "ant_id": "ANT-2026-YN5QG0SH",
@@ -15173,6 +16084,21 @@
       ]
     },
     {
+      "ant_id": "ANT-2026-ZPF40VKS",
+      "advisory": "CVE-2026-63652",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "FreeRDP",
+      "product": "FreeRDP",
+      "version_type": "custom",
+      "range_type": "CUSTOM",
+      "events": [],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/63xxx/CVE-2026-63652.json",
+      "versions": [
+        "< 3.28.0"
+      ]
+    },
+    {
       "ant_id": "ANT-2026-ZQ8AY22X",
       "advisory": "CVE-2026-32267",
       "source": "cve_list_v5",
@@ -15637,6 +16563,122 @@
         "5.9.9"
       ],
       "source": "osv"
+    },
+    {
+      "ant_id": "ANT-2026-ZRDQDR79",
+      "advisory": "CVE-2026-13595",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "costmanagement/costmanagement-ui-rhel10",
+      "product": "costmanagement/costmanagement-ui-rhel10",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "1793825318"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/13xxx/CVE-2026-13595.json",
+      "cpes": [
+        "cpe:/a:redhat:cost_management_on_premise:1::el10"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-ZRDQDR79",
+      "advisory": "CVE-2026-13595",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "util-linux",
+      "product": "util-linux",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "0:2.32.1-50.el8_10"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/13xxx/CVE-2026-13595.json",
+      "cpes": [
+        "cpe:/a:redhat:enterprise_linux:8::appstream",
+        "cpe:/a:redhat:enterprise_linux:8::crb",
+        "cpe:/o:redhat:enterprise_linux:8::baseos"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-ZRDQDR79",
+      "advisory": "CVE-2026-13595",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "util-linux",
+      "product": "util-linux",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "0:2.37.4-25.el9_8.2"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/13xxx/CVE-2026-13595.json",
+      "cpes": [
+        "cpe:/a:redhat:rhel_eus:9.8::appstream",
+        "cpe:/a:redhat:rhel_eus:9.8::crb",
+        "cpe:/o:redhat:rhel_eus:9.8::baseos"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-ZRDQDR79",
+      "advisory": "CVE-2026-13595",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "util-linux",
+      "product": "util-linux",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "0:2.37.4-28.el9_9"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/13xxx/CVE-2026-13595.json",
+      "cpes": [
+        "cpe:/a:redhat:enterprise_linux:9::appstream",
+        "cpe:/a:redhat:enterprise_linux:9::crb",
+        "cpe:/o:redhat:enterprise_linux:9::baseos"
+      ]
+    },
+    {
+      "ant_id": "ANT-2026-ZRDQDR79",
+      "advisory": "CVE-2026-13595",
+      "source": "cve_list_v5",
+      "ecosystem": "cve",
+      "package": "util-linux",
+      "product": "util-linux",
+      "version_type": "rpm",
+      "range_type": "RPM",
+      "events": [
+        {
+          "introduced": "0"
+        },
+        {
+          "fixed": "0:2.40.2-18.el10_2.20"
+        }
+      ],
+      "provenance": "https://raw.githubusercontent.com/CVEProject/cvelistV5/main/cves/2026/13xxx/CVE-2026-13595.json",
+      "cpes": [
+        "cpe:/o:redhat:enterprise_linux:10.2"
+      ]
     },
     {
       "ant_id": "ANT-2026-ZRDQDR79",
